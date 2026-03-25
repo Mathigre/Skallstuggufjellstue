@@ -1,0 +1,368 @@
+/* =========================
+   RESET / GRUNNLEGGENDE
+========================= */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: white;
+  color: #111;
+}
+
+
+/* =========================
+   TYPOGRAFI
+========================= */
+
+h1, h2, h3 {
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+p {
+  line-height: 1.6;
+}
+
+a {
+  text-decoration: none;
+}
+
+
+/* =========================
+   NAVBAR
+========================= */
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  background: white;
+  position: sticky;
+  top: 0;
+  border-bottom: 1px solid #eee;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  z-index: 1000;
+}
+
+.logo img {
+  height: 60px;
+}
+
+nav a {
+  margin-left: 25px;
+  color: #333;
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+nav a:hover {
+  color: #8B4A2B;
+}
+
+
+/* =========================
+   HERO
+========================= */
+
+.hero {
+  height: 85vh;
+  background: url("images/snøbildelbak.jpg") center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-text {
+  background: rgba(255,255,255,0.9);
+  padding: 50px;
+  text-align: center;
+  border-radius: 10px;
+  max-width: 500px;
+}
+
+.hero-text h1 {
+  font-size: 40px;
+}
+
+.hero-text p {
+  font-size: 18px;
+}
+
+
+/* =========================
+   KNAPPER
+========================= */
+
+.btn {
+  background: #8B4A2B;
+  color: white;
+  padding: 12px 28px;
+  display: inline-block;
+  margin-top: 20px;
+  border-radius: 6px;
+  transition: 0.2s;
+}
+
+.btn:hover {
+  background: #6e3820;
+}
+
+
+/* =========================
+   GENERELT SIDEOPPSETT
+========================= */
+
+.page {
+  padding: 60px 20px;
+  max-width: 1100px;
+  margin: auto;
+}
+
+section {
+  margin-bottom: 50px;
+}
+
+
+/* =========================
+   CARDS
+========================= */
+
+.cards {
+  display: flex;
+  gap: 20px;
+  padding: 40px;
+}
+
+.card {
+  flex: 1;
+  transition: 0.3s;
+}
+
+.card img {
+  width: 100%;
+  border-radius: 10px;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+}
+
+
+/* =========================
+   GALLERI
+========================= */
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.gallery img {
+  width: 100%;
+  border-radius: 10px;
+  transition: 0.3s;
+}
+
+.gallery img:hover {
+  transform: scale(1.04);
+}
+
+
+/* =========================
+   BOOKING KALENDER
+========================= */
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.day {
+  padding: 14px;
+  text-align: center;
+  border-radius: 8px;
+  background: #e8f5e9;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+.day:hover {
+  transform: scale(1.05);
+}
+
+/* 🔴 FULL BOOKET */
+.booked {
+  background: #ffcdd2;
+  cursor: not-allowed;
+}
+
+/* 🟩🟥 START DAG (innsjekk) */
+.half-start {
+  background: linear-gradient(
+    to right,
+    #e8f5e9 50%,
+    #ffcdd2 50%
+  );
+}
+
+/* 🟥🟩 SLUTT DAG (utsjekk) */
+.half-end {
+  background: linear-gradient(
+    to right,
+    #ffcdd2 50%,
+    #e8f5e9 50%
+  );
+}
+
+/* 🔴|🔴 SAMME DAG */
+.split {
+  background: #ffcdd2;
+  position: relative;
+}
+
+.split::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: black;
+}
+
+/* valgt dato */
+.selected {
+  border: 3px solid black;
+}
+
+
+/* =========================
+   ADMIN STATUS
+========================= */
+
+.foresporsel {
+  border-left: 6px solid orange;
+}
+
+.godkjent {
+  border-left: 6px solid green;
+}
+
+.avslaatt {
+  border-left: 6px solid red;
+}
+
+
+/* =========================
+   MELDINGSBOKS
+========================= */
+
+.message-success {
+  background: #d4edda;
+  color: #155724;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.message-error {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 900px) {
+
+  .calendar-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .cards {
+    flex-direction: column;
+  }
+}
+
+.day {
+  height: 95px;
+  padding: 6px;
+  box-sizing: border-box;
+}
+
+.day-content {
+  text-align: center;
+  width: 100%;
+}
+
+.day-number {
+  font-weight: bold;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+.day-name {
+  font-size: 12px;
+  line-height: 1.3;
+  color: #222;
+  font-weight: 500;
+  white-space: normal;
+}
+
+/* NAVBAR */
+.navbar {
+  width: 100%;
+  background: white;
+  border-bottom: 1px solid #eee;
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 15px 20px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* LOGO */
+.logo img {
+  height: 60px;
+}
+
+/* MENY */
+.nav-links {
+  display: flex;
+  gap: 25px;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: black;
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+.nav-links a:hover {
+  color: #8B4A2B;
+}
+
+.nav-links a.active {
+  color: #8B4A2B;
+  font-weight: bold;
+}

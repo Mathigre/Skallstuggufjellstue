@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booking - Skallstuggu</title>
+  <link rel="stylesheet" href="style.css">
+  
+  <style>
+    #messageBox {
+      margin: 20px 0;
+      padding: 15px 20px;
+      border-radius: 8px;
+      font-size: 15px;
+      line-height: 1.5;
+      display: none;
+    }
+    .message-success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .message-error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    /* Stil for tekstboksen */
+    #customerMessage {
+      width: 100%;
+      max-width: 600px;
+      height: 90px;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-family: inherit;
+      resize: vertical;
+      margin-top: 5px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo">
+        <img src="images/Logo.png" alt="Skallstuggu">
+      </a>
+      <nav class="nav-links">
+        <a href="index.html">Hjem</a>
+        <a href="lokaler.html">Lokaler</a>
+        <a href="booking.html">Booking</a>
+        <a href="servering.html">Servering</a>
+        <a href="firmasamlinger.html">Firma</a>
+        <a href="turopplevelser.html">Opplevelser</a>
+        <a href="kontakt.html">Kontakt</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="page">
+    <h1>Send bookingforespørsel</h1>
+
+    <!-- KALENDER -->
+    <h2>Velg dato</h2>
+    <div style="display:flex; justify-content:center; gap:20px; margin-bottom:15px;">
+      <button onclick="changeMonth(-1)">← Forrige måned</button>
+      <h3 id="monthTitle"></h3>
+      <button onclick="changeMonth(1)">Neste måned →</button>
+    </div>
+    <div class="calendar-grid" id="calendar"></div>
+
+    <!-- MELDINGSBOKS -->
+    <div id="messageBox"></div>
+
+    <!-- SKJEMA -->
+    <form id="bookingForm">
+      <input type="text" id="name" placeholder="Navn" required><br><br>
+      <input type="email" id="email" placeholder="E-post" required><br><br>
+      <input type="tel" id="phone" placeholder="Telefonnummer" required><br><br>
+      
+      <label>Fra dato:</label><br>
+      <input type="date" id="start" required><br><br>
+      
+      <label>Til dato:</label><br>
+      <input type="date" id="end" required><br><br>
+
+      <!-- TEKSTBOKS FOR KUNDENS MELDING -->
+      <label>Eventuell melding eller kommentar til oss (valgfritt, maks 300 tegn):</label><br>
+      <textarea id="customerMessage" rows="4" maxlength="300" 
+        placeholder="Skriv her hvis du har spesielle ønsker, allergier, tidspunkt du foretrekker, eller andre kommentarer..."></textarea><br><br>
+      
+      <button type="submit" class="btn">Send forespørsel</button>
+    </form>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="script.js"></script>
+</body>
+</html>
