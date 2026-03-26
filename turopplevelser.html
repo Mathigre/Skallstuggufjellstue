@@ -5,14 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Turopplevelser - Skallstuggu</title>
   <link rel="stylesheet" href="style.css">
+  
   <style>
     .section {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 40px;
+      gap: 35px;
       max-width: 1200px;
-      margin: 60px auto;
+      margin: 55px auto;
       padding: 0 20px;
     }
     .section.reverse {
@@ -20,35 +21,35 @@
     }
     .section .text {
       flex: 1;
-      min-width: 320px;
+      min-width: 300px;
     }
     .section img {
       flex: 1;
-      min-width: 300px;
-      max-width: 550px;
+      min-width: 280px;
       border-radius: 12px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
     }
 
     .intro {
       max-width: 900px;
-      margin: 40px auto;
+      margin: 30px auto 50px;
       text-align: center;
       padding: 0 20px;
-      font-size: 1.1em;
+      font-size: 1.08em;
+      line-height: 1.65;
     }
 
     .gallery {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 15px;
       max-width: 1200px;
-      margin: 50px auto;
-      padding: 0 20px;
+      margin: 40px auto;
+      padding: 0 15px;
     }
     .gallery img {
       width: 100%;
-      height: 220px;
+      height: 200px;
       object-fit: cover;
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -58,6 +59,49 @@
       max-width: 900px;
       margin: 50px auto;
       padding: 0 20px;
+    }
+
+    /* ========================
+       MOBIL OPTIMALISERING
+       ======================== */
+    @media (max-width: 768px) {
+      .section, .section.reverse {
+        flex-direction: column;
+        gap: 25px;
+      }
+      
+      .section img {
+        width: 100%;
+        max-width: 100%;
+      }
+      
+      h1 {
+        font-size: 1.85em;
+        text-align: center;
+      }
+      
+      h2, h3 {
+        font-size: 1.45em;
+        text-align: center;
+      }
+      
+      .gallery {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      }
+      
+      .gallery img {
+        height: 180px;
+      }
+      
+      .intro {
+        font-size: 1.05em;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .gallery img {
+        height: 160px;
+      }
     }
   </style>
 </head>
@@ -112,7 +156,6 @@
   <!-- Spesifikke opplevelser -->
   <h2 style="text-align:center; margin: 60px 0 40px;">Våre turopplevelser</h2>
 
-  <!-- 1 -->
   <section class="section">
     <img src="images/kveldsturrandone.jpg" alt="Kveldstur på ski">
     <div class="text">
@@ -121,7 +164,6 @@
     </div>
   </section>
 
-  <!-- 2 -->
   <section class="section reverse">
     <img src="images/Turtilroknesvollen.jpg" alt="Tur til Roknesvollen">
     <div class="text">
@@ -130,7 +172,6 @@
     </div>
   </section>
 
-  <!-- 3 -->
   <section class="section">
     <img src="images/Turtilskalltjønna.jpg" alt="Tur til Skalltjønna">
     <div class="text">
@@ -139,7 +180,6 @@
     </div>
   </section>
 
-  <!-- 4 -->
   <section class="section reverse">
     <img src="images/liggeilavvo.jpg" alt="Lavvo">
     <div class="text">
@@ -148,7 +188,6 @@
     </div>
   </section>
 
-  <!-- 5 -->
   <section class="section">
     <img src="images/Articracemedmåliskallstuggu.jpg" alt="Arctic Race">
     <div class="text">
@@ -157,7 +196,7 @@
     </div>
   </section>
 
-  <!-- Guidede turer / Aktiviteter -->
+  <!-- Guidede turer -->
   <div class="activity">
     <h2 style="text-align:center; margin-bottom: 30px;">Guidede turopplevelser</h2>
     <div class="menu" style="background:#f9f5eb; padding:25px; border-radius:12px;">
@@ -212,7 +251,7 @@
       <p><a href="kontakt.html" style="color: #555; text-decoration: none;">Send melding</a></p>
     </div>
   </div>
-  
+ 
   <div style="max-width: 1200px; margin: 60px auto 0; padding-top: 25px; border-top: 1px solid #ddd; text-align: center; color: #777; font-size: 0.95em;">
     <p>© 2026 Skallstuggu – Fjellhytte i Levanger kommune</p>
     <p style="margin-top: 8px;">

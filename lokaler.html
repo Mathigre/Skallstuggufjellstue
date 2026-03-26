@@ -5,6 +5,66 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Leie av lokaler og Priser - Skallstuggu</title>
   <link rel="stylesheet" href="style.css">
+  
+  <style>
+    .two-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      margin-top: 50px;
+    }
+    .box {
+      border: 3px solid #8B4A2B;
+      border-radius: 16px;
+      padding: 35px;
+      background: #fffaf0;
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+      margin-top: 70px;
+    }
+    .gallery img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    /* ========================
+       MOBIL OPTIMALISERING
+       ======================== */
+    @media (max-width: 900px) {
+      .two-columns {
+        grid-template-columns: 1fr;
+        gap: 30px;
+      }
+      .box {
+        padding: 28px 22px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .page {
+        padding: 30px 15px;
+      }
+      h1 {
+        font-size: 1.85em;
+        text-align: center;
+      }
+      .gallery {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      }
+      .gallery img {
+        height: 190px;
+      }
+      .box h2 {
+        font-size: 1.45em;
+      }
+    }
+  </style>
 </head>
 <body>
 
@@ -27,85 +87,79 @@
 
 <section class="page">
   <h1>Leie av lokaler og Priser</h1>
- 
-  <p style="font-size: 1.15em; max-width: 800px; line-height: 1.6;">
+  
+  <p style="font-size: 1.15em; max-width: 800px; line-height: 1.7;">
     Skallstuggu har totalt 22 soverom og over 50 sengeplasser. 
     Perfekt for kurs, arrangementer, firmafester og større grupper.
   </p>
 
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 50px;">
-    <!-- VENSTRE BOKS -->
-    <div style="border: 3px solid #8B4A2B; border-radius: 16px; padding: 35px; background: #fffaf0;">
-      <h2 style="color: #8B4A2B; margin-top: 0; margin-bottom: 20px;">Priser</h2>
-      <p><strong>Helg:</strong> 13.000 kr (25 personer)</p>
+  <div class="two-columns">
+    <!-- VENSTRE KOLONNE -->
+    <div class="box">
+      <h2 style="color: #8B4A2B;">Priser</h2>
+      <p><strong>Helg (fredag–søndag):</strong> 13.000 kr (opptil 25 personer)</p>
       <p><strong>Ukedager:</strong> 6.000 kr</p>
-      <p><strong>Selskap kveld:</strong> 5.000 kr</p>
+      <p><strong>Selskap / festkveld:</strong> 5.000 kr</p>
 
-      <h2 style="color: #8B4A2B; margin-top: 40px; margin-bottom: 15px;">Fasiliteter</h2>
-      <ul style="line-height: 2; padding-left: 5px;">
+      <h2 style="color: #8B4A2B; margin-top: 35px;">Fasiliteter</h2>
+      <ul style="line-height: 2.1;">
         <li>Plass til opptil 50 personer</li>
-        <li>Kjøkken for 80 personer</li>
-        <li>Seminarrom med projektor</li>
+        <li>Stort kjøkken for 80 personer</li>
+        <li>Seminarrom med projektor og whiteboard</li>
         <li>Nyoppussede dusjer og garderober</li>
+        <li>51 sengeplasser fordelt på 22 rom</li>
       </ul>
     </div>
 
-    <!-- HØYRE BOKS -->
-    <div style="border: 3px solid #8B4A2B; border-radius: 16px; padding: 35px; background: #fffaf0;">
-      <h2 style="color: #8B4A2B; margin-top: 0; margin-bottom: 20px;">Leieprisen inkluderer</h2>
+    <!-- HØYRE KOLONNE -->
+    <div class="box">
+      <h2 style="color: #8B4A2B;">Leieprisen inkluderer</h2>
+      <p>Fri bruk av hele Skallstuggu og alt utstyr i leieperioden.</p>
+      <p>Ekstra rom og kjellerstue kan leies i tillegg.</p>
+      <p>Sluttrengjøring kan bestilles for kr 3.000,-</p>
       
-      <p>Fri bruk av Skallstuggu og alt utstyr i leieperioden (kjøkken og 1. etasje).</p>
-      
-      <p>Ønskes leie av kjeller med 5 soverom og seminarrom, eller ekstra hytte med 8 soverom, kommer dette i tillegg.</p>
-      
-      <p>Sluttrengjøring kan bestilles for kr 3.000,- (avhenger av antall gjester). Dette inkluderer vask, men ikke rydding.</p>
-      
-      <p style="margin-top: 25px;"><strong>Leietaker er ansvarlig</strong> for rydding og bortkjøring av søppel.</p>
+      <p style="margin-top: 25px; font-weight: 500;">
+        <strong>Leietaker er ansvarlig</strong> for rydding, oppvask og søppel.
+      </p>
     </div>
   </div>
 
-  <!-- LEIEVILKÅR SEKSJON -->
+  <!-- LEIEVILKÅR -->
   <div style="margin-top: 70px; text-align: center;">
-    <h2 style="color: #8B4A2B; margin-bottom: 15px;">Leievilkår</h2>
-    <p style="max-width: 700px; margin: 0 auto 25px; font-size: 1.08em;">
-      Les gjennom våre leievilkår nøye før du booker. Her finner du viktig informasjon om booking, avbestilling, 
-      ansvar og praktiske detaljer.
+    <h2 style="color: #8B4A2B;">Leievilkår</h2>
+    <p style="max-width: 700px; margin: 0 auto 25px;">
+      Les gjennom våre leievilkår før du booker.
     </p>
-    
-    <a href="https://rbphgvnwmzjeuvyrasvy.supabase.co/storage/v1/object/public/leiebetingelser/Leiebetingelse_Skallstuggu.pdf" 
+    <a href="https://rbphgvnwmzjeuvyrasvy.supabase.co/storage/v1/object/public/leiebetingelser/Leiebetingelse_Skallstuggu.pdf"
        target="_blank"
-       style="display: inline-block; background: #8B4A2B; color: white; padding: 14px 32px; 
-              border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 1.1em;">
-      Les leievilkårene her (PDF)
+       style="display: inline-block; background: #8B4A2B; color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+      Les leievilkårene (PDF)
     </a>
   </div>
 
   <!-- BILDER -->
-  <div class="gallery" style="margin-top: 80px;">
-    <img src="images/lokaler.jpeg" alt="Lokaler">
-    <img src="images/lokaler1.jpeg" alt="Lokaler">
-    <img src="images/lokaler2.jpeg" alt="Lokaler">
-    <img src="images/lokaler3.jpeg" alt="Lokaler">
-    <img src="images/lokaler4.jpeg" alt="Lokaler">
-    <img src="images/lokaler5.jpeg" alt="Lokaler">
-    <img src="images/lokaler6.jpeg" alt="Lokaler">
+  <div class="gallery">
+    <img src="images/lokaler.jpeg" alt="Lokaler Skallstuggu">
+    <img src="images/lokaler1.jpeg" alt="Interiør">
+    <img src="images/lokaler2.jpeg" alt="Spiseområde">
+    <img src="images/lokaler3.jpeg" alt="Kjøkken">
+    <img src="images/lokaler4.jpeg" alt="Soverom">
+    <img src="images/lokaler5.jpeg" alt="Soverom">
+    <img src="images/lokaler6.jpeg" alt="Fasiliteter">
     <img src="images/soverom1.jpeg" alt="Soverom">
     <img src="images/soverom.jpeg" alt="Soverom">
   </div>
 </section>
 
-
 <!-- FOOTER -->
 <footer style="background: #f8f1e3; padding: 60px 20px 30px; margin-top: 100px; border-top: 3px solid #8B4A2B;">
   <div style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 40px;">
-
     <div>
       <h4 style="color: #8B4A2B; margin-bottom: 18px;">Hjelp og informasjon</h4>
       <p><a href="kontakt.html" style="color: #555; text-decoration: none;">Kontakt oss</a></p>
       <p><a href="booking.html" style="color: #555; text-decoration: none;">Booking og priser</a></p>
       <p><a href="lokaler.html" style="color: #555; text-decoration: none;">Leievilkår</a></p>
     </div>
-
     <div>
       <h4 style="color: #8B4A2B; margin-bottom: 18px;">Om Skallstuggu</h4>
       <p><a href="index.html#om" style="color: #555; text-decoration: none;">Om hytta</a></p>
@@ -113,14 +167,12 @@
       <p><a href="turopplevelser.html" style="color: #555; text-decoration: none;">Aktiviteter i området</a></p>
       <p><a href="index.html#historie" style="color: #555; text-decoration: none;">Historie</a></p>
     </div>
-
     <div>
       <h4 style="color: #8B4A2B; margin-bottom: 18px;">Inspirasjon</h4>
       <p><a href="turopplevelser.html" style="color: #555; text-decoration: none;">Turmuligheter</a></p>
       <p><a href="firmasamlinger.html" style="color: #555; text-decoration: none;">Firmaarrangementer</a></p>
       <p><a href="servering.html" style="color: #555; text-decoration: none;">Servering og mat</a></p>
     </div>
-
     <div>
       <h4 style="color: #8B4A2B; margin-bottom: 18px;">Kontakt oss</h4>
       <p style="color: #555;">
@@ -131,18 +183,14 @@
       </p>
       <p><a href="kontakt.html" style="color: #555; text-decoration: none;">Send melding</a></p>
     </div>
-
   </div>
-
-  <!-- Nederste linje -->
+  
   <div style="max-width: 1200px; margin: 60px auto 0; padding-top: 25px; border-top: 1px solid #ddd; text-align: center; color: #777; font-size: 0.95em;">
     <p>© 2026 Skallstuggu – Fjellhytte i Levanger kommune</p>
     <p style="margin-top: 8px;">
-      <a href="https://rbphgvnwmzjeuvyrasvy.supabase.co/storage/v1/object/public/leiebetingelser/Leiebetingelse_Skallstuggu.pdf" 
-         target="_blank" style="color: #777; text-decoration: none; margin: 0 10px;">Leievilkår (PDF)</a> • 
-      <a href="https://rbphgvnwmzjeuvyrasvy.supabase.co/storage/v1/object/public/leiebetingelser/Personvern_Skallstuggu.pdf" 
-         target="_blank" style="color: #777; text-decoration: none; margin: 0 10px;">Personvern (PDF)</a> • 
-      <a href="kontakt.html" style="color: #777; text-decoration: none; margin: 0 10px;">Kontakt</a>
+      <a href="https://rbphgvnwmzjeuvyrasvy.supabase.co/storage/v1/object/public/leiebetingelser/Leiebetingelse_Skallstuggu.pdf" target="_blank" style="color: #777; text-decoration: none;">Leievilkår (PDF)</a> •
+      <a href="https://rbphgvnwmzjeuvyrasvy.supabase.co/storage/v1/object/public/leiebetingelser/Personvern_Skallstuggu.pdf" target="_blank" style="color: #777; text-decoration: none;">Personvern (PDF)</a> •
+      <a href="kontakt.html" style="color: #777; text-decoration: none;">Kontakt</a>
     </p>
   </div>
 </footer>

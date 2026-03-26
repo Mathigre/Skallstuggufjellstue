@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Servering - Skallstuggu</title>
   <link rel="stylesheet" href="style.css">
+  
   <style>
     /* Hero bilder - tre bilder ved siden av hverandre */
     .hero-images {
@@ -14,25 +15,23 @@
       justify-content: center;
       margin: 35px auto 40px;
     }
-
     .hero-img {
       width: 100%;
-      max-width: 340px;           /* Tilpasset for 3 bilder */
+      max-width: 340px;
       height: auto;
       border-radius: 12px;
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
-      flex: 1 1 300px;            /* Gjør at de vokser pent */
-      object-fit: cover;          /* Sørger for at bildene ser jevne ut */
+      flex: 1 1 300px;
+      object-fit: cover;
     }
 
-    /* Meny-bokser i 2x2 grid */
+    /* Meny-bokser */
     .menu-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
       gap: 25px;
       margin: 40px 0;
     }
-
     .menu-card {
       background: #f9f5eb;
       border: 2px solid #8B4A2B;
@@ -40,7 +39,6 @@
       padding: 24px;
       box-shadow: 0 4px 12px rgba(139, 74, 43, 0.08);
     }
-
     .menu-card h3 {
       color: #8B4A2B;
       margin-top: 0;
@@ -49,26 +47,58 @@
       border-bottom: 2px solid #8B4A2B;
       padding-bottom: 10px;
     }
-
     .menu-card p {
       margin: 14px 0;
       line-height: 1.5;
     }
-
     .price {
       font-weight: bold;
       color: #8B4A2B;
     }
-
     .note {
       font-style: italic;
       color: #555;
       margin-top: 20px;
       font-size: 0.98em;
     }
+
+    /* ========================
+       MOBIL OPTIMALISERING
+       ======================== */
+    @media (max-width: 900px) {
+      .menu-grid {
+        grid-template-columns: 1fr;
+      }
+      .hero-images {
+        gap: 15px;
+      }
+      .hero-img {
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .page {
+        padding: 30px 15px;
+      }
+      h1 {
+        font-size: 1.85em;
+        text-align: center;
+      }
+      .hero-images {
+        margin: 25px auto 30px;
+      }
+      .menu-card {
+        padding: 22px 18px;
+      }
+      .menu-card h3 {
+        font-size: 1.25em;
+      }
+    }
   </style>
 </head>
 <body>
+
 <header class="navbar">
   <div class="nav-container">
     <a href="index.html" class="logo">
@@ -88,7 +118,7 @@
 
 <section class="page">
   <h1>Servering</h1>
-  
+ 
   <!-- TRE BILDER VED SIDEN AV HVERANDRE -->
   <div class="hero-images">
     <img src="images/mat2.jpg" alt="Servering på Skallstuggu - mat 2" class="hero-img">
@@ -98,7 +128,6 @@
 
   <!-- Menyene i 2x2 grid -->
   <div class="menu-grid">
-
     <!-- Lunsj -->
     <div class="menu-card">
       <h3>Lunsjmeny</h3>
@@ -141,7 +170,6 @@
       <p>Vask av kopper etter middag <span class="price">– 1500,-</span></p>
       <p>Vask etter kaffe <span class="price">– 1500,-</span></p>
     </div>
-
   </div>
 </section>
 
@@ -178,15 +206,13 @@
       <p><a href="kontakt.html" style="color: #555; text-decoration: none;">Send melding</a></p>
     </div>
   </div>
-  
+ 
   <div style="max-width: 1200px; margin: 60px auto 0; padding-top: 25px; border-top: 1px solid #ddd; text-align: center; color: #777; font-size: 0.95em;">
     <p>© 2026 Skallstuggu – Fjellhytte i Levanger kommune</p>
     <p style="margin-top: 8px;">
-      <a href="https://rbphgvnwmzjeuvyrasvy.supabase.co/storage/v1/object/public/leiebetingelser/Leiebetingelse_Skallstuggu.pdf"
-         target="_blank" style="color: #777; text-decoration: none; margin: 0 10px;">Leievilkår (PDF)</a> •
-      <a href="https://rbphgvnwmzjeuvyrasvy.supabase.co/storage/v1/object/public/leiebetingelser/Personvern_Skallstuggu.pdf"
-         target="_blank" style="color: #777; text-decoration: none; margin: 0 10px;">Personvern (PDF)</a> •
-      <a href="kontakt.html" style="color: #777; text-decoration: none; margin: 0 10px;">Kontakt</a>
+      <a href="https://rbphgvnwmzjeuvyrasvy.supabase.co/storage/v1/object/public/leiebetingelser/Leiebetingelse_Skallstuggu.pdf" target="_blank" style="color: #777; text-decoration: none;">Leievilkår (PDF)</a> •
+      <a href="https://rbphgvnwmzjeuvyrasvy.supabase.co/storage/v1/object/public/leiebetingelser/Personvern_Skallstuggu.pdf" target="_blank" style="color: #777; text-decoration: none;">Personvern (PDF)</a> •
+      <a href="kontakt.html" style="color: #777; text-decoration: none;">Kontakt</a>
     </p>
   </div>
 </footer>
