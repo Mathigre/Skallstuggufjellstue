@@ -101,7 +101,10 @@ function loadRequests() {
 
     div.innerHTML = `
       <p><strong>${b.name || "Ukjent"}</strong></p>
-      <p>${b.email || "-"}</p>
+      <p>
+        E-post: <a href="mailto:${b.email}" class="contact-link">${b.email || "-"}</a><br>
+        Telefon: <a href="tel:${b.phone}" class="contact-link">${b.phone || "-"}</a>
+      </p>
       <p>${b.start_date} → ${b.end_date}</p>
       <p>Status: <strong>${statusText(b.status)}</strong></p>
       
@@ -148,7 +151,6 @@ async function approve(id) {
     return;
   }
 
-  // NYTT: Spør etter svar til kunden
   const adminReply = prompt(
     `Skriv svar til ${b.name} (f.eks. pris, velkomst, tidspunkt osv.):\n\n` +
     `Eksempel: "Velkommen! Total pris for 2 netter blir 2500 kr. Vi møtes kl 15."\n\n` +
@@ -158,7 +160,6 @@ async function approve(id) {
 
   const finalReply = adminReply ? adminReply.trim() : "";
 
-  // Oppdater status til godkjent
   const { error: updateError } = await supabaseClient
     .from("bookings")
     .update({ status: "approved" })
@@ -170,7 +171,6 @@ async function approve(id) {
     return;
   }
 
-  // Send godkjennings-epost med ditt svar
   try {
     const response = await fetch("https://rbphgvnwmzjeuvyrasvy.supabase.co/functions/v1/resend-email", {
       method: "POST",
@@ -186,7 +186,7 @@ async function approve(id) {
         phone: b.phone || "",
         start: b.start_date,
         end: b.end_date,
-        adminReply: finalReply   // ← sender svaret ditt med
+        adminReply: finalReply
       })
     });
 
