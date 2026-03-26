@@ -99,41 +99,28 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 30px;
-      max-width: 1100px;
+      max-width: 1200px;
       margin: 0 auto;
     }
 
-    /* ========================
-       MOBIL OPTIMALISERING
-       ======================== */
+    /* Mobiltilpasning */
     @media (max-width: 768px) {
       .hero {
         height: 65vh;
         min-height: 420px;
       }
-      
-      .hero-text {
-        padding: 28px 25px;
-        max-width: 90%;
-      }
-      
       .hero-text h1 {
-        font-size: 2.35rem;
+        font-size: 2.4rem;
       }
-
+      .hero-text {
+        padding: 30px 25px;
+      }
       .flip-card {
         height: 290px;
       }
-
       .intro-grid, .history-grid {
         grid-template-columns: 1fr;
         gap: 25px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .flip-card {
-        height: 260px;
       }
     }
   </style>
@@ -173,36 +160,38 @@
   
   <div class="intro-grid">
     <div style="border: 3px solid #8B4A2B; border-radius: 16px; padding: 35px; background: #fffaf0;">
-      <h3 style="color: #8B4A2B;">Beliggenhet og natur</h3>
-      <p>Hytta ligger på <strong>480 meter over havet</strong>.</p>
-      <p>Kort vei til turmuligheter og Hårskallen.</p>
-      <p><strong>Vulusjøen</strong> ligger 150 meter unna.</p>
+      <h3 style="color: #8B4A2B; margin-top: 0;">Beliggenhet og natur</h3>
+      <p>Hytta ligger på <strong>480 meter over havet</strong> med gode parkeringsmuligheter like ved. Asfaltert vei helt opp.</p>
+      <p>Fra hytta er det kort vei til mange fine turmuligheter både sommer og vinter. Du kan gå en tur på ca. 2 km til <strong>Hårskallens topp</strong> (735 m.o.h.) og nyte fantastisk utsikt over store deler av Trondheimsfjorden.</p>
+      <p><strong>Vulusjøen</strong> ligger bare 150 meter fra hytta – her kan du fiske og benytte båt.</p>
     </div>
+
     <div style="border: 3px solid #8B4A2B; border-radius: 16px; padding: 35px; background: #fffaf0;">
-      <h3 style="color: #8B4A2B;">Overnatting</h3>
-      <p>22 rom og 51 sengeplasser.</p>
-      <p>Glamping og moderne fasiliteter.</p>
+      <h3 style="color: #8B4A2B; margin-top: 0;">Overnatting og kapasitet</h3>
+      <p>Skallstuggu har <strong>22 nyoppussede soverom</strong> og totalt <strong>51 sengeplasser</strong>.</p>
+      <p>Mulighet for å leie glamping-telt på sommeren. Vi har nyoppussede dusjer og garderober, inkludert handicaptilpasset dusj.</p>
     </div>
   </div>
 </section>
 
 <!-- HISTORIE -->
-<section style="margin-top: 80px; padding: 0 20px;">
-  <h2 style="text-align: center; color: #8B4A2B; margin-bottom: 40px;">Litt historie</h2>
+<section class="history-section" style="margin-top: 80px; padding: 0 20px;">
+  <h2 class="history-title">Litt historie fra Skallstuggu</h2>
   
   <div class="history-grid">
     <div>
-      <img src="images/historie.jpeg" style="width:100%; border-radius:12px;" alt="Historisk bilde">
-      <div style="margin-top:15px;">
-        <h3>1970-tallet</h3>
-        <p>Bygd av Frol IL.</p>
+      <img src="images/historie.jpeg" alt="Skallstuggu 1970-tallet" style="width:100%; border-radius:12px;">
+      <div class="history-box">
+        <h3 style="color: #8B4A2B;">1970-tallet</h3>
+        <p>Bygd av Frol idrettslag. Hytta ble opprinnelig brukt til arrangementer, kaffesalg på søndager og leirskoler.</p>
       </div>
     </div>
+
     <div>
-      <img src="images/historie2.jpeg" style="width:100%; border-radius:12px;" alt="Middagsgjester">
-      <div style="margin-top:15px;">
-        <h3>Middagsgjester</h3>
-        <p>Historisk bruk av hytta.</p>
+      <img src="images/historie2.jpeg" alt="Middagsgjester" style="width:100%; border-radius:12px;">
+      <div class="history-box">
+        <h3 style="color: #8B4A2B;">Middagsgjester på 1970-tallet</h3>
+        <p>I september 1987 behandlet styret i Verdal Samvirkelag en søknad fra Frol Idrettslag om bidrag til utbygging av turisthytta Skallstuggu ved Vulusjøen. Det ble bevilget kr. 1.000,- til utbyggingen.</p>
       </div>
     </div>
   </div>
