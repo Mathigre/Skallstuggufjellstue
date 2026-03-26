@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin - Skallstuggu</title>
-  <link rel="stylesheet" href="../style.css">
-
+  <link rel="stylesheet" href="style.css">
+  
   <style>
     .admin-layout {
       display: grid;
@@ -15,13 +15,32 @@
       margin: 0 auto;
       padding: 0 15px;
     }
-
     @media (min-width: 900px) {
       .admin-layout {
         grid-template-columns: 1fr 1fr;
       }
     }
 
+    /* Navbar og Logo - viktig for at logoen skal vises */
+    .navbar {
+      background: #ffffff;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo img {
+      height: 65px;
+      width: auto;
+      max-width: 100%;
+      display: block;
+    }
+
+    /* Resten av stilen din */
     .menu {
       padding: 16px;
       border-radius: 10px;
@@ -29,11 +48,9 @@
       background: #f8f9fa;
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
-
     .foresporsel { background: #fff3cd; }
     .godkjent { background: #d4edda; }
     .avslatt { background: #f8d7da; }
-
     .customer-message {
       background: #e3f2fd;
       padding: 12px;
@@ -42,31 +59,34 @@
       border-radius: 4px;
       font-size: 0.95em;
     }
-
     .contact-link {
       color: #1976d2;
       text-decoration: underline;
       cursor: pointer;
     }
-    .contact-link:hover { 
-      color: #1565c0; 
-    }
+    .contact-link:hover { color: #1565c0; }
 
-    .warning { color: #d32f2f; font-weight: bold; }
+    .warning {
+      color: #d32f2f;
+      font-weight: bold;
+      background: #ffebee;
+      padding: 10px;
+      border-radius: 6px;
+      margin: 10px 0;
+      border-left: 4px solid #d32f2f;
+    }
     .section-header {
       cursor: pointer;
       margin: 25px 0 12px 0;
       font-size: 1.25em;
     }
     .hidden { display: none; }
-
     .calendar-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       gap: 6px;
       margin-top: 15px;
     }
-
     .day {
       padding: 10px 4px;
       text-align: center;
@@ -76,12 +96,10 @@
       font-size: 0.9em;
       min-height: 52px;
     }
-
     .booked { background: #ffcdd2; }
     .half-start { background: linear-gradient(to right, #e8f5e9 50%, #ffcdd2 50%); }
     .half-end { background: linear-gradient(to right, #ffcdd2 50%, #e8f5e9 50%); }
     .highlight { border: 3px solid #1976d2; }
-
     #search {
       width: 100%;
       padding: 12px;
@@ -90,7 +108,6 @@
       border-radius: 6px;
       font-size: 1em;
     }
-
     .calendar-nav {
       display: flex;
       justify-content: center;
@@ -98,35 +115,62 @@
       margin-bottom: 15px;
       flex-wrap: wrap;
     }
+    .password-screen {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .password-box {
+      background: white;
+      padding: 40px 30px;
+      border-radius: 12px;
+      text-align: center;
+      max-width: 380px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
   </style>
 </head>
 <body>
 
+<!-- PASSORD-SKJERM -->
+<div id="passwordScreen" class="password-screen">
+  <div class="password-box">
+    <h2>Admin tilgang</h2>
+    <p>Skriv inn admin-koden:</p>
+    <input type="password" id="adminPassword" placeholder="Skriv kode her..."
+           style="padding:12px; width:85%; font-size:1.1em; margin:15px 0;">
+    <br>
+    <button onclick="checkPassword()" style="padding:12px 30px; font-size:1.1em;">Logg inn</button>
+    <p id="passwordError" style="color:red; margin-top:10px;"></p>
+  </div>
+</div>
+
+<!-- HEADER MED LOGO -->
 <header class="navbar">
   <div class="logo">
-    <img src="../images/Logo.png" alt="Skallstuggu" style="height: 65px; width: auto;">
+    <img src="images/logo.png" alt="Skallstuggu">
   </div>
 </header>
 
-<section class="page">
+<section class="page" id="adminContent" style="display:none;">
   <h1>Booking admin</h1>
-
   <div class="admin-layout">
-    <!-- VENSTRE - Forespørsler -->
     <div>
       <input id="search" placeholder="Søk navn eller e-post...">
 
-      <h3 class="section-header" onclick="toggle('foresporsler')">📩 Forespørsler</h3>
+      <h3 id="foresporsler-header" class="section-header" onclick="toggle('foresporsler')">📩 Forespørsler</h3>
       <div id="foresporsler"></div>
 
-      <h3 class="section-header" onclick="toggle('godkjente')">✅ Godkjente</h3>
+      <h3 id="godkjente-header" class="section-header" onclick="toggle('godkjente')">✅ Godkjente</h3>
       <div id="godkjente" class="hidden"></div>
 
-      <h3 class="section-header" onclick="toggle('avslatte')">❌ Avslåtte</h3>
+      <h3 id="avslatte-header" class="section-header" onclick="toggle('avslatte')">❌ Avslåtte</h3>
       <div id="avslatte" class="hidden"></div>
     </div>
-
-    <!-- HØYRE - Kalender -->
     <div>
       <h2>Kalender</h2>
       <div class="calendar-nav">
@@ -140,7 +184,27 @@
 </section>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
 <script src="admin.js"></script>
 
+<script>
+// Passord-sjekk
+function checkPassword() {
+  const input = document.getElementById("adminPassword").value;
+  const error = document.getElementById("passwordError");
+  if (input === ADMIN_CONFIG.password) {
+    document.getElementById("passwordScreen").style.display = "none";
+    document.getElementById("adminContent").style.display = "block";
+  } else {
+    error.textContent = "Feil kode. Prøv igjen.";
+    document.getElementById("adminPassword").value = "";
+  }
+}
+
+// Enter-tast støtte
+document.getElementById("adminPassword").addEventListener("keypress", function(e) {
+  if (e.key === "Enter") checkPassword();
+});
+</script>
 </body>
 </html>

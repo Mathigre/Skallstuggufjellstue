@@ -19,10 +19,7 @@ let currentDate = new Date();
 // =========================
 async function loadData() {
   try {
-    const { data, error } = await supabaseClient
-      .from("bookings")
-      .select("*");
-
+    const { data, error } = await supabaseClient.from("bookings").select("*");
     if (error) throw error;
 
     allBookings = data || [];
@@ -30,7 +27,6 @@ async function loadData() {
 
     loadRequests();
     loadCalendar();
-
   } catch (err) {
     console.error("Feil ved henting av data:", err);
     alert("Kunne ikke laste bookinger. Sjekk konsollen.");
@@ -38,12 +34,11 @@ async function loadData() {
 }
 
 // =========================
-// TOGGLE, STATUS, OVERLAP, SEARCH, REQUESTS
+// TOGGLE, STATUS, SEARCH
 // =========================
 function toggle(id) {
   const el = document.getElementById(id);
-  if (!el) return;
-  el.classList.toggle("hidden");
+  if (el) el.classList.toggle("hidden");
 }
 
 function statusText(status) {
@@ -52,17 +47,22 @@ function statusText(status) {
   return "Forespørsel";
 }
 
+document.getElementById("search")?.addEventListener("input", loadRequests);
+
+// =========================
+// OVERLAP SJekk (automatisk for pending)
+// =========================
 function checkOverlap(booking) {
-  for (let b of approvedBookings) {
-    if (booking.id === b.id) continue;
+  for (let b of allBookings) {
+    if (b.id === booking.id) continue;
+    if (b.status !== "pending") continue;   // kun sjekk mot andre ventende bookinger
+
     if (!(booking.end_date <= b.start_date || booking.start_date >= b.end_date)) {
       return b;
     }
   }
   return null;
 }
-
-document.getElementById("search")?.addEventListener("input", loadRequests);
 
 function loadRequests() {
   const search = (document.getElementById("search")?.value || "").toLowerCase();
@@ -71,33 +71,23 @@ function loadRequests() {
   const godkj = document.getElementById("godkjente");
   const avsl = document.getElementById("avslatte");
 
-  if (!foresp || !godkj || !avsl) return;
+  foresp.innerHTML = godkj.innerHTML = avsl.innerHTML = "";
 
-  foresp.innerHTML = "";
-  godkj.innerHTML = "";
-  avsl.innerHTML = "";
-
-  let countPending = 0;
-  let countApproved = 0;
-  let countRejected = 0;
+  let countPending = 0, countApproved = 0, countRejected = 0;
 
   allBookings.forEach(b => {
-    const name = (b.name || "").toLowerCase();
-    const email = (b.email || "").toLowerCase();
-
     if (b.status === "approved") countApproved++;
     else if (b.status === "rejected") countRejected++;
     else countPending++;
 
-    if (!name.includes(search) && !email.includes(search)) return;
+    const nameLower = (b.name || "").toLowerCase();
+    const emailLower = (b.email || "").toLowerCase();
+    if (search && !nameLower.includes(search) && !emailLower.includes(search)) return;
 
     const overlap = checkOverlap(b);
 
-    let css = b.status === "approved" ? "godkjent" :
-              b.status === "rejected" ? "avslatt" : "foresporsel";
-
     const div = document.createElement("div");
-    div.className = "menu " + css;
+    div.className = `menu ${b.status === "approved" ? "godkjent" : b.status === "rejected" ? "avslatt" : "foresporsel"}`;
 
     div.innerHTML = `
       <p><strong>${b.name || "Ukjent"}</strong></p>
@@ -109,33 +99,72 @@ function loadRequests() {
       <p>Status: <strong>${statusText(b.status)}</strong></p>
       
       ${b.message ? `<div class="customer-message"><strong>Melding fra kunde:</strong><br>${b.message}</div>` : ""}
-      
-      ${overlap ? `<p class="warning">⚠️ Dobbelbooking med ${overlap.name}</p>` : ""}
-      
+
+      ${overlap ? `<div class="warning">⚠️ Dobbelbooking med ${overlap.name || "en annen forespørsel"}</div>` : ""}
+
+      <!-- Tekstboks for å sende svar -->
+      <div style="margin: 12px 0 10px 0;">
+        <textarea id="reply-${b.id}" rows="3" placeholder="Skriv svar til kunden her..." 
+                  style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; resize:vertical;"></textarea>
+        <button onclick="sendReply('${b.id}', '${b.email}', '${b.name}')" 
+                style="margin-top:6px; padding:8px 16px; background:#1976d2; color:white; border:none; border-radius:6px; cursor:pointer;">
+          Send svar til kunde
+        </button>
+      </div>
+
       <button onclick="approve('${b.id}')">Godkjenn</button>
       <button onclick="reject('${b.id}')">Avslå</button>
     `;
-
-    div.addEventListener("click", (e) => {
-      if (e.target.tagName === "BUTTON") return;
-      selectedBooking = b;
-      loadCalendar();
-    });
 
     if (b.status === "approved") godkj.appendChild(div);
     else if (b.status === "rejected") avsl.appendChild(div);
     else foresp.appendChild(div);
   });
 
-  if (foresp.innerHTML === "") foresp.innerHTML = "<p>Ingen forespørsler</p>";
+  document.querySelector("[onclick=\"toggle('foresporsler')\"]").innerText = `📩 Forespørsler (${countPending})`;
+  document.querySelector("[onclick=\"toggle('godkjente')\"]").innerText = `✅ Godkjente (${countApproved})`;
+  document.querySelector("[onclick=\"toggle('avslatte')\"]").innerText = `❌ Avslåtte (${countRejected})`;
+}
 
-  const forespHeader = document.querySelector("[onclick=\"toggle('foresporsler')\"]");
-  const godkjHeader = document.querySelector("[onclick=\"toggle('godkjente')\"]");
-  const avslHeader = document.querySelector("[onclick=\"toggle('avslatte')\"]");
+// =========================
+// SEND SVAR TIL KUNDE
+// =========================
+async function sendReply(bookingId, customerEmail, customerName) {
+  const textarea = document.getElementById(`reply-${bookingId}`);
+  const message = textarea.value.trim();
 
-  if (forespHeader) forespHeader.innerText = `📩 Forespørsler (${countPending})`;
-  if (godkjHeader) godkjHeader.innerText = `✅ Godkjente (${countApproved})`;
-  if (avslHeader) avslHeader.innerText = `❌ Avslåtte (${countRejected})`;
+  if (!message) {
+    alert("Skriv en melding før du sender.");
+    return;
+  }
+
+  if (!confirm(`Vil du sende dette svaret til ${customerName}?`)) return;
+
+  try {
+    const response = await fetch("https://rbphgvnwmzjeuvyrasvy.supabase.co/functions/v1/resend-email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${supabaseAnonKey}`
+      },
+      body: JSON.stringify({
+        type: "admin_reply",
+        name: customerName,
+        email: customerEmail,
+        message: message
+      })
+    });
+
+    if (response.ok) {
+      alert("✅ Svar sendt til kunden!");
+      textarea.value = "";
+    } else {
+      alert("Feil ved sending av svar.");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Kunne ikke sende e-post. Sjekk konsollen.");
+  }
 }
 
 // =========================
@@ -151,14 +180,7 @@ async function approve(id) {
     return;
   }
 
-  const adminReply = prompt(
-    `Skriv svar til ${b.name} (f.eks. pris, velkomst, tidspunkt osv.):\n\n` +
-    `Eksempel: "Velkommen! Total pris for 2 netter blir 2500 kr. Vi møtes kl 15."\n\n` +
-    `Skriv her (kan stå tomt):`,
-    ""
-  );
-
-  const finalReply = adminReply ? adminReply.trim() : "";
+  if (!confirm("Vil du godkjenne denne bookingen?")) return;
 
   const { error: updateError } = await supabaseClient
     .from("bookings")
@@ -166,43 +188,29 @@ async function approve(id) {
     .eq("id", id);
 
   if (updateError) {
-    console.error("Feil ved oppdatering:", updateError);
     alert(`Kunne ikke godkjenne:\n${updateError.message || updateError}`);
     return;
   }
 
+  // Send godkjennings-epost
   try {
-    const response = await fetch("https://rbphgvnwmzjeuvyrasvy.supabase.co/functions/v1/resend-email", {
+    await fetch("https://rbphgvnwmzjeuvyrasvy.supabase.co/functions/v1/resend-email", {
       method: "POST",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${supabaseAnonKey}`
-      },
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${supabaseAnonKey}` },
       body: JSON.stringify({
         type: "approved",
         name: b.name,
         email: b.email,
         phone: b.phone || "",
         start: b.start_date,
-        end: b.end_date,
-        adminReply: finalReply
+        end: b.end_date
       })
     });
-
-    const result = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      console.error("E-post feilet:", result);
-      alert(`✅ Booking godkjent!\n\nMen e-posten ble ikke sendt til ${b.email}.`);
-    } else {
-      alert(`✅ Booking godkjent!\n\nBekreftelse med ditt svar er sendt til ${b.email}`);
-    }
   } catch (err) {
     console.error("Feil ved e-post sending:", err);
-    alert(`✅ Booking er godkjent, men e-posten kunne ikke sendes.\nSjekk konsollen.`);
   }
 
+  alert("✅ Booking godkjent.");
   await loadData();
 }
 
@@ -214,18 +222,14 @@ async function reject(id) {
     .update({ status: "rejected" })
     .eq("id", id);
 
-  if (error) {
-    console.error("Feil ved avslå:", error);
-    alert(`Kunne ikke avslå booking.\nFeil: ${error.message || JSON.stringify(error)}`);
-    return;
-  }
+  if (error) alert("Feil ved avslåing");
+  else alert("✅ Booking avslått");
 
-  alert("✅ Booking avslått.");
   await loadData();
 }
 
 // =========================
-// KALENDER + POPUP (uendret)
+// KALENDER + POPUP
 // =========================
 function changeMonth(dir) {
   currentDate.setMonth(currentDate.getMonth() + dir);
@@ -235,7 +239,6 @@ function changeMonth(dir) {
 function loadCalendar() {
   const calendar = document.getElementById("calendar");
   if (!calendar) return;
-
   calendar.innerHTML = "";
 
   const year = currentDate.getFullYear();
@@ -272,22 +275,10 @@ function loadCalendar() {
 
       let relevant = false;
 
-      if (dateStr === bStart && dateStr === bEnd) {
-        isFullyBooked = true;
-        relevant = true;
-      }
-      else if (dateStr === bStart) {
-        isStart = true;
-        relevant = true;
-      }
-      else if (dateStr === bEnd) {
-        isEnd = true;
-        relevant = true;
-      }
-      else if (dateStr > bStart && dateStr < bEnd) {
-        isFullyBooked = true;
-        relevant = true;
-      }
+      if (dateStr === bStart && dateStr === bEnd) isFullyBooked = relevant = true;
+      else if (dateStr === bStart) isStart = relevant = true;
+      else if (dateStr === bEnd) isEnd = relevant = true;
+      else if (dateStr > bStart && dateStr < bEnd) isFullyBooked = relevant = true;
 
       if (relevant) {
         dayBookings.push({
@@ -308,17 +299,11 @@ function loadCalendar() {
       content.appendChild(nameDiv);
     }
 
-    if (isFullyBooked || (isStart && isEnd)) {
-      div.classList.add("booked");
-    } else if (isStart) {
-      div.classList.add("half-start");
-    } else if (isEnd) {
-      div.classList.add("half-end");
-    }
+    if (isFullyBooked || (isStart && isEnd)) div.classList.add("booked");
+    else if (isStart) div.classList.add("half-start");
+    else if (isEnd) div.classList.add("half-end");
 
-    if (selectedBooking && 
-        dateStr >= selectedBooking.start_date && 
-        dateStr <= selectedBooking.end_date) {
+    if (selectedBooking && dateStr >= selectedBooking.start_date && dateStr <= selectedBooking.end_date) {
       div.classList.add("highlight");
     }
 
@@ -334,23 +319,12 @@ function loadCalendar() {
 
 function showDayInfo(dateStr, bookings) {
   let html = `<h3>${dateStr}</h3><hr>`;
-
   bookings.forEach(b => {
-    html += `
-    <strong>${b.name}</strong><br>
-    E-post: ${b.email}<br>
-    Telefon: ${b.phone}<br>
-    Periode: ${b.start} → ${b.end}<br><br>
-`;
+    html += `<strong>${b.name}</strong><br>E-post: ${b.email}<br>Telefon: ${b.phone}<br>Periode: ${b.start} → ${b.end}<br><br>`;
   });
 
   const popup = document.createElement("div");
-  popup.style.cssText = `
-    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    background: white; padding: 25px; border-radius: 12px; 
-    box-shadow: 0 10px 30px rgba(0,0,0,0.4); z-index: 10000; 
-    max-width: 420px;
-  `;
+  popup.style.cssText = `position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;padding:25px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.4);z-index:10000;max-width:420px;`;
   popup.innerHTML = html;
 
   const closeBtn = document.createElement("button");
