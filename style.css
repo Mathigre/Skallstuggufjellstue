@@ -11,8 +11,8 @@ body {
   font-family: Arial, sans-serif;
   background: white;
   color: #111;
+  line-height: 1.6;
 }
-
 
 /* =========================
    TYPOGRAFI
@@ -24,46 +24,55 @@ h1, h2, h3 {
 }
 
 p {
-  line-height: 1.6;
+  line-height: 1.65;
 }
 
 a {
   text-decoration: none;
 }
 
-
 /* =========================
    NAVBAR
 ========================= */
 
 .navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 40px;
   background: white;
   position: sticky;
   top: 0;
-  border-bottom: 1px solid #eee;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
   z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  border-bottom: 1px solid #eee;
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .logo img {
   height: 60px;
+  width: auto;
 }
 
-nav a {
-  margin-left: 25px;
+.nav-links {
+  display: flex;
+  gap: 25px;
+}
+
+.nav-links a {
   color: #333;
   font-weight: 500;
-  transition: 0.2s;
+  transition: color 0.2s;
 }
 
-nav a:hover {
+.nav-links a:hover,
+.nav-links a.active {
   color: #8B4A2B;
 }
-
 
 /* =========================
    HERO
@@ -93,12 +102,11 @@ nav a:hover {
   font-size: 18px;
 }
 
-
 /* =========================
    KNAPPER
 ========================= */
 
-.btn {
+.btn, .btn-contact {
   background: #8B4A2B;
   color: white;
   padding: 12px 28px;
@@ -108,10 +116,9 @@ nav a:hover {
   transition: 0.2s;
 }
 
-.btn:hover {
+.btn:hover, .btn-contact:hover {
   background: #6e3820;
 }
-
 
 /* =========================
    GENERELT SIDEOPPSETT
@@ -126,7 +133,6 @@ nav a:hover {
 section {
   margin-bottom: 50px;
 }
-
 
 /* =========================
    CARDS
@@ -152,7 +158,6 @@ section {
   transform: translateY(-6px);
 }
 
-
 /* =========================
    GALLERI
 ========================= */
@@ -173,7 +178,6 @@ section {
   transform: scale(1.04);
 }
 
-
 /* =========================
    BOOKING KALENDER
 ========================= */
@@ -193,74 +197,34 @@ section {
   cursor: pointer;
   font-weight: bold;
   transition: 0.2s;
+  min-height: 95px;
 }
 
 .day:hover {
   transform: scale(1.05);
 }
 
-/* 🔴 FULL BOOKET */
-.booked {
-  background: #ffcdd2;
-  cursor: not-allowed;
-}
+.booked { background: #ffcdd2; cursor: not-allowed; }
 
-/* 🟩🟥 START DAG (innsjekk) */
 .half-start {
-  background: linear-gradient(
-    to right,
-    #e8f5e9 50%,
-    #ffcdd2 50%
-  );
+  background: linear-gradient(to right, #e8f5e9 50%, #ffcdd2 50%);
 }
 
-/* 🟥🟩 SLUTT DAG (utsjekk) */
 .half-end {
-  background: linear-gradient(
-    to right,
-    #ffcdd2 50%,
-    #e8f5e9 50%
-  );
+  background: linear-gradient(to right, #ffcdd2 50%, #e8f5e9 50%);
 }
 
-/* 🔴|🔴 SAMME DAG */
-.split {
-  background: #ffcdd2;
-  position: relative;
-}
-
-.split::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 0;
-  width: 2px;
-  height: 100%;
-  background: black;
-}
-
-/* valgt dato */
 .selected {
-  border: 3px solid black;
+  border: 3px solid #1976d2;
 }
-
 
 /* =========================
    ADMIN STATUS
 ========================= */
 
-.foresporsel {
-  border-left: 6px solid orange;
-}
-
-.godkjent {
-  border-left: 6px solid green;
-}
-
-.avslaatt {
-  border-left: 6px solid red;
-}
-
+.foresporsel { border-left: 6px solid orange; }
+.godkjent   { border-left: 6px solid green; }
+.avslatt    { border-left: 6px solid red; }
 
 /* =========================
    MELDINGSBOKS
@@ -282,13 +246,11 @@ section {
   margin-bottom: 20px;
 }
 
-
 /* =========================
-   RESPONSIVE
+   RESPONSIVE - MOBIL
 ========================= */
 
 @media (max-width: 900px) {
-
   .calendar-grid {
     grid-template-columns: repeat(4, 1fr);
   }
@@ -296,73 +258,50 @@ section {
   .cards {
     flex-direction: column;
   }
+
+  .gallery {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .hero-text {
+    padding: 30px 25px;
+    max-width: 90%;
+  }
+
+  .hero-text h1 {
+    font-size: 32px;
+  }
+
+  .page {
+    padding: 40px 15px;
+  }
+
+  .nav-links {
+    gap: 15px;
+  }
 }
 
-.day {
-  height: 95px;
-  padding: 6px;
-  box-sizing: border-box;
-}
+@media (max-width: 600px) {
+  .nav-container {
+    padding: 10px 15px;
+  }
 
-.day-content {
-  text-align: center;
-  width: 100%;
-}
+  .logo img {
+    height: 48px;
+  }
 
-.day-number {
-  font-weight: bold;
-  font-size: 15px;
-  margin-bottom: 4px;
-}
+  .nav-links {
+    gap: 10px;
+    font-size: 0.95em;
+  }
 
-.day-name {
-  font-size: 12px;
-  line-height: 1.3;
-  color: #222;
-  font-weight: 500;
-  white-space: normal;
-}
+  .gallery {
+    grid-template-columns: 1fr;
+  }
 
-/* NAVBAR */
-.navbar {
-  width: 100%;
-  background: white;
-  border-bottom: 1px solid #eee;
-}
-
-.nav-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 15px 20px;
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-/* LOGO */
-.logo img {
-  height: 60px;
-}
-
-/* MENY */
-.nav-links {
-  display: flex;
-  gap: 25px;
-}
-
-.nav-links a {
-  text-decoration: none;
-  color: black;
-  font-weight: 500;
-  transition: 0.2s;
-}
-
-.nav-links a:hover {
-  color: #8B4A2B;
-}
-
-.nav-links a.active {
-  color: #8B4A2B;
-  font-weight: bold;
+  .day {
+    padding: 8px 4px;
+    min-height: 80px;
+    font-size: 0.9em;
+  }
 }
