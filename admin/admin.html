@@ -9,16 +9,27 @@
   <style>
     .admin-layout {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 40px;
+      grid-template-columns: 1fr;
+      gap: 30px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
     }
+
+    @media (min-width: 900px) {
+      .admin-layout {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
     .menu {
-      padding: 18px;
+      padding: 16px;
       border-radius: 10px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       background: #f8f9fa;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
+
     .foresporsel { background: #fff3cd; }
     .godkjent { background: #d4edda; }
     .avslatt { background: #f8d7da; }
@@ -29,6 +40,7 @@
       border-left: 5px solid #2196F3;
       margin: 12px 0;
       border-radius: 4px;
+      font-size: 0.95em;
     }
 
     .contact-link {
@@ -36,13 +48,62 @@
       text-decoration: underline;
       cursor: pointer;
     }
-    .contact-link:hover {
-      color: #1565c0;
+    .contact-link:hover { color: #1565c0; }
+
+    .warning { color: #d32f2f; font-weight: bold; }
+
+    .section-header {
+      cursor: pointer;
+      margin: 25px 0 12px 0;
+      font-size: 1.25em;
     }
 
-    .warning { color: red; font-weight: bold; }
-    .section-header { cursor: pointer; margin: 25px 0 10px 0; }
     .hidden { display: none; }
+
+    /* Kalender - bedre på mobil */
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin-top: 15px;
+    }
+
+    .day {
+      padding: 10px 4px;
+      text-align: center;
+      border-radius: 8px;
+      background: #e8f5e9;
+      border: 1px solid #ddd;
+      font-size: 0.9em;
+      min-height: 52px;
+    }
+
+    .booked { background: #ffcdd2; }
+    .half-start { background: linear-gradient(to right, #e8f5e9 50%, #ffcdd2 50%); }
+    .half-end { background: linear-gradient(to right, #ffcdd2 50%, #e8f5e9 50%); }
+    .highlight { border: 3px solid #1976d2; }
+
+    #search {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1em;
+    }
+
+    .calendar-nav {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    .calendar-nav button {
+      padding: 8px 16px;
+      font-size: 1em;
+    }
   </style>
 </head>
 <body>
@@ -57,9 +118,9 @@
   <h1>Booking admin</h1>
 
   <div class="admin-layout">
-    <!-- VENSTRE -->
+    <!-- VENSTRE - Forespørsler -->
     <div>
-      <input id="search" placeholder="Søk navn eller e-post..." style="width:100%; padding:12px; margin-bottom:20px;">
+      <input id="search" placeholder="Søk navn eller e-post...">
 
       <h3 class="section-header" onclick="toggle('foresporsler')">📩 Forespørsler</h3>
       <div id="foresporsler"></div>
@@ -71,13 +132,13 @@
       <div id="avslatte" class="hidden"></div>
     </div>
 
-    <!-- HØYRE -->
+    <!-- HØYRE - Kalender -->
     <div>
       <h2>Kalender</h2>
-      <div style="display:flex; justify-content:center; gap:20px; margin-bottom:15px;">
-        <button onclick="changeMonth(-1)">←</button>
+      <div class="calendar-nav">
+        <button onclick="changeMonth(-1)">← Forrige måned</button>
         <h3 id="monthTitle"></h3>
-        <button onclick="changeMonth(1)">→</button>
+        <button onclick="changeMonth(1)">Neste måned →</button>
       </div>
       <div class="calendar-grid" id="calendar"></div>
     </div>
