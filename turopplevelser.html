@@ -2,107 +2,225 @@
 <html lang="no">
 <head>
   <meta charset="UTF-8">
-  <title>Turopplevelser</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Turopplevelser - Skallstuggu</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    .section {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 40px;
+      max-width: 1200px;
+      margin: 60px auto;
+      padding: 0 20px;
+    }
+    .section.reverse {
+      flex-direction: row-reverse;
+    }
+    .section .text {
+      flex: 1;
+      min-width: 320px;
+    }
+    .section img {
+      flex: 1;
+      min-width: 300px;
+      max-width: 550px;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .intro {
+      max-width: 900px;
+      margin: 40px auto;
+      text-align: center;
+      padding: 0 20px;
+      font-size: 1.1em;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 15px;
+      max-width: 1200px;
+      margin: 50px auto;
+      padding: 0 20px;
+    }
+    .gallery img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .activity {
+      max-width: 900px;
+      margin: 50px auto;
+      padding: 0 20px;
+    }
+  </style>
 </head>
 <body>
 
 <header class="navbar">
   <div class="nav-container">
-
-    <!-- LOGO -->
     <a href="index.html" class="logo">
       <img src="images/Logo.png" alt="Skallstuggu">
     </a>
-
-    <!-- MENY -->
     <nav class="nav-links">
       <a href="index.html">Hjem</a>
-      <a href="lokaler.html">Lokaler</a>
+      <a href="lokaler.html">Lokaler og Priser</a>
       <a href="booking.html">Booking</a>
       <a href="servering.html">Servering</a>
       <a href="firmasamlinger.html">Firma</a>
       <a href="turopplevelser.html">Opplevelser</a>
       <a href="kontakt.html">Kontakt</a>
     </nav>
-
   </div>
 </header>
-<section class="page">
 
+<section class="page">
   <h1>Turopplevelser</h1>
 
-  <!-- INTRO -->
-  <p>
-    Skallstuggu er full av opplevelser! Vakre omgivelser og god tilgjengelighet gjør stedet perfekt for turer, aktiviteter og arrangementer.
-  </p>
+  <!-- Intro -->
+  <div class="intro">
+    <p>Skallstuggu er full av opplevelser! Vakre omgivelser og god tilgjengelighet gjør stedet perfekt for turer, aktiviteter og arrangementer.</p>
+    <p>Hytta ligger kun 20 minutter fra Levanger sentrum og litt over en time fra Trondheim Lufthavn.</p>
+  </div>
 
-  <p>
-    Hytta ligger kun 20 minutter fra Levanger og litt over en time fra Trondheim Lufthavn.
-  </p>
-
-  <!-- BILDER -->
+  <!-- Galleri -->
   <div class="gallery">
-    <img src="images/sykkelbilde3stk.jpg">
-    <img src="images/sykkelbildeeng.jpg">
-    <img src="images/sykkelbildefjellet.jpg">
+    <img src="images/fjellbilde.jpg" alt="Fjell rundt Skallstuggu">
+    <img src="images/sykkelbildefjellet.jpg" alt="Sykling i fjellet">
+    <img src="images/myreng.jpg" alt="Myr og natur">
   </div>
 
-  <!-- BESKRIVELSE -->
-  <h2>Området</h2>
+  <!-- Området -->
+  <section class="section">
+    <div class="text">
+      <h2>Området rundt Skallstuggu</h2>
+      <p>Hårskallen og området rundt byr på fjellturer i verdensklasse med fantastisk utsikt over Trondheimsfjorden og fjellene mot øst.</p>
+      <p>Solnedgangen på Hårskallen må oppleves – og området er kjent for tørre, fine stier.</p>
+      <p>Værneområdet Øvre Forra er et unikt våtmarksområde med tilrettelagte stier, blant annet plankevei til Reinsjøen.</p>
+      <p>Du finner også flotte turer til setre som Roknesvollen og andre åpne sommerområder med gårdsdyr.</p>
+      <p>Vinterstid er området perfekt for toppturer og fjellski, mens sommeren byr på stisykling i verdensklasse.</p>
+    </div>
+    <img src="images/fjellbilde.jpg" alt="Utsikt fra Hårskallen">
+  </section>
 
-  <p>
-    Hårskallen og området rundt byr på fjellturer i verdensklasse med fantastisk utsikt over Trondheimsfjorden og fjellene mot øst.
-  </p>
+  <!-- Spesifikke opplevelser -->
+  <h2 style="text-align:center; margin: 60px 0 40px;">Våre turopplevelser</h2>
 
-  <p>
-    Solnedgangen på Hårskallen må oppleves – og området er kjent for tørre, fine stier.
-  </p>
+  <!-- 1 -->
+  <section class="section">
+    <img src="images/kveldsturrandone.jpg" alt="Kveldstur på ski">
+    <div class="text">
+      <h3>Kveldstur / Måneskinnstur på ski</h3>
+      <p>Opplev stillheten og magien i fjellet under stjernehimmelen eller fullmåne. Guidet tur med hodelykt.</p>
+    </div>
+  </section>
 
-  <p>
-    Værneområdet Øvre Forra er et unikt våtmarksområde med tilrettelagte stier, blant annet plankevei til Reinsjøen.
-  </p>
+  <!-- 2 -->
+  <section class="section reverse">
+    <img src="images/Turtilroknesvollen.jpg" alt="Tur til Roknesvollen">
+    <div class="text">
+      <h3>Tur til Roknesvollen</h3>
+      <p>Flott tur til seteren med grillplasser og gårdsdyr om sommeren. Servering stort sett året rundt.</p>
+    </div>
+  </section>
 
-  <p>
-    Du finner også flotte turer til setre som Roknesvollen og andre åpne sommerområder med gårdsdyr.
-  </p>
+  <!-- 3 -->
+  <section class="section">
+    <img src="images/Turtilskalltjønna.jpg" alt="Tur til Skalltjønna">
+    <div class="text">
+      <h3>Tur til Skalltjønna</h3>
+      <p>Et grønt paradis midt i naturen – perfekt for en rolig tur med venner og familie.</p>
+    </div>
+  </section>
 
-  <p>
-    Vinterstid er området perfekt for toppturer og fjellski, mens sommeren byr på stisykling i verdensklasse.
-  </p>
+  <!-- 4 -->
+  <section class="section reverse">
+    <img src="images/liggeilavvo.jpg" alt="Lavvo">
+    <div class="text">
+      <h3>Overnatting i lavvo</h3>
+      <p>Opplev ekte friluftsliv. Lavvo kan leies og er perfekt for grupper som vil sove under åpen himmel.</p>
+    </div>
+  </section>
 
-  <!-- TURER -->
-  <h2>Våre turopplevelser</h2>
+  <!-- 5 -->
+  <section class="section">
+    <img src="images/Articracemedmåliskallstuggu.jpg" alt="Arctic Race">
+    <div class="text">
+      <h3>Arctic Race og sykkelopplevelser</h3>
+      <p>Stisykling i verdensklasse. Her har Arctic Race hatt mål og fest – og du kan sykle de samme fine løypene.</p>
+    </div>
+  </section>
 
-  <div class="menu">
-
-    <p><b>Guidet gåtur</b><br>
-    Fra Tomtvatnet over Hårskallen til Skallstuggu<br>
-    Langtur: 12 km / Korttur: 7 km<br>
-    Buss tilbake inkludert<br>
-    Pris: på forespørsel</p>
-
-    <p><b>Toppturkurs ski / randonné</b><br>
-    Inkl. lunsj og skiutstyr<br>
-    1500,- per person</p>
-
-    <p><b>Guidet sykkeltur</b><br>
-    Tur til Reinsjøen ca. 11 km<br>
-    Inkl. sykkel og lunsj<br>
-    1500,- per person (min 3, maks 6)</p>
-
-    <p><b>Fottur seter til seter</b><br>
-    Rute via flere setre med servering<br>
-    Ca. 12 km<br>
-    Fra 500,- per person (min 6)</p>
-
-    <p><b>Rundtur Hårskallen</b><br>
-    Ca. 4 km / 2 timer<br>
-    Pris: på forespørsel</p>
-
+  <!-- Guidede turer / Aktiviteter -->
+  <div class="activity">
+    <h2 style="text-align:center; margin-bottom: 30px;">Guidede turopplevelser</h2>
+    <div class="menu" style="background:#f9f5eb; padding:25px; border-radius:12px;">
+      <p><strong>Guidet gåtur – Tomtvatnet over Hårskallen til Skallstuggu</strong><br>
+      Langtur: 12 km / Korttur: 7 km • Buss tilbake inkludert • Pris: på forespørsel</p>
+      
+      <p><strong>Toppturkurs ski / randonné</strong><br>
+      Inkl. lunsj og skiutstyr • 1500,- per person</p>
+      
+      <p><strong>Guidet sykkeltur til Reinsjøen</strong><br>
+      Ca. 11 km • Inkl. sykkel og lunsj • 1500,- per person (min 3, maks 6)</p>
+      
+      <p><strong>Fottur seter til seter</strong><br>
+      Via flere setre med servering • Ca. 12 km • Fra 500,- per person (min 6)</p>
+      
+      <p><strong>Rundtur Hårskallen</strong><br>
+      Ca. 4 km / 2 timer • Pris: på forespørsel</p>
+    </div>
   </div>
-
 </section>
 
+<!-- FOOTER -->
+<footer style="background: #f8f1e3; padding: 60px 20px 30px; margin-top: 100px; border-top: 3px solid #8B4A2B;">
+  <div style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 40px;">
+    <div>
+      <h4 style="color: #8B4A2B; margin-bottom: 18px;">Hjelp og informasjon</h4>
+      <p><a href="kontakt.html" style="color: #555; text-decoration: none;">Kontakt oss</a></p>
+      <p><a href="booking.html" style="color: #555; text-decoration: none;">Booking og priser</a></p>
+      <p><a href="lokaler.html" style="color: #555; text-decoration: none;">Leievilkår</a></p>
+    </div>
+    <div>
+      <h4 style="color: #8B4A2B; margin-bottom: 18px;">Om Skallstuggu</h4>
+      <p><a href="index.html#om" style="color: #555; text-decoration: none;">Om hytta</a></p>
+      <p><a href="lokaler.html" style="color: #555; text-decoration: none;">Lokaler og fasiliteter</a></p>
+      <p><a href="turopplevelser.html" style="color: #555; text-decoration: none;">Aktiviteter i området</a></p>
+      <p><a href="index.html#historie" style="color: #555; text-decoration: none;">Historie</a></p>
+    </div>
+    <div>
+      <h4 style="color: #8B4A2B; margin-bottom: 18px;">Inspirasjon</h4>
+      <p><a href="turopplevelser.html" style="color: #555; text-decoration: none;">Turmuligheter</a></p>
+      <p><a href="firmasamlinger.html" style="color: #555; text-decoration: none;">Firmaarrangementer</a></p>
+      <p><a href="servering.html" style="color: #555; text-decoration: none;">Servering og mat</a></p>
+    </div>
+    <div>
+      <h4 style="color: #8B4A2B; margin-bottom: 18px;">Kontakt oss</h4>
+      <p style="color: #555;">
+        Telefon: <a href="tel:90688873" style="color: #555; text-decoration: none;"><strong>906 88 873</strong></a>
+      </p>
+      <p>
+        <a href="mailto:post@skallstuggu.com" style="color: #555; text-decoration: none;">E-post: post@skallstuggu.com</a>
+      </p>
+      <p><a href="kontakt.html" style="color: #555; text-decoration: none;">Send melding</a></p>
+    </div>
+  </div>
+  
+  <div style="max-width: 1200px; margin: 60px auto 0; padding-top: 25px; border-top: 1px solid #ddd; text-align: center; color: #777; font-size: 0.95em;">
+    <p>© 2026 Skallstuggu – Fjellhytte i Levanger kommune</p>
+    <p style="margin-top: 8px;">
+      <a href="https://rbphgvnwmzjeuvyrasvy.supabase.co/storage/v1/object/public/leiebetingelser/Leiebetingelse_Skallstuggu.pdf" target="_blank" style="color: #777; text-decoration: none;">Leievilkår (PDF)</a> •
+      <a href="https://rbphgvnwmzjeuvyrasvy.supabase.co/storage/v1/object/public/leiebetingelser/Personvern_Skallstuggu.pdf" target="_blank" style="color: #777; text-decoration: none;">Personvern (PDF)</a> •
+      <a href="kontakt.html" style="color: #777; text-decoration: none;">Kontakt</a>
+    </p>
+  </div>
+</footer>
 </body>
 </html>

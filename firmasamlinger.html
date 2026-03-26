@@ -2,85 +2,265 @@
 <html lang="no">
 <head>
   <meta charset="UTF-8">
-  <title>Skallstuggu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firmasamlinger & Kurs - Skallstuggu</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    .section {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 40px;
+      max-width: 1200px;
+      margin: 60px auto;
+      padding: 0 20px;
+    }
+    .section .text {
+      flex: 1;
+      min-width: 320px;
+    }
+    .section img {
+      flex: 1;
+      min-width: 300px;
+      max-width: 550px;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      max-width: 1200px;
+      margin: 60px auto;
+      padding: 0 20px;
+    }
+    .grid div {
+      text-align: center;
+      background: #f9f5eb;
+      padding: 20px;
+      border-radius: 12px;
+      border: 2px solid #8B4A2B;
+    }
+    .grid img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+    .package {
+      background: #f9f5eb;
+      border: 3px solid #8B4A2B;
+      border-radius: 12px;
+      padding: 35px;
+      max-width: 900px;
+      margin: 60px auto;
+      text-align: left;
+    }
+    .facilities ul, .rooms ul {
+      list-style: none;
+      padding: 0;
+    }
+    .facilities li, .rooms li {
+      padding: 10px 0;
+      font-size: 1.05em;
+      border-bottom: 1px solid #ddd;
+    }
+    .facilities li:before, .rooms li:before {
+      content: "✓";
+      color: #8B4A2B;
+      font-weight: bold;
+      margin-right: 12px;
+    }
+    .price-highlight {
+      font-size: 1.35em;
+      font-weight: bold;
+      color: #8B4A2B;
+      margin: 20px 0;
+    }
+
+    /* Knapp for "Kontakt oss nå" */
+    .btn-contact {
+      display: inline-block;
+      background: #8B4A2B;
+      color: white;
+      padding: 14px 32px;
+      font-size: 1.1em;
+      font-weight: bold;
+      border-radius: 8px;
+      text-decoration: none;
+      margin-top: 20px;
+      box-shadow: 0 4px 12px rgba(139, 74, 43, 0.2);
+      transition: all 0.3s ease;
+    }
+    .btn-contact:hover {
+      background: #6f3a22;
+      transform: translateY(-2px);
+    }
+  </style>
 </head>
 <body>
 
 <header class="navbar">
   <div class="nav-container">
-
-    <!-- LOGO -->
     <a href="index.html" class="logo">
       <img src="images/Logo.png" alt="Skallstuggu">
     </a>
-
-    <!-- MENY -->
     <nav class="nav-links">
       <a href="index.html">Hjem</a>
-      <a href="lokaler.html">Lokaler</a>
+      <a href="lokaler.html">Lokaler og Priser</a>
       <a href="booking.html">Booking</a>
       <a href="servering.html">Servering</a>
       <a href="firmasamlinger.html">Firma</a>
       <a href="turopplevelser.html">Opplevelser</a>
       <a href="kontakt.html">Kontakt</a>
     </nav>
-
   </div>
 </header>
-<!-- HERO -->
-<section class="hero">
-  <div class="overlay">
-    <h1>Skallstuggu</h1>
-    <p>Ekte fjellopplevelser</p>
-    <a href="booking.html" class="btn">Book nå</a>
+
+<section class="page">
+  <h1>Firmasamlinger & Kurs</h1>
+
+  <!-- Innledningstekst til høyre -->
+  <section class="section">
+    <div class="text">
+      <h2>Profesjonelle rammer i naturskjønne omgivelser</h2>
+      <p><strong>Skallstuggu er det perfekte stedet for kurs, møter, strategisamlinger og teambuilding.</strong><br>
+      Rolig beliggenhet, god mat og fleksible lokaler.</p>
+      
+      <p style="margin-top: 20px; font-size: 1.05em;">
+        Vakre omgivelser og god tilgjengelighet gjør Skallstuggu godt egnet som lokale for ulike arrangementer. 
+        Hytta ligger kun 20 minutter unna Levanger sentrum og en drøy times kjøring fra Trondheim Lufthavn.
+      </p>
+    </div>
+    <img src="images/samlinginnendørs.jpg" alt="Firmasamling innendørs">
+  </section>
+
+  <!-- Fasiliteter - Oppdatert liste -->
+  <div class="facilities" style="max-width: 900px; margin: 50px auto; padding: 0 20px;">
+    <h2 style="text-align: center; color: #8B4A2B; margin-bottom: 30px;">Våre fasiliteter for firma og kurs</h2>
+    <ul>
+      <li>Kurs- og møterom med plass til 8–25 personer</li>
+      <li>Projektor, lerret og whiteboard</li>
+      <li>Hurtig WiFi og strømuttak ved alle plasser</li>
+      <li>Fleksibel bordoppsett (U-bord, klasserom, rundbord)</li>
+      <li>God lyd og mulighet for hybrid-møter</li>
+      <li>Privat spise- og oppholdsrom</li>
+      <li>Tilgang til utendørsområder for pauser og teambuilding</li>
+      <li>Full servering – lunsj, middag, kaffe og snacks</li>
+      <li>Med totalt 51 sengeplasser</li>
+      <li>Dame- og herregarderobe med flere nyoppussede dusjer (handicaptilpasset)</li>
+      <li>Tilbygget har en underetasje med kjellerstue/sokkel med plass til 50 personer, tilpasset selskaper, kurs og seminarer med prosjektor</li>
+    </ul>
   </div>
+
+  <!-- Teambuilding aktiviteter -->
+  <section class="grid">
+    <div>
+      <img src="images/sykkelbilde3stk.jpg" alt="Sykkel">
+      <h3>Teambuilding</h3>
+      <p>Sykling, kajakk, pil og bue eller guidede turer</p>
+    </div>
+    <div>
+      <img src="images/pilogbue.jpg" alt="Pil og bue">
+      <h3>Opplevelser</h3>
+      <p>Aktiviteter som styrker samholdet</p>
+    </div>
+    <div>
+      <img src="images/fjellbilde.jpg" alt="Natur">
+      <h3>Natur & inspirasjon</h3>
+      <p>Fjell, skog og ro som gir ny energi</p>
+    </div>
+  </section>
+
+  <!-- Matseksjon med mat4.jpg -->
+  <section class="section reverse">
+    <img src="images/mat4.jpg" alt="Matservering for firma">
+    <div class="text">
+      <h2>Mat som skaper trivsel</h2>
+      <p>Vi tilbyr skreddersydd servering – fra enkel lunsj til festmiddag. Alt kan tilpasses deres program og budsjett.</p>
+      
+      <!-- Kontakt oss nå som knapp -->
+      <a href="booking.html" class="btn-contact">Kontakt oss nå</a>
+    </div>
+  </section>
+
+  <!-- Kurs- og seminar-pakken – NEST NEDERST -->
+  <div class="package">
+    <h2 style="color: #8B4A2B; text-align: center; margin-bottom: 25px;">Kurseminar-pakke</h2>
+    <p><strong>1. Kurseminar – Leie av hele hytta</strong></p>
+    <p><strong>2 dager, 1 natt – fra kl. 08:00 til kl. 15:00 dagen etter</strong></p>
+   
+    <div class="price-highlight">
+      Min pris: 7 500 kr – Maks pris: 23 000 kr
+    </div>
+    
+    <p><strong>Overnatting:</strong> 22 soverom – maks 50 plasser</p>
+   
+    <div class="rooms">
+      <h3>Romfordeling:</h3>
+      <ul>
+        <li>3 rom med dobbelseng</li>
+        <li>13 enkeltrom</li>
+        <li>6 stk 4-mannsrom</li>
+        <li>1 stk 6-mannsrom</li>
+        <li>1 stk 7-mannsrom</li>
+      </ul>
+    </div>
+    
+    <p style="margin-top: 20px;"><strong>Pris per rom:</strong> 800 kr eks. sengetøy</p>
+  </div>
+
+  <!-- Call to action -->
+  <section class="hero small">
+    <div class="overlay">
+      <h2>La oss skape en vellykket samling sammen</h2>
+    </div>
+  </section>
 </section>
 
-<!-- STEMNING -->
-<section class="section">
-  <div class="text">
-    <h2>Opplevelser sammen</h2>
-    <p>Her handler det ikke bare om overnatting – men om gode minner.</p>
+<!-- FOOTER -->
+<footer style="background: #f8f1e3; padding: 60px 20px 30px; margin-top: 100px; border-top: 3px solid #8B4A2B;">
+  <div style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 40px;">
+    <div>
+      <h4 style="color: #8B4A2B; margin-bottom: 18px;">Hjelp og informasjon</h4>
+      <p><a href="kontakt.html" style="color: #555; text-decoration: none;">Kontakt oss</a></p>
+      <p><a href="booking.html" style="color: #555; text-decoration: none;">Booking og priser</a></p>
+      <p><a href="lokaler.html" style="color: #555; text-decoration: none;">Leievilkår</a></p>
+    </div>
+    <div>
+      <h4 style="color: #8B4A2B; margin-bottom: 18px;">Om Skallstuggu</h4>
+      <p><a href="index.html#om" style="color: #555; text-decoration: none;">Om hytta</a></p>
+      <p><a href="lokaler.html" style="color: #555; text-decoration: none;">Lokaler og fasiliteter</a></p>
+      <p><a href="turopplevelser.html" style="color: #555; text-decoration: none;">Aktiviteter i området</a></p>
+      <p><a href="index.html#historie" style="color: #555; text-decoration: none;">Historie</a></p>
+    </div>
+    <div>
+      <h4 style="color: #8B4A2B; margin-bottom: 18px;">Inspirasjon</h4>
+      <p><a href="turopplevelser.html" style="color: #555; text-decoration: none;">Turmuligheter</a></p>
+      <p><a href="firmasamlinger.html" style="color: #555; text-decoration: none;">Firmaarrangementer</a></p>
+      <p><a href="servering.html" style="color: #555; text-decoration: none;">Servering og mat</a></p>
+    </div>
+    <div>
+      <h4 style="color: #8B4A2B; margin-bottom: 18px;">Kontakt oss</h4>
+      <p style="color: #555;">
+        Telefon: <a href="tel:90688873" style="color: #555; text-decoration: none;"><strong>906 88 873</strong></a>
+      </p>
+      <p>
+        <a href="mailto:post@skallstuggu.com" style="color: #555; text-decoration: none;">E-post: post@skallstuggu.com</a>
+      </p>
+      <p><a href="kontakt.html" style="color: #555; text-decoration: none;">Send melding</a></p>
+    </div>
   </div>
-  <img src="images/samlinginnendørs.jpg">
-</section>
-
-<!-- AKTIVITETER -->
-<section class="grid">
-  <div>
-    <img src="images/sykkelbilde3stk.jpg">
-    <h3>Aktiviteter</h3>
+ 
+  <div style="max-width: 1200px; margin: 60px auto 0; padding-top: 25px; border-top: 1px solid #ddd; text-align: center; color: #777; font-size: 0.95em;">
+    <p>© 2026 Skallstuggu – Fjellhytte i Levanger kommune</p>
+    <p style="margin-top: 8px;">
+      <a href="https://rbphgvnwmzjeuvyrasvy.supabase.co/storage/v1/object/public/leiebetingelser/Leiebetingelse_Skallstuggu.pdf" target="_blank" style="color: #777; text-decoration: none;">Leievilkår (PDF)</a> •
+      <a href="https://rbphgvnwmzjeuvyrasvy.supabase.co/storage/v1/object/public/leiebetingelser/Personvern_Skallstuggu.pdf" target="_blank" style="color: #777; text-decoration: none;">Personvern (PDF)</a> •
+      <a href="kontakt.html" style="color: #777; text-decoration: none;">Kontakt</a>
+    </p>
   </div>
-  <div>
-    <img src="images/pilogbue.jpg">
-    <h3>Opplevelser</h3>
-  </div>
-  <div>
-    <img src="images/fjellbilde.jpg">
-    <h3>Natur</h3>
-  </div>
-</section>
-
-<!-- MAT -->
-<section class="section reverse">
-  <img src="images/mat.jpg">
-  <div class="text">
-    <h2>Mat & hygge</h2>
-    <p>God mat. Gode folk. Gode minner.</p>
-  </div>
-</section>
-
-<!-- WOW -->
-<section class="hero small">
-  <div class="overlay">
-    <h2>Opplev noe unikt</h2>
-  </div>
-</section>
-
-<footer>
-  <p>© Skallstuggu</p>
 </footer>
-
 </body>
 </html>
