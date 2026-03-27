@@ -119,10 +119,26 @@ document.getElementById("bookingForm").addEventListener("submit", async (e) => {
     }
 
     if (emailsSent) {
-      showSuccess(`<strong>✅ Takk for din forespørsel!</strong><br><br>Vi har mottatt din booking og melding.<br>Du vil få svar på e-post så snart som mulig.<br><br>Ring <strong>906 88 873</strong> ved spørsmål.`);
-    } else {
-      showSuccess(`<strong>✅ Booking registrert!</strong><br><br>Forespørselen er lagret, men e-post kunne ikke sendes akkurat nå.<br>Vi kontakter deg likevel.<br><br>Ring: <strong>906 88 873</strong>`);
-    }
+  showSuccess(`
+    <strong>✅ Takk for din forespørsel!</strong><br><br>
+    Vi har mottatt din booking og melding.<br>
+    Du vil få svar på e-post så snart som mulig.<br><br>
+    
+    Hvis du ikke har fått svar i løpet av 24 timer, 
+    sjekk søppelmappen i e-postprogrammet ditt.<br><br>
+    
+    Du kan også ringe oss på <strong>906 88 873</strong>.
+  `);
+} else {
+  showSuccess(`
+    <strong>✅ Booking registrert!</strong><br><br>
+    Forespørselen er lagret, men e-post kunne ikke sendes akkurat nå.<br>
+    Vi kontakter deg likevel så snart som mulig.<br><br>
+    
+    Hvis du ikke hører fra oss innen 24 timer, sjekk søppelmappen.<br>
+    Du kan også ringe oss på <strong>906 88 873</strong>.
+  `);
+}
 
     document.getElementById("bookingForm").reset();
 
