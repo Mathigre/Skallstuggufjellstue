@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oversikt - Skallstuggu</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+ 
+  <style>
+    body {
+      background: #f6f3ee;
+      margin: 0;
+    }
+
+    .logo img {
+      height: 58px;
+      width: auto;
+      display: block;
+    }
+
+    .admin-top-menu {
+      background: #ffffff;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      position: sticky;
+      top: 0;
+      z-index: 110;
+      padding: 14px 0;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .admin-top-menu .menu-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .menu-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .menu-tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .menu-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .admin-tab {
+      padding: 12px 24px;
+      background: #f3f0eb;
+      color: #333;
+      border: none;
+      border-radius: 10px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .admin-tab:hover {
+      background: #e9e2d8;
+    }
+
+    .admin-tab.active {
+      background: #8B4A2B;
+      color: white;
+    }
+
+    .logout-btn {
+      padding: 12px 22px;
+      background: #d32f2f;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 500;
+      transition: 0.2s ease;
+    }
+
+    .logout-btn:hover {
+      background: #b71c1c;
+    }
+
+    .admin-page-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px 40px 15px;
+    }
+
+    .chart-container {
+      background: white;
+      border-radius: 18px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+      padding: 25px;
+      margin-bottom: 40px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 18px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+      padding: 24px;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 2.3em;
+      font-weight: 600;
+      margin: 10px 0;
+    }
+
+    .trend-positive {
+      color: #2e7d32;
+    }
+
+    .trend-negative {
+      color: #d32f2f;
+    }
+
+    .trend-neutral {
+      color: #666;
+    }
+
+    @media (max-width: 640px) {
+      .menu-container {
+        align-items: flex-start;
+      }
+
+      .menu-left,
+      .menu-tabs,
+      .menu-right {
+        width: 100%;
+      }
+
+      .menu-tabs {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .admin-tab {
+        width: 100%;
+        text-align: center;
+      }
+
+      .menu-right {
+        justify-content: space-between;
+      }
+
+      .chart-container,
+      .stat-card {
+        padding: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- PASSORD-SKJERM -->
+<div id="passwordScreen" class="password-screen">
+  <div class="password-box">
+    <h2>Admin tilgang</h2>
+    <p>Skriv inn admin-koden:</p>
+    <input type="password" id="adminPassword" class="password-input" placeholder="Skriv kode her...">
+    <button onclick="checkPassword()" class="login-btn">Logg inn</button>
+    <p id="passwordError" style="color:red; margin-top:12px;"></p>
+  </div>
+</div>
+
+<!-- TOPP MENY -->
+<div class="admin-top-menu">
+  <div class="menu-container">
+    <div class="menu-left">
+      <div class="logo">
+        <img src="images/logo.png" alt="Skallstuggu">
+      </div>
+      <div class="menu-tabs">
+        <a href="admin.html" class="admin-tab">Bookinger</a>
+        <a href="administrasjon.html" class="admin-tab">Administrasjon</a>
+        <a href="overview.html" class="admin-tab active">Oversikt</a>
+      </div>
+    </div>
+    <div class="menu-right">
+      <button onclick="logoutAdmin()" class="logout-btn">
+        Logg ut
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- HOVEDINNHOLD -->
+<section class="page" id="adminContent" style="display:none;">
+  <div class="admin-page-wrap">
+    <h1 style="margin-bottom: 30px;">Oversikt</h1>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>Totalt bookinger i år</h3>
+        <div class="stat-number" id="totalBookings">0</div>
+      </div>
+      <div class="stat-card">
+        <h3>Godkjente bookinger</h3>
+        <div class="stat-number" id="approvedBookings" style="color:#4caf50;">0</div>
+      </div>
+      <div class="stat-card">
+        <h3>Under behandling</h3>
+        <div class="stat-number" id="pendingBookings" style="color:#ff9800;">0</div>
+      </div>
+      <div class="stat-card">
+        <h3>Anslått omsetning</h3>
+        <div class="stat-number" id="estimatedRevenue">0 kr</div>
+        <small style="color:#666;">(basert på gjennomsnitt 12 500 kr per booking)</small>
+      </div>
+    </div>
+
+    <!-- Bookinggraf -->
+    <div class="chart-container">
+      <h2>Bookinger per måned i år</h2>
+      <div style="height: 320px;">
+        <canvas id="monthlyChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Nye besøksbokser -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>Besøk denne måneden</h3>
+        <div class="stat-number" id="visitsThisMonth">0</div>
+      </div>
+      <div class="stat-card">
+        <h3>Besøk i år</h3>
+        <div class="stat-number" id="visitsThisYear">0</div>
+      </div>
+      <div class="stat-card">
+        <h3>Sammenlignet med forrige måned</h3>
+        <div class="stat-number trend-neutral" id="visitTrendText">0%</div>
+        <small id="visitTrendSubtext" style="color:#666;">Ingen data ennå</small>
+      </div>
+    </div>
+
+    <!-- Besøksgraf -->
+    <div class="chart-container">
+      <h2>Besøk per måned i år</h2>
+      <div style="height: 320px;">
+        <canvas id="viewsChart"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="admin.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+let bookingsChartInstance = null;
+let viewsChartInstance = null;
+
+// Passord og innlogging
+function checkPassword() {
+  const input = document.getElementById("adminPassword").value.trim();
+  const error = document.getElementById("passwordError");
+  if (input === ADMIN_CONFIG.password) {
+    localStorage.setItem("adminLoggedIn", "true");
+    document.getElementById("passwordScreen").style.display = "none";
+    document.getElementById("adminContent").style.display = "block";
+    loadOverviewData();
+  } else {
+    error.textContent = "Feil kode. Prøv igjen.";
+    document.getElementById("adminPassword").value = "";
+  }
+}
+
+function checkIfAlreadyLoggedIn() {
+  if (localStorage.getItem("adminLoggedIn") === "true") {
+    document.getElementById("passwordScreen").style.display = "none";
+    document.getElementById("adminContent").style.display = "block";
+    loadOverviewData();
+  }
+}
+
+function logoutAdmin() {
+  if (confirm("Vil du logge ut fra admin?")) {
+    localStorage.removeItem("adminLoggedIn");
+    location.reload();
+  }
+}
+
+// Hovedfunksjon
+async function loadOverviewData() {
+  try {
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth();
+
+    // Hent bookinger
+    const { data: bookings, error: bookingError } = await supabaseClient
+      .from("bookings")
+      .select("*");
+
+    if (bookingError) throw bookingError;
+
+    // Hent sidevisninger
+    const { data: pageViews, error: pageViewError } = await supabaseClient
+      .from("page_views")
+      .select("*");
+
+    if (pageViewError) throw pageViewError;
+
+    // BOOKINGDATA
+    let total = 0, approved = 0, pending = 0;
+    let monthlyBookingCounts = new Array(12).fill(0);
+
+    bookings.forEach(b => {
+      total++;
+      if (b.status === "approved") approved++;
+      else if (b.status === "pending") pending++;
+
+      if (b.start_date) {
+        const date = new Date(b.start_date);
+        if (!isNaN(date) && date.getFullYear() === currentYear) {
+          monthlyBookingCounts[date.getMonth()]++;
+        }
+      }
+    });
+
+    document.getElementById("totalBookings").textContent = total;
+    document.getElementById("approvedBookings").textContent = approved;
+    document.getElementById("pendingBookings").textContent = pending;
+
+    const estimated = approved * 12500;
+    document.getElementById("estimatedRevenue").textContent = estimated.toLocaleString('no-NO') + " kr";
+
+    drawBookingsChart(monthlyBookingCounts);
+
+    // BESØKSDATA
+    let monthlyViewCounts = new Array(12).fill(0);
+    let visitsThisMonth = 0;
+    let visitsThisYear = 0;
+
+    pageViews.forEach(view => {
+      if (!view.viewed_at) return;
+
+      const date = new Date(view.viewed_at);
+      if (isNaN(date)) return;
+
+      if (date.getFullYear() === currentYear) {
+        visitsThisYear++;
+        monthlyViewCounts[date.getMonth()]++;
+
+        if (date.getMonth() === currentMonth) {
+          visitsThisMonth++;
+        }
+      }
+    });
+
+    document.getElementById("visitsThisMonth").textContent = visitsThisMonth.toLocaleString('no-NO');
+    document.getElementById("visitsThisYear").textContent = visitsThisYear.toLocaleString('no-NO');
+
+    // Sammenligning mot forrige måned
+    const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+    const currentMonthViews = monthlyViewCounts[currentMonth];
+    const previousMonthViews = monthlyViewCounts[previousMonth];
+
+    const trendText = document.getElementById("visitTrendText");
+    const trendSubtext = document.getElementById("visitTrendSubtext");
+
+    trendText.classList.remove("trend-positive", "trend-negative", "trend-neutral");
+
+    if (previousMonthViews === 0 && currentMonthViews === 0) {
+      trendText.textContent = "0%";
+      trendText.classList.add("trend-neutral");
+      trendSubtext.textContent = "Ingen besøk verken denne eller forrige måned";
+    } else if (previousMonthViews === 0 && currentMonthViews > 0) {
+      trendText.textContent = "Bedre";
+      trendText.classList.add("trend-positive");
+      trendSubtext.textContent = `Du har ${currentMonthViews} flere besøk enn forrige måned`;
+    } else {
+      const diff = currentMonthViews - previousMonthViews;
+      const percent = ((diff / previousMonthViews) * 100).toFixed(1);
+
+      if (diff > 0) {
+        trendText.textContent = `+${percent}%`;
+        trendText.classList.add("trend-positive");
+        trendSubtext.textContent = `${diff} flere besøk enn forrige måned`;
+      } else if (diff < 0) {
+        trendText.textContent = `${percent}%`;
+        trendText.classList.add("trend-negative");
+        trendSubtext.textContent = `${Math.abs(diff)} færre besøk enn forrige måned`;
+      } else {
+        trendText.textContent = "0%";
+        trendText.classList.add("trend-neutral");
+        trendSubtext.textContent = "Akkurat likt som forrige måned";
+      }
+    }
+
+    drawViewsChart(monthlyViewCounts);
+
+  } catch (err) {
+  }
+}
+
+function drawBookingsChart(counts) {
+  const canvas = document.getElementById("monthlyChart");
+
+  if (bookingsChartInstance) {
+    bookingsChartInstance.destroy();
+    bookingsChartInstance = null;
+  }
+
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Des"];
+
+  bookingsChartInstance = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels: monthNames,
+      datasets: [{
+        label: 'Antall bookinger',
+        data: counts,
+        borderColor: '#8B4A2B',
+        backgroundColor: 'rgba(139, 74, 43, 0.1)',
+        borderWidth: 3.5,
+        tension: 0.3,
+        pointBackgroundColor: '#8B4A2B',
+        pointRadius: 5,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          min: 0,
+          suggestedMax: Math.max(10, Math.max(...counts) + 2),
+          ticks: { stepSize: 1 }
+        }
+      }
+    }
+  });
+}
+
+function drawViewsChart(counts) {
+  const canvas = document.getElementById("viewsChart");
+
+  if (viewsChartInstance) {
+    viewsChartInstance.destroy();
+    viewsChartInstance = null;
+  }
+
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Des"];
+
+  viewsChartInstance = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels: monthNames,
+      datasets: [{
+        label: 'Antall besøk',
+        data: counts,
+        borderColor: '#3f6b8a',
+        backgroundColor: 'rgba(63, 107, 138, 0.12)',
+        borderWidth: 3.5,
+        tension: 0.3,
+        pointBackgroundColor: '#3f6b8a',
+        pointRadius: 5,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          min: 0,
+          suggestedMax: Math.max(10, Math.max(...counts) + 5),
+          ticks: {
+            stepSize: 1
+          }
+        }
+      }
+    }
+  });
+}
+
+// Kjør ved lasting
+window.addEventListener("load", checkIfAlreadyLoggedIn);
+
+document.getElementById("adminPassword").addEventListener("keypress", function(e) {
+  if (e.key === "Enter") checkPassword();
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administrasjon - Skallstuggu</title>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    body {
+      background: #f6f3ee;
+      margin: 0;
+    }
+
+    .logo img {
+      height: 58px;
+      width: auto;
+      display: block;
+    }
+
+    .admin-top-menu {
+      background: #ffffff;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      position: sticky;
+      top: 0;
+      z-index: 110;
+      padding: 14px 0;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .admin-top-menu .menu-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .menu-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .menu-tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .menu-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .admin-tab {
+      padding: 12px 24px;
+      background: #f3f0eb;
+      color: #333;
+      border: none;
+      border-radius: 10px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .admin-tab:hover {
+      background: #e9e2d8;
+    }
+
+    .admin-tab.active {
+      background: #8B4A2B;
+      color: white;
+    }
+
+    .logout-btn {
+      padding: 12px 22px;
+      background: #d32f2f;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 500;
+      transition: 0.2s ease;
+    }
+
+    .logout-btn:hover {
+      background: #b71c1c;
+    }
+
+    .admin-page-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px 40px 15px;
+    }
+
+    .coming-soon-box {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+      padding: 60px 30px;
+      text-align: center;
+      margin-top: 40px;
+    }
+
+    .coming-soon-box h1 {
+      margin: 0 0 12px 0;
+      font-size: 2.2rem;
+      color: #2f2a26;
+    }
+
+    .coming-soon-box p {
+      margin: 0;
+      font-size: 1.05rem;
+      color: #6a625b;
+    }
+
+    .password-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .password-box {
+      background: white;
+      padding: 38px 30px;
+      border-radius: 16px;
+      text-align: center;
+      max-width: 380px;
+      width: 100%;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .password-box h2 {
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+
+    .password-input {
+      padding: 12px;
+      width: 100%;
+      font-size: 1.05em;
+      margin: 15px 0;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      box-sizing: border-box;
+    }
+
+    .login-btn {
+      padding: 12px 30px;
+      font-size: 1.05em;
+      border: none;
+      border-radius: 10px;
+      background: #8B4A2B;
+      color: white;
+      cursor: pointer;
+    }
+
+    .login-btn:hover {
+      background: #6f3921;
+    }
+
+    @media (max-width: 640px) {
+      .menu-container {
+        align-items: flex-start;
+      }
+
+      .menu-left,
+      .menu-tabs,
+      .menu-right {
+        width: 100%;
+      }
+
+      .menu-tabs {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .admin-tab {
+        width: 100%;
+        text-align: center;
+      }
+
+      .menu-right {
+        justify-content: space-between;
+      }
+
+      .coming-soon-box {
+        padding: 40px 20px;
+        margin-top: 25px;
+      }
+
+      .coming-soon-box h1 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PASSORD-SKJERM -->
+  <div id="passwordScreen" class="password-screen">
+    <div class="password-box">
+      <h2>Admin tilgang</h2>
+      <p>Skriv inn admin-koden:</p>
+      <input
+        type="password"
+        id="adminPassword"
+        class="password-input"
+        placeholder="Skriv kode her..."
+      >
+      <button onclick="checkPassword()" class="login-btn">Logg inn</button>
+      <p id="passwordError" style="color:red; margin-top:12px;"></p>
+    </div>
+  </div>
+
+  <!-- TOPP MENY -->
+  <div class="admin-top-menu">
+    <div class="menu-container">
+      <div class="menu-left">
+        <div class="logo">
+          <img src="images/logo.png" alt="Skallstuggu">
+        </div>
+
+        <div class="menu-tabs">
+          <a href="admin.html" class="admin-tab">Bookinger</a>
+          <a href="administrasjon.html" class="admin-tab active">Administrasjon</a>
+          <a href="overview.html" class="admin-tab">Oversikt</a>
+        </div>
+      </div>
+
+      <div class="menu-right">
+        <button onclick="logoutAdmin()" class="logout-btn">
+          Logg ut
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOVEDINNHOLD -->
+  <section class="page" id="adminContent" style="display:none;">
+    <div class="admin-page-wrap">
+      <div class="coming-soon-box">
+        <h1>Kommer senere</h1>
+        <p>Denne siden er under utvikling.</p>
+      </div>
+    </div>
+  </section>
+
+  <script src="config.js"></script>
+
+  <script>
+    function checkPassword() {
+      const input = document.getElementById("adminPassword").value.trim();
+      const error = document.getElementById("passwordError");
+
+      if (input === ADMIN_CONFIG.password) {
+        localStorage.setItem("adminLoggedIn", "true");
+        document.getElementById("passwordScreen").style.display = "none";
+        document.getElementById("adminContent").style.display = "block";
+      } else {
+        error.textContent = "Feil kode. Prøv igjen.";
+        document.getElementById("adminPassword").value = "";
+      }
+    }
+
+    function checkIfAlreadyLoggedIn() {
+      if (localStorage.getItem("adminLoggedIn") === "true") {
+        document.getElementById("passwordScreen").style.display = "none";
+        document.getElementById("adminContent").style.display = "block";
+      }
+    }
+
+    function logoutAdmin() {
+      if (confirm("Vil du logge ut fra admin?")) {
+        localStorage.removeItem("adminLoggedIn");
+        location.reload();
+      }
+    }
+
+    window.addEventListener("load", checkIfAlreadyLoggedIn);
+
+    document.getElementById("adminPassword").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") checkPassword();
+    });
+  </script>
+
+</body>
+</html>

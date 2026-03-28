@@ -341,6 +341,38 @@ hamburger.addEventListener('click', () => {
   navLinks.classList.toggle('active');
 });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+  async function trackPageView() {
+    console.log("🚀 Starter tracking...");
+
+    const supabaseClient = supabase.createClient(
+      "https://rbphgvnwmzjeuvyrasvy.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJicGhndm53bXpqZXV2eXJhc3Z5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MjM3MjksImV4cCI6MjA4OTk5OTcyOX0.ug7k4jDtYwudivBJaWyKuCdwbt3GVnLXtWtpsBUhvEQ"
+    );
+
+    const pageName = window.location.pathname.split("/").pop() || "index.html";
+
+    const { data, error } = await supabaseClient
+      .from("page_views")
+      .insert([
+        { page_name: pageName }
+      ])
+      .select();
+
+    if (error) {
+      console.error("❌ Feil:", error);
+    } else {
+      console.log("✅ Lagret:", data);
+    }
+  }
+
+  window.addEventListener("load", trackPageView);
+</script>
 
 </body>
 </html>

@@ -25,11 +25,10 @@ async function loadData() {
     allBookings = data || [];
     approvedBookings = allBookings.filter(b => b.status === "approved");
 
-    loadRequests();
+    loadRequestsWithHighlight();   // Endret her
     loadCalendar();
   } catch (err) {
     console.error("Feil ved henting av data:", err);
-    alert("Kunne ikke laste bookinger. Sjekk konsollen.");
   }
 }
 
@@ -47,25 +46,20 @@ function statusText(status) {
   return "Forespørsel";
 }
 
-document.getElementById("search")?.addEventListener("input", loadRequests);
-
-// =========================
-// OVERLAP SJekk (automatisk for pending)
-// =========================
-function checkOverlap(booking) {
-  for (let b of allBookings) {
-    if (b.id === booking.id) continue;
-    if (b.status !== "pending") continue;   // kun sjekk mot andre ventende bookinger
-
-    if (!(booking.end_date <= b.start_date || booking.start_date >= b.end_date)) {
-      return b;
-    }
-  }
-  return null;
+// Debounce for å unngå for mange kall mens man skriver
+function debounce(func, delay) {
+  let timeout;
+  return function(...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), delay);
+  };
 }
 
-function loadRequests() {
-  const search = (document.getElementById("search")?.value || "").toLowerCase();
+// Ny søkefunksjon med highlighting
+document.getElementById("search")?.addEventListener("input", debounce(loadRequestsWithHighlight, 300));
+
+function loadRequestsWithHighlight() {
+  const searchTerm = (document.getElementById("search")?.value || "").toLowerCase().trim();
 
   const foresp = document.getElementById("foresporsler");
   const godkj = document.getElementById("godkjente");
@@ -74,6 +68,7 @@ function loadRequests() {
   foresp.innerHTML = godkj.innerHTML = avsl.innerHTML = "";
 
   let countPending = 0, countApproved = 0, countRejected = 0;
+  let firstMatch = null;
 
   allBookings.forEach(b => {
     if (b.status === "approved") countApproved++;
@@ -82,7 +77,11 @@ function loadRequests() {
 
     const nameLower = (b.name || "").toLowerCase();
     const emailLower = (b.email || "").toLowerCase();
-    if (search && !nameLower.includes(search) && !emailLower.includes(search)) return;
+
+    if (searchTerm && !nameLower.includes(searchTerm) && !emailLower.includes(searchTerm)) return;
+
+    // Husk første treff for å highlighte i kalenderen
+    if (!firstMatch) firstMatch = b;
 
     const overlap = checkOverlap(b);
 
@@ -102,7 +101,6 @@ function loadRequests() {
 
       ${overlap ? `<div class="warning">⚠️ Dobbelbooking med ${overlap.name || "en annen forespørsel"}</div>` : ""}
 
-      <!-- Tekstboks for å sende svar -->
       <div style="margin: 12px 0 10px 0;">
         <textarea id="reply-${b.id}" rows="3" placeholder="Skriv svar til kunden her..." 
                   style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; resize:vertical;"></textarea>
@@ -121,9 +119,55 @@ function loadRequests() {
     else foresp.appendChild(div);
   });
 
+  // Oppdater tellere
   document.querySelector("[onclick=\"toggle('foresporsler')\"]").innerText = `📩 Forespørsler (${countPending})`;
   document.querySelector("[onclick=\"toggle('godkjente')\"]").innerText = `✅ Godkjente (${countApproved})`;
   document.querySelector("[onclick=\"toggle('avslatte')\"]").innerText = `❌ Avslåtte (${countRejected})`;
+
+  // Highlight i kalenderen hvis vi har treff
+  if (firstMatch) {
+    highlightBookingInCalendar(firstMatch);
+  } else {
+    selectedBooking = null;
+    loadCalendar();
+  }
+}
+
+// =========================
+// OVERLAP SJekk
+// =========================
+function checkOverlap(booking) {
+  for (let b of allBookings) {
+    if (b.id === booking.id) continue;
+    if (b.status !== "pending") continue;
+
+    if (!(booking.end_date <= b.start_date || booking.start_date >= b.end_date)) {
+      return b;
+    }
+  }
+  return null;
+}
+
+// =========================
+// HIGHLIGHT BOOKING I KALENDEREN
+// =========================
+function highlightBookingInCalendar(booking) {
+  selectedBooking = booking;
+
+  // Hopp til riktig måned basert på startdato
+  const startDate = new Date(booking.start_date);
+  currentDate.setFullYear(startDate.getFullYear());
+  currentDate.setMonth(startDate.getMonth());
+
+  loadCalendar();
+
+  // Scroll ned til kalenderen
+  setTimeout(() => {
+    const calendarElement = document.getElementById("calendar");
+    if (calendarElement) {
+      calendarElement.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, 100);
 }
 
 // =========================
@@ -192,7 +236,6 @@ async function approve(id) {
     return;
   }
 
-  // Send godkjennings-epost
   try {
     await fetch("https://rbphgvnwmzjeuvyrasvy.supabase.co/functions/v1/resend-email", {
       method: "POST",
@@ -303,6 +346,7 @@ function loadCalendar() {
     else if (isStart) div.classList.add("half-start");
     else if (isEnd) div.classList.add("half-end");
 
+    // Highlight valgt booking
     if (selectedBooking && dateStr >= selectedBooking.start_date && dateStr <= selectedBooking.end_date) {
       div.classList.add("highlight");
     }
