@@ -3,9 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Skallstuggu - Fjellhytte i Levanger</title>
-  <link rel="stylesheet" href="style.css">
   
+  <!-- SEO-forbedringer -->
+  <title>Skallstuggu - Fjellhytte i Levanger | Overnatting og Arrangement</title>
+  <meta name="description" content="Skallstuggu er en nyoppusset fjellhytte på 480 moh ved Vulusjøen i Levanger. 51 sengeplasser, fullt utstyrt kjøkken, turopplevelser og firmaarrangementer. Book nå!">
+  
+  <meta name="robots" content="index, follow">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="Skallstuggu - Fjellhytte i Levanger">
+  <meta property="og:description" content="Kafé, overnatting, firmaopplevelser og turopplevelser ved Vulusjøen.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://www.skallstuggu.no">
+  <meta property="og:image" content="https://www.skallstuggu.no/images/snøbildehytte2.jpg">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Skallstuggu - Fjellhytte i Levanger">
+  <meta name="twitter:description" content="Overnatting og opplevelser på 480 moh ved Vulusjøen i Levanger.">
+
+  <link rel="stylesheet" href="style.css">
+ 
   <style>
     .hero {
       height: 75vh;
@@ -16,7 +34,6 @@
       justify-content: center;
       position: relative;
     }
-
     .hero-text {
       background: rgba(255,255,255,0.93);
       padding: 40px 30px;
@@ -26,13 +43,11 @@
       margin: 20px;
       box-shadow: 0 8px 25px rgba(0,0,0,0.18);
     }
-
     .hero-text h1 {
       font-size: 3rem;
       margin-bottom: 12px;
       color: #8B4A2B;
     }
-
     /* Flip cards */
     .flip-card {
       background-color: transparent;
@@ -41,7 +56,6 @@
       perspective: 1000px;
       cursor: pointer;
     }
-
     .flip-card-inner {
       position: relative;
       width: 100%;
@@ -51,12 +65,10 @@
       border-radius: 16px;
       box-shadow: 0 6px 20px rgba(0,0,0,0.15);
     }
-
     .flip-card:hover .flip-card-inner,
     .flip-card.flipped .flip-card-inner {
       transform: rotateY(180deg);
     }
-
     .flip-card-front, .flip-card-back {
       position: absolute;
       width: 100%;
@@ -65,13 +77,11 @@
       border-radius: 16px;
       overflow: hidden;
     }
-
     .flip-card-front img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
-
     .card-overlay {
       position: absolute;
       bottom: 0;
@@ -82,13 +92,11 @@
       padding: 25px 20px;
       text-align: center;
     }
-
     .card-overlay h3 {
       margin: 0;
       font-size: 1.6em;
       text-shadow: 0 2px 8px rgba(0,0,0,0.7);
     }
-
     .flip-card-back {
       background: #f8f1e3;
       color: #333;
@@ -99,7 +107,6 @@
       justify-content: center;
       line-height: 1.7;
     }
-
     /* Grids */
     .intro-grid, .history-grid {
       display: grid;
@@ -108,7 +115,6 @@
       max-width: 1200px;
       margin: 0 auto;
     }
-
     /* Historie-bokser */
     .history-card {
       border: 3px solid #8B4A2B;
@@ -118,7 +124,6 @@
       margin-top: 20px;
       min-height: 260px;
     }
-
     /* Hamburger */
     .hamburger {
       display: none;
@@ -127,7 +132,6 @@
       color: #333;
       padding: 5px;
     }
-
     @media (max-width: 900px) {
       .nav-links {
         display: none;
@@ -148,7 +152,6 @@
         display: block;
       }
     }
-
     @media (max-width: 768px) {
       .hero {
         height: 65vh;
@@ -174,7 +177,6 @@
     <a href="index.html" class="logo">
       <img src="images/Logo.png" alt="Skallstuggu">
     </a>
-    
     <nav class="nav-links" id="navLinks">
       <a href="index.html">Hjem</a>
       <a href="lokaler.html">Lokaler og Priser</a>
@@ -200,7 +202,6 @@
 <!-- OM SKALLSTUGGU -->
 <section style="margin-top: 80px; padding: 0 20px;">
   <h2 style="text-align: center; margin-bottom: 50px; color: #8B4A2B;">Om Skallstuggu</h2>
-  
   <div class="intro-grid">
     <div style="border: 3px solid #8B4A2B; border-radius: 16px; padding: 35px; background: #fffaf0;">
       <h3 style="color: #8B4A2B; margin-top: 0;">Beliggenhet og natur</h3>
@@ -231,7 +232,6 @@
         </div>
       </div>
     </div>
-
     <div class="flip-card" onclick="this.classList.toggle('flipped')">
       <div class="flip-card-inner">
         <div class="flip-card-front">
@@ -244,7 +244,6 @@
         </div>
       </div>
     </div>
-
     <div class="flip-card" onclick="this.classList.toggle('flipped')">
       <div class="flip-card-inner">
         <div class="flip-card-front">
@@ -263,21 +262,17 @@
 <!-- HISTORIE -->
 <section style="margin-top: 80px; padding: 0 20px;">
   <h2 style="text-align: center; color: #8B4A2B; margin-bottom: 40px;">Litt historie fra Skallstuggu</h2>
-  
   <div class="history-grid">
     <div>
-      <img src="images/historie.jpeg" alt="Skallstuggu 1970-tallet" 
-           style="width:100%; border-radius:12px; box-shadow: 0 6px 20px rgba(0,0,0,0.15);">
+      <img src="images/historie.jpeg" alt="Skallstuggu 1970-tallet" style="width:100%; border-radius:12px; box-shadow: 0 6px 20px rgba(0,0,0,0.15);">
       <div class="history-card">
         <h3 style="color: #8B4A2B; margin-top: 0;">Dette er hvordan Skallstuggu så ut på 1970-tallet</h3>
         <p>Bygd i 1970 av Frol idrettslag. Hytta ble opprinnelig brukt til arrangementer, kaffesalg på søndager og leirskoler.</p>
         <p style="margin-top: 15px;">I kjelleren finnes det fortsatt litt kunst fra før 1990-tallet som gir et innblikk i hyttas tidlige historie.</p>
       </div>
     </div>
-
     <div>
-      <img src="images/historie2.jpeg" alt="Middagsgjester 1970-tallet" 
-           style="width:100%; border-radius:12px; box-shadow: 0 6px 20px rgba(0,0,0,0.15);">
+      <img src="images/historie2.jpeg" alt="Middagsgjester 1970-tallet" style="width:100%; border-radius:12px; box-shadow: 0 6px 20px rgba(0,0,0,0.15);">
       <div class="history-card">
         <h3 style="color: #8B4A2B; margin-top: 0;">Middagsgjester på Skallstuggu på 1970-tallet</h3>
         <p>I september 1987 behandlet styret i Verdal Samvirkelag en søknad fra Frol Idrettslag om bidrag til utbygging av turisthytta Skallstuggu ved Vulusjøen. Det ble bevilget kr. 1.000,- til utbyggingen.</p>
@@ -286,7 +281,39 @@
   </div>
 </section>
 
-<!-- FOOTER - samme som på de andre sidene -->
+<!-- UTVENDIGE BILDER – Nå tilbake på plass -->
+<section style="margin-top: 100px; padding: 0 20px;">
+  <h2 style="text-align: center; color: #8B4A2B; margin-bottom: 50px;">Utvendige bilder</h2>
+  
+  <div style="display: grid; 
+              grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); 
+              gap: 22px; 
+              max-width: 1350px; 
+              margin: 0 auto;">
+    
+    <img src="images/utvendig1.jpg" alt="Skallstuggu utvendig" style="width: 100%; height: auto; max-height: 440px; object-fit: contain; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); background: #f8f1e3;">
+    <img src="images/utvendig2.jpg" alt="Skallstuggu utvendig" style="width: 100%; height: auto; max-height: 440px; object-fit: contain; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); background: #f8f1e3;">
+    <img src="images/utvendig3.jpg" alt="Skallstuggu utvendig" style="width: 100%; height: auto; max-height: 440px; object-fit: contain; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); background: #f8f1e3;">
+    
+    <img src="images/utvendig4.jpg" alt="Skallstuggu utvendig" style="width: 100%; height: auto; max-height: 440px; object-fit: contain; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); background: #f8f1e3;">
+    <img src="images/utvendig5.jpg" alt="Skallstuggu utvendig" style="width: 100%; height: auto; max-height: 440px; object-fit: contain; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); background: #f8f1e3;">
+    <img src="images/utvendig6.jpg" alt="Skallstuggu utvendig" style="width: 100%; height: auto; max-height: 440px; object-fit: contain; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); background: #f8f1e3;">
+    
+    <img src="images/utvendig7.jpg" alt="Skallstuggu utvendig" style="width: 100%; height: auto; max-height: 440px; object-fit: contain; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); background: #f8f1e3;">
+    <img src="images/utvendig8.jpg" alt="Skallstuggu utvendig" style="width: 100%; height: auto; max-height: 440px; object-fit: contain; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); background: #f8f1e3;">
+    <img src="images/utvendig9.jpg" alt="Skallstuggu utvendig" style="width: 100%; height: auto; max-height: 440px; object-fit: contain; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); background: #f8f1e3;">
+    
+    <img src="images/utvendig10.jpg" alt="Skallstuggu utvendig" style="width: 100%; height: auto; max-height: 440px; object-fit: contain; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); background: #f8f1e3;">
+    <img src="images/utvendig11.jpg" alt="Skallstuggu utvendig" style="width: 100%; height: auto; max-height: 440px; object-fit: contain; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); background: #f8f1e3;">
+    <img src="images/utvendig12.jpg" alt="Skallstuggu utvendig" style="width: 100%; height: auto; max-height: 440px; object-fit: contain; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); background: #f8f1e3;">
+    
+    <img src="images/utvendig13.jpg" alt="Skallstuggu utvendig" style="width: 100%; height: auto; max-height: 440px; object-fit: contain; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); background: #f8f1e3;">
+    <img src="images/utvendig14.jpg" alt="Skallstuggu utvendig" style="width: 100%; height: auto; max-height: 440px; object-fit: contain; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); background: #f8f1e3;">
+    <img src="images/utvendig15.jpg" alt="Skallstuggu utvendig" style="width: 100%; height: auto; max-height: 440px; object-fit: contain; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); background: #f8f1e3;">
+  </div>
+</section>
+
+<!-- FOOTER -->
 <footer style="background: #f8f1e3; padding: 60px 20px 30px; margin-top: 100px; border-top: 3px solid #8B4A2B;">
   <div style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 40px;">
     <div>
@@ -319,14 +346,12 @@
       <p><a href="kontakt.html" style="color: #555; text-decoration: none;">Send melding</a></p>
     </div>
   </div>
-  
+ 
   <div style="max-width: 1200px; margin: 60px auto 0; padding-top: 25px; border-top: 1px solid #ddd; text-align: center; color: #777; font-size: 0.95em;">
     <p>© 2026 Skallstuggu – Fjellhytte i Levanger kommune</p>
     <p style="margin-top: 8px;">
-      <a href="https://rbphgvnwmzjeuvyrasvy.supabase.co/storage/v1/object/public/leiebetingelser/Leiebetingelse_Skallstuggu.pdf" 
-         target="_blank" style="color: #777; text-decoration: none;">Leievilkår (PDF)</a> •
-      <a href="https://rbphgvnwmzjeuvyrasvy.supabase.co/storage/v1/object/public/leiebetingelser/Personvern_Skallstuggu.pdf" 
-         target="_blank" style="color: #777; text-decoration: none;">Personvern (PDF)</a> •
+      <a href="https://rbphgvnwmzjeuvyrasvy.supabase.co/storage/v1/object/public/leiebetingelser/Leiebetingelse_Skallstuggu.pdf" target="_blank" style="color: #777; text-decoration: none;">Leievilkår (PDF)</a> •
+      <a href="https://rbphgvnwmzjeuvyrasvy.supabase.co/storage/v1/object/public/leiebetingelser/Personvern_Skallstuggu.pdf" target="_blank" style="color: #777; text-decoration: none;">Personvern (PDF)</a> •
       <a href="kontakt.html" style="color: #777; text-decoration: none;">Kontakt</a>
     </p>
   </div>
@@ -336,41 +361,21 @@
 // Hamburger meny
 const hamburger = document.getElementById('hamburger');
 const navLinks = document.getElementById('navLinks');
-
 hamburger.addEventListener('click', () => {
   navLinks.classList.toggle('active');
 });
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
   async function trackPageView() {
-    console.log("🚀 Starter tracking...");
-
     const supabaseClient = supabase.createClient(
       "https://rbphgvnwmzjeuvyrasvy.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJicGhndm53bXpqZXV2eXJhc3Z5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MjM3MjksImV4cCI6MjA4OTk5OTcyOX0.ug7k4jDtYwudivBJaWyKuCdwbt3GVnLXtWtpsBUhvEQ"
     );
-
     const pageName = window.location.pathname.split("/").pop() || "index.html";
-
-    const { data, error } = await supabaseClient
-      .from("page_views")
-      .insert([
-        { page_name: pageName }
-      ])
-      .select();
-
-    if (error) {
-      console.error("❌ Feil:", error);
-    } else {
-      console.log("✅ Lagret:", data);
-    }
+    await supabaseClient.from("page_views").insert([{ page_name: pageName }]);
   }
-
   window.addEventListener("load", trackPageView);
 </script>
 
