@@ -39,6 +39,7 @@
       align-items: center;
       gap: 16px;
       flex-wrap: wrap;
+      position: relative;
     }
 
     .menu-left {
@@ -100,6 +101,16 @@
       background: #b71c1c;
     }
 
+    .admin-hamburger {
+      display: none;
+      font-size: 1.8rem;
+      cursor: pointer;
+      color: #333;
+      padding: 5px 10px;
+      line-height: 1;
+      user-select: none;
+    }
+
     .admin-page-wrap {
       max-width: 1200px;
       margin: 0 auto;
@@ -147,34 +158,60 @@
       color: #666;
     }
 
-    @media (max-width: 640px) {
-      .menu-container {
-        align-items: flex-start;
-      }
-
-      .menu-left,
-      .menu-tabs,
-      .menu-right {
-        width: 100%;
-      }
-
+    @media (max-width: 900px) {
       .menu-tabs {
-        display: flex;
+        display: none;
         flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: white;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        gap: 15px;
+        box-sizing: border-box;
+        z-index: 200;
       }
 
-      .admin-tab {
+      .menu-tabs.active {
+        display: flex;
+      }
+
+      .admin-hamburger {
+        display: block;
+      }
+
+      .menu-tabs .admin-tab {
         width: 100%;
         text-align: center;
       }
+    }
+
+    @media (max-width: 640px) {
+      .menu-container {
+        align-items: center;
+      }
+
+      .menu-left {
+        width: auto;
+        flex: 1;
+        justify-content: space-between;
+      }
 
       .menu-right {
-        justify-content: space-between;
+        width: auto;
+        justify-content: flex-end;
       }
 
       .chart-container,
       .stat-card {
         padding: 18px;
+      }
+
+      .logout-btn {
+        padding: 10px 16px;
+        font-size: 0.92em;
       }
     }
   </style>
@@ -199,16 +236,19 @@
       <div class="logo">
         <img src="images/logo.png" alt="Skallstuggu">
       </div>
-      <div class="menu-tabs">
+
+      <nav class="menu-tabs" id="adminNavLinks">
         <a href="admin.html" class="admin-tab">Bookinger</a>
         <a href="administrasjon.html" class="admin-tab">Administrasjon</a>
         <a href="overview.html" class="admin-tab active">Oversikt</a>
-      </div>
+      </nav>
     </div>
+
     <div class="menu-right">
       <button onclick="logoutAdmin()" class="logout-btn">
         Logg ut
       </button>
+      <div class="admin-hamburger" id="adminHamburger">☰</div>
     </div>
   </div>
 </div>
@@ -318,21 +358,18 @@ async function loadOverviewData() {
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth();
 
-    // Hent bookinger
     const { data: bookings, error: bookingError } = await supabaseClient
       .from("bookings")
       .select("*");
 
     if (bookingError) throw bookingError;
 
-    // Hent sidevisninger
     const { data: pageViews, error: pageViewError } = await supabaseClient
       .from("page_views")
       .select("*");
 
     if (pageViewError) throw pageViewError;
 
-    // BOOKINGDATA
     let total = 0, approved = 0, pending = 0;
     let monthlyBookingCounts = new Array(12).fill(0);
 
@@ -358,7 +395,6 @@ async function loadOverviewData() {
 
     drawBookingsChart(monthlyBookingCounts);
 
-    // BESØKSDATA
     let monthlyViewCounts = new Array(12).fill(0);
     let visitsThisMonth = 0;
     let visitsThisYear = 0;
@@ -382,7 +418,6 @@ async function loadOverviewData() {
     document.getElementById("visitsThisMonth").textContent = visitsThisMonth.toLocaleString('no-NO');
     document.getElementById("visitsThisYear").textContent = visitsThisYear.toLocaleString('no-NO');
 
-    // Sammenligning mot forrige måned
     const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
     const currentMonthViews = monthlyViewCounts[currentMonth];
     const previousMonthViews = monthlyViewCounts[previousMonth];
@@ -515,12 +550,20 @@ function drawViewsChart(counts) {
   });
 }
 
-// Kjør ved lasting
 window.addEventListener("load", checkIfAlreadyLoggedIn);
 
 document.getElementById("adminPassword").addEventListener("keypress", function(e) {
   if (e.key === "Enter") checkPassword();
 });
+
+const adminHamburger = document.getElementById('adminHamburger');
+const adminNavLinks = document.getElementById('adminNavLinks');
+
+if (adminHamburger && adminNavLinks) {
+  adminHamburger.addEventListener('click', () => {
+    adminNavLinks.classList.toggle('active');
+  });
+}
 </script>
 
 </body>
