@@ -38,6 +38,7 @@
       align-items: center;
       gap: 16px;
       flex-wrap: wrap;
+      position: relative;
     }
 
     .menu-left {
@@ -97,6 +98,16 @@
 
     .logout-btn:hover {
       background: #b71c1c;
+    }
+
+    .admin-hamburger {
+      display: none;
+      font-size: 1.8rem;
+      cursor: pointer;
+      color: #333;
+      padding: 5px 10px;
+      line-height: 1;
+      user-select: none;
     }
 
     .admin-page-wrap {
@@ -239,7 +250,6 @@
       border-left: 4px solid #d32f2f;
     }
 
-    /* FIKSET KALENDERNAV */
     .calendar-nav {
       display: grid;
       grid-template-columns: 1fr auto 1fr;
@@ -358,6 +368,36 @@
       background: #6f3921;
     }
 
+    @media (max-width: 900px) {
+      .menu-tabs {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: white;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        gap: 15px;
+        box-sizing: border-box;
+        z-index: 200;
+      }
+
+      .menu-tabs.active {
+        display: flex;
+      }
+
+      .admin-hamburger {
+        display: block;
+      }
+
+      .menu-tabs .admin-tab {
+        width: 100%;
+        text-align: center;
+      }
+    }
+
     @media (max-width: 640px) {
       .admin-card,
       .search-panel {
@@ -374,27 +414,18 @@
       }
 
       .menu-container {
-        align-items: flex-start;
+        align-items: center;
       }
 
-      .menu-left,
-      .menu-tabs,
-      .menu-right {
-        width: 100%;
-      }
-
-      .menu-tabs {
-        display: flex;
-        flex-direction: column;
-      }
-
-      .admin-tab {
-        width: 100%;
-        text-align: center;
-      }
-
-      .menu-right {
+      .menu-left {
+        width: auto;
+        flex: 1;
         justify-content: space-between;
+      }
+
+      .menu-right {
+        width: auto;
+        justify-content: flex-end;
       }
 
       .calendar-nav {
@@ -410,6 +441,11 @@
       #monthTitle {
         order: -1;
         white-space: normal;
+      }
+
+      .logout-btn {
+        padding: 10px 16px;
+        font-size: 0.92em;
       }
     }
   </style>
@@ -438,17 +474,18 @@
           <img src="images/logo.png" alt="Skallstuggu">
         </div>
 
-        <div class="menu-tabs">
+        <nav class="menu-tabs" id="adminNavLinks">
           <a href="admin.html" class="admin-tab active">Bookinger</a>
           <a href="administrasjon.html" class="admin-tab">Administrasjon</a>
           <a href="overview.html" class="admin-tab">Oversikt</a>
-        </div>
+        </nav>
       </div>
 
       <div class="menu-right">
         <button onclick="logoutAdmin()" class="logout-btn">
           Logg ut
         </button>
+        <div class="admin-hamburger" id="adminHamburger">☰</div>
       </div>
     </div>
   </div>
@@ -541,6 +578,15 @@
     document.getElementById("adminPassword").addEventListener("keypress", function(e) {
       if (e.key === "Enter") checkPassword();
     });
+
+    const adminHamburger = document.getElementById('adminHamburger');
+    const adminNavLinks = document.getElementById('adminNavLinks');
+
+    if (adminHamburger && adminNavLinks) {
+      adminHamburger.addEventListener('click', () => {
+        adminNavLinks.classList.toggle('active');
+      });
+    }
   </script>
 
 </body>
