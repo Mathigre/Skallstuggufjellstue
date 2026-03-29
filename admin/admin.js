@@ -14,6 +14,48 @@ let approvedBookings = [];
 let selectedBooking = null;
 let currentDate = new Date();
 
+// ======== fakturaer =======
+
+async function uploadInvoiceFile(bookingId) {
+  const fileInput = document.getElementById(`invoice-${bookingId}`);
+  const file = fileInput?.files?.[0];
+
+  if (!file) return null;
+
+  if (file.type !== "application/pdf") {
+    alert("Kun PDF-filer er tillatt.");
+    return null;
+  }
+
+  const fileExt = file.name.split(".").pop();
+  const fileName = `faktura-${bookingId}-${Date.now()}.${fileExt}`;
+  const filePath = `booking-${bookingId}/${fileName}`;
+
+  const { error: uploadError } = await supabaseClient.storage
+    .from("fakturaer")
+    .upload(filePath, file, { upsert: true });
+
+  if (uploadError) {
+    console.error("Feil ved opplasting:", uploadError);
+    alert("Kunne ikke laste opp faktura.");
+    return null;
+  }
+
+  const { data, error: signedUrlError } = await supabaseClient.storage
+    .from("fakturaer")
+    .createSignedUrl(filePath, 60 * 60 * 24 * 7);
+
+  if (signedUrlError) {
+    console.error("Feil ved oppretting av lenke:", signedUrlError);
+    alert("Kunne ikke lage lenke til faktura.");
+    return null;
+  }
+
+  return data.signedUrl;
+}
+
+
+
 // =========================
 // LOAD DATA
 // =========================
@@ -103,11 +145,18 @@ function loadRequestsWithHighlight() {
 
       <div style="margin: 12px 0 10px 0;">
         <textarea id="reply-${b.id}" rows="3" placeholder="Skriv svar til kunden her..." 
-                  style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; resize:vertical;"></textarea>
+            style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; resize:vertical;"></textarea>
+
+        <div style="margin-top:10px;">
+         <label style="display:block; margin-bottom:6px; font-weight:600;">Legg ved faktura (PDF)</label>
+         <input type="file" id="invoice-${b.id}" accept=".pdf,application/pdf"
+           style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; background:white;">
+        </div>
+
         <button onclick="sendReply('${b.id}', '${b.email}', '${b.name}')" 
-                style="margin-top:6px; padding:8px 16px; background:#1976d2; color:white; border:none; border-radius:6px; cursor:pointer;">
+          style="margin-top:10px; padding:8px 16px; background:#1976d2; color:white; border:none; border-radius:6px; cursor:pointer;">
           Send svar til kunde
-        </button>
+         </button>
       </div>
 
       <button onclick="approve('${b.id}')">Godkjenn</button>
@@ -226,9 +275,22 @@ async function approve(id) {
 
   if (!confirm("Vil du godkjenne denne bookingen?")) return;
 
+  let invoiceUrl = null;
+
+  try {
+    invoiceUrl = await uploadInvoiceFile(id);
+  } catch (err) {
+    console.error("Feil ved håndtering av faktura:", err);
+    alert("Kunne ikke behandle fakturaen.");
+    return;
+  }
+
   const { error: updateError } = await supabaseClient
     .from("bookings")
-    .update({ status: "approved" })
+    .update({
+      status: "approved",
+      invoice_url: invoiceUrl
+    })
     .eq("id", id);
 
   if (updateError) {
@@ -239,14 +301,18 @@ async function approve(id) {
   try {
     await fetch("https://rbphgvnwmzjeuvyrasvy.supabase.co/functions/v1/resend-email", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${supabaseAnonKey}` },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${supabaseAnonKey}`
+      },
       body: JSON.stringify({
         type: "approved",
         name: b.name,
         email: b.email,
         phone: b.phone || "",
         start: b.start_date,
-        end: b.end_date
+        end: b.end_date,
+        invoiceUrl: invoiceUrl || null
       })
     });
   } catch (err) {
