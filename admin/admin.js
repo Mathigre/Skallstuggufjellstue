@@ -55,40 +55,62 @@ async function uploadInvoiceFile(bookingId) {
 }
 
 // =========================
-// OPPRETT FAKTURA I FIKEN (via Edge Function)
+// OPPRETT FAKTURA I FIKEN (FIXET)
 // =========================
 async function createFikenInvoice(booking) {
   const nights = Math.ceil(
     (new Date(booking.end_date) - new Date(booking.start_date)) / (1000 * 60 * 60 * 24)
   );
 
-  const pricePerNight = 1500; // ← BYTT UT MED DIN EGEN PRIS PER NATT
+  const pricePerNight = 1500;
 
-  const res = await fetch(`${supabaseUrl}/functions/v1/create-fiken-invoice`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${supabaseAnonKey}`
-    },
-    body: JSON.stringify({
-      name: booking.name,
-      email: booking.email,
-      phone: booking.phone || "",
-      startDate: booking.start_date,
-      endDate: booking.end_date,
-      nights: nights,
-      pricePerNight: pricePerNight
-    })
-  });
+  let res;
 
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.error || "Kunne ikke lage faktura i Fiken");
+  try {
+    res = await fetch(`${supabaseUrl}/functions/v1/create-fiken-invoice`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${supabaseAnonKey}`
+      },
+      body: JSON.stringify({
+        name: booking.name,
+        email: booking.email,
+        phone: booking.phone || "",
+        startDate: booking.start_date,
+        endDate: booking.end_date,
+        nights: nights,
+        pricePerNight: pricePerNight
+      })
+    });
+  } catch (fetchError) {
+    console.error("Fetch feilet:", fetchError);
+    throw new Error("Kunne ikke nå Edge Function");
   }
 
-  return await res.json();
-}
+  // 🔥 LES SOM TEXT FØRST (fixer JSON error)
+  const text = await res.text();
 
+  let data;
+
+  try {
+    data = JSON.parse(text);
+  } catch (parseError) {
+    console.error("❌ Ikke JSON fra Edge Function:");
+    console.error(text);
+    throw new Error("Edge function returnerte ikke gyldig JSON");
+  }
+
+  // 🔥 hvis Fiken feiler
+  if (!res.ok) {
+    console.error("❌ Fiken/API feil:", data);
+    throw new Error(data.error || "Feil ved oppretting av faktura");
+  }
+
+  console.log("✅ Fiken OK:", data);
+
+  return data;
+}
 // =========================
 // LOAD DATA
 // =========================
