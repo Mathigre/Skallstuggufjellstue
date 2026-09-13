@@ -61,17 +61,35 @@
     const payment = document.getElementById("manualPayment")?.value || "unpaid";
     const message = document.getElementById("manualMessage")?.value.trim() || "Manuelt lagt inn av admin.";
     if (!name || !start || !end) return alert("Fyll inn navn, fra-dato og til-dato.");
+    if (!email) return alert("Fyll inn e-post slik at kunden kan få bookingbekreftelse.");
     if (end <= start) return alert("Til-dato må være etter fra-dato.");
     const overlap = approvedOverlap(start, end);
     if (overlap) return alert(`❌ Kan ikke legge inn booking.\nPerioden overlapper med ${overlap.name || "en eksisterende godkjent booking"} (${overlap.start_date} → ${overlap.end_date}).`);
-    if (!confirm(`Legge inn ${name} som godkjent booking ${start} → ${end}?`)) return;
+    if (!confirm(`Legge inn ${name} som godkjent booking ${start} → ${end} og sende bekreftelse til ${email}?`)) return;
+
     const row = {name, email, phone, start_date:start, end_date:end, status:"approved", payment_status:payment, paid_at:payment === "paid" ? new Date().toISOString() : null, message};
-    const {error} = await supabaseClient.from("bookings").insert(row);
+    const {data:created,error} = await supabaseClient.from("bookings").insert(row).select("id").single();
     if (error) { console.error(error); return alert("Kunne ikke legge inn bookingen: " + error.message); }
+
+    let emailSent = false;
+    try {
+      const bookingId = String(created.id);
+      const replyUrl = `${location.origin}/reply.html?booking=${encodeURIComponent(bookingId)}`;
+      const response = await fetch(`${supabaseUrl}/functions/v1/resend-email`, {
+        method:"POST",
+        headers:{"Content-Type":"application/json","Authorization":`Bearer ${supabaseAnonKey}`},
+        body:JSON.stringify({type:"approved",name,email,phone:phone||"",start,end,invoiceUrl:null,bookingId,replyUrl})
+      });
+      emailSent = response.ok;
+      if (!response.ok) console.error("Booking lagret, men bekreftelsesmail feilet:", await response.text());
+    } catch (mailError) {
+      console.error("Booking lagret, men bekreftelsesmail feilet:", mailError);
+    }
+
     ["manualName","manualEmail","manualPhone","manualStart","manualEnd","manualMessage"].forEach(id => { const el=document.getElementById(id); if(el) el.value=""; });
     const pay=document.getElementById("manualPayment"); if(pay) pay.value="unpaid";
     toggleManualBooking(false);
-    alert("✅ Booking lagt inn og godkjent!");
+    alert(emailSent ? "✅ Booking lagt inn og bekreftelse sendt på e-post!" : "⚠️ Booking ble lagt inn, men bekreftelsesmailen kunne ikke sendes.");
     await loadData();
   };
 
