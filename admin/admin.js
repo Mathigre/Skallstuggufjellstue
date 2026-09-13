@@ -1,4 +1,4 @@
- =========================
+// =========================
 // SUPABASE
 // =========================
 const supabaseUrl = "https://rbphgvnwmzjeuvyrasvy.supabase.co";
