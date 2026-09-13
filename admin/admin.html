@@ -17,6 +17,7 @@
   <script src="config.js?v=20260913-2"></script>
   <script src="admin.js?v=20260913-3"></script>
   <script src="overlap-fix.js?v=20260913-1"></script>
+  <script src="manual-booking.js?v=20260913-1"></script>
   <script>
     function checkPassword(){const input=document.getElementById('adminPassword').value.trim(),error=document.getElementById('passwordError');if(input===ADMIN_CONFIG.password){localStorage.setItem('adminLoggedIn','true');document.getElementById('passwordScreen').style.display='none';document.getElementById('adminContent').style.display='block'}else{error.textContent='Feil kode. Prøv igjen.';document.getElementById('adminPassword').value=''}}
     function checkIfAlreadyLoggedIn(){if(localStorage.getItem('adminLoggedIn')==='true'){document.getElementById('passwordScreen').style.display='none';document.getElementById('adminContent').style.display='block'}}
