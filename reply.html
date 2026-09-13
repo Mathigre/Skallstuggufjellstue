@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Samtale om booking - Skallstuggu</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .conversation-wrap{max-width:760px;margin:50px auto;padding:0 20px}.conversation-card{background:#fff;border:1px solid #e2e2e2;border-radius:12px;padding:24px;box-shadow:0 5px 20px rgba(0,0,0,.06)}
+    .message{padding:12px 15px;border-radius:10px;margin:10px 0;white-space:pre-wrap}.message.admin{background:#eef4ff;margin-right:40px}.message.customer{background:#f4efe9;margin-left:40px}.meta{font-size:.82rem;color:#777;margin-bottom:4px}
+    #replyMessage{width:100%;min-height:110px;padding:12px;border:1px solid #ccc;border-radius:8px;font:inherit;resize:vertical}.send-btn{background:#8B4A2B;color:#fff;border:0;border-radius:7px;padding:12px 22px;font-weight:600;cursor:pointer}.status{margin:12px 0;color:#555}
+  </style>
+</head>
+<body>
+<header class="navbar"><div class="nav-container"><a href="index.html" class="logo"><img src="images/Logo.png" alt="Skallstuggu"></a></div></header>
+<main class="conversation-wrap">
+  <h1>Samtale om booking</h1>
+  <div class="conversation-card">
+    <div id="bookingInfo"></div>
+    <hr>
+    <div id="messages"><p>Laster samtale...</p></div>
+    <hr>
+    <h3>Svar Skallstuggu</h3>
+    <textarea id="replyMessage" maxlength="2000" placeholder="Skriv svaret ditt her..."></textarea>
+    <div><button class="send-btn" id="sendBtn">Send svar</button></div>
+    <div class="status" id="status"></div>
+  </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const supabaseUrl="https://rbphgvnwmzjeuvyrasvy.supabase.co";
+const supabaseAnonKey="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJicGhndm53bXpqZXV2eXJhc3Z5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MjM3MjksImV4cCI6MjA4OTk5OTcyOX0.ug7k4jDtYwudivBJaWyKuCdwbt3GVnLXtWtpsBUhvEQ";
+const db=supabase.createClient(supabaseUrl,supabaseAnonKey);
+const bookingId=new URLSearchParams(location.search).get("booking");
+function esc(v){return String(v??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));}
+function formatDate(v){if(!v)return "";return new Date(v).toLocaleString("no-NO",{dateStyle:"medium",timeStyle:"short"});}
+async function load(){
+ if(!bookingId){document.getElementById("messages").innerHTML="<p>Ugyldig samtalelenke.</p>";document.getElementById("sendBtn").disabled=true;return;}
+ const {data:booking}=await db.from("bookings").select("id,name,start_date,end_date").eq("id",bookingId).maybeSingle();
+ if(booking)document.getElementById("bookingInfo").innerHTML=`<strong>${esc(booking.name||"")}</strong><br>Booking: ${esc(booking.start_date)} → ${esc(booking.end_date)}`;
+ const {data,error}=await db.from("booking_messages").select("*").eq("booking_id",bookingId).order("created_at",{ascending:true});
+ if(error){console.error(error);document.getElementById("messages").innerHTML="<p>Kunne ikke hente samtalen.</p>";return;}
+ document.getElementById("messages").innerHTML=(data||[]).length?(data||[]).map(m=>`<div class="message ${m.sender==="admin"?"admin":"customer"}"><div class="meta"><strong>${m.sender==="admin"?"Skallstuggu":"Deg"}</strong> · ${esc(formatDate(m.created_at))}</div>${esc(m.message)}</div>`).join(""):"<p>Ingen meldinger ennå.</p>";
+}
+document.getElementById("sendBtn").addEventListener("click",async()=>{
+ const text=document.getElementById("replyMessage").value.trim(),status=document.getElementById("status");
+ if(!text){status.textContent="Skriv en melding først.";return;}
+ status.textContent="Sender...";
+ const {error}=await db.from("booking_messages").insert({booking_id:bookingId,sender:"customer",message:text});
+ if(error){console.error(error);status.textContent="Kunne ikke sende. Prøv igjen.";return;}
+ document.getElementById("replyMessage").value="";status.textContent="Svaret er sendt.";await load();
+});
+load();
+</script>
+</body>
+</html>
