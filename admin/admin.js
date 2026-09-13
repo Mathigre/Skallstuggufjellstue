@@ -1,4 +1,4 @@
-// =========================
+ =========================
 // SUPABASE
 // =========================
 const supabaseUrl = "https://rbphgvnwmzjeuvyrasvy.supabase.co";
@@ -54,8 +54,63 @@ async function uploadInvoiceFile(bookingId) {
   return data.signedUrl;
 }
 
+// =========================
+// OPPRETT FAKTURA I FIKEN (FIXET)
+// =========================
+async function createFikenInvoice(booking) {
+  const nights = Math.ceil(
+    (new Date(booking.end_date) - new Date(booking.start_date)) / (1000 * 60 * 60 * 24)
+  );
 
+  const pricePerNight = 1500;
 
+  let res;
+
+  try {
+    res = await fetch(`${supabaseUrl}/functions/v1/create-fiken-invoice`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${supabaseAnonKey}`
+      },
+      body: JSON.stringify({
+        name: booking.name,
+        email: booking.email,
+        phone: booking.phone || "",
+        startDate: booking.start_date,
+        endDate: booking.end_date,
+        nights: nights,
+        pricePerNight: pricePerNight
+      })
+    });
+  } catch (fetchError) {
+    console.error("Fetch feilet:", fetchError);
+    throw new Error("Kunne ikke nå Edge Function");
+  }
+
+  // 🔥 LES SOM TEXT FØRST (fixer JSON error)
+  const text = await res.text();
+
+  let data;
+
+  try {
+    data = JSON.parse(text);
+  } catch (parseError) {
+    console.error("❌ Ikke JSON fra Edge Function:");
+    console.error(text);
+    throw new Error("Edge function returnerte ikke gyldig JSON");
+  }
+
+  // 🔥 hvis Fiken feiler
+  if (!res.ok) {
+    console.error("❌ Fiken/API feil:", data);
+    throw new Error(data.error || "Feil ved oppretting av faktura");
+  }
+
+  console.log("✅ Fiken OK:", data);
+
+  return data;
+}
 // =========================
 // LOAD DATA
 // =========================
@@ -67,7 +122,7 @@ async function loadData() {
     allBookings = data || [];
     approvedBookings = allBookings.filter(b => b.status === "approved");
 
-    loadRequestsWithHighlight();   // Endret her
+    loadRequestsWithHighlight();
     loadCalendar();
   } catch (err) {
     console.error("Feil ved henting av data:", err);
@@ -88,7 +143,6 @@ function statusText(status) {
   return "Forespørsel";
 }
 
-// Debounce for å unngå for mange kall mens man skriver
 function debounce(func, delay) {
   let timeout;
   return function(...args) {
@@ -97,7 +151,6 @@ function debounce(func, delay) {
   };
 }
 
-// Ny søkefunksjon med highlighting
 document.getElementById("search")?.addEventListener("input", debounce(loadRequestsWithHighlight, 300));
 
 function loadRequestsWithHighlight() {
@@ -122,7 +175,6 @@ function loadRequestsWithHighlight() {
 
     if (searchTerm && !nameLower.includes(searchTerm) && !emailLower.includes(searchTerm)) return;
 
-    // Husk første treff for å highlighte i kalenderen
     if (!firstMatch) firstMatch = b;
 
     const overlap = checkOverlap(b);
@@ -168,12 +220,10 @@ function loadRequestsWithHighlight() {
     else foresp.appendChild(div);
   });
 
-  // Oppdater tellere
   document.querySelector("[onclick=\"toggle('foresporsler')\"]").innerText = `📩 Forespørsler (${countPending})`;
   document.querySelector("[onclick=\"toggle('godkjente')\"]").innerText = `✅ Godkjente (${countApproved})`;
   document.querySelector("[onclick=\"toggle('avslatte')\"]").innerText = `❌ Avslåtte (${countRejected})`;
 
-  // Highlight i kalenderen hvis vi har treff
   if (firstMatch) {
     highlightBookingInCalendar(firstMatch);
   } else {
@@ -203,14 +253,12 @@ function checkOverlap(booking) {
 function highlightBookingInCalendar(booking) {
   selectedBooking = booking;
 
-  // Hopp til riktig måned basert på startdato
   const startDate = new Date(booking.start_date);
   currentDate.setFullYear(startDate.getFullYear());
   currentDate.setMonth(startDate.getMonth());
 
   loadCalendar();
 
-  // Scroll ned til kalenderen
   setTimeout(() => {
     const calendarElement = document.getElementById("calendar");
     if (calendarElement) {
@@ -261,7 +309,7 @@ async function sendReply(bookingId, customerEmail, customerName) {
 }
 
 // =========================
-// GODKJENN / AVSLÅ
+// GODKJENN / AVSLÅ (oppdatert med Fiken)
 // =========================
 async function approve(id) {
   const b = allBookings.find(x => x.id === id);
@@ -273,32 +321,35 @@ async function approve(id) {
     return;
   }
 
-  if (!confirm("Vil du godkjenne denne bookingen?")) return;
+  if (!confirm(`Vil du godkjenne bookingen og lage faktura i Fiken til ${b.name}?`)) return;
 
-  let invoiceUrl = null;
+  let pdfUrl = null;
 
   try {
-    invoiceUrl = await uploadInvoiceFile(id);
+    pdfUrl = await uploadInvoiceFile(id);   // PDF er fortsatt valgfri
   } catch (err) {
-    console.error("Feil ved håndtering av faktura:", err);
-    alert("Kunne ikke behandle fakturaen.");
-    return;
-  }
-
-  const { error: updateError } = await supabaseClient
-    .from("bookings")
-    .update({
-      status: "approved",
-      invoice_url: invoiceUrl
-    })
-    .eq("id", id);
-
-  if (updateError) {
-    alert(`Kunne ikke godkjenne:\n${updateError.message || updateError}`);
-    return;
+    console.error("Feil ved PDF-opplasting:", err);
   }
 
   try {
+    // Lag faktura i Fiken
+    const fikenResult = await createFikenInvoice(b);
+
+    // Oppdater booking i databasen
+    const { error: updateError } = await supabaseClient
+      .from("bookings")
+      .update({
+        status: "approved",
+        invoice_url: fikenResult.fikenDraftUrl || pdfUrl   // Fiken-lenke prioriteres
+      })
+      .eq("id", id);
+
+    if (updateError) {
+      alert(`Kunne ikke godkjenne:\n${updateError.message || updateError}`);
+      return;
+    }
+
+    // Send e-post til kunde (som før)
     await fetch("https://rbphgvnwmzjeuvyrasvy.supabase.co/functions/v1/resend-email", {
       method: "POST",
       headers: {
@@ -312,15 +363,17 @@ async function approve(id) {
         phone: b.phone || "",
         start: b.start_date,
         end: b.end_date,
-        invoiceUrl: invoiceUrl || null
+        invoiceUrl: fikenResult.fikenDraftUrl || pdfUrl || null
       })
     });
-  } catch (err) {
-    console.error("Feil ved e-post sending:", err);
-  }
 
-  alert("✅ Booking godkjent.");
-  await loadData();
+    alert(`✅ Booking godkjent!\nFaktura opprettet i Fiken`);
+    await loadData();
+
+  } catch (err) {
+    console.error(err);
+    alert("Feil ved godkjenning:\n" + err.message);
+  }
 }
 
 async function reject(id) {
@@ -412,7 +465,6 @@ function loadCalendar() {
     else if (isStart) div.classList.add("half-start");
     else if (isEnd) div.classList.add("half-end");
 
-    // Highlight valgt booking
     if (selectedBooking && dateStr >= selectedBooking.start_date && dateStr <= selectedBooking.end_date) {
       div.classList.add("highlight");
     }
