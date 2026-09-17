@@ -12,15 +12,15 @@
 </head>
 <body>
   <div id="passwordScreen" class="password-screen"><div class="password-box"><h2>Admin tilgang</h2><p>Skriv inn admin-koden:</p><input type="password" id="adminPassword" class="password-input" placeholder="Skriv kode her..."><button onclick="checkPassword()" class="login-btn">Logg inn</button><p id="passwordError" style="color:red;margin-top:12px"></p></div></div>
-  <div class="admin-top-menu"><div class="menu-container"><div class="menu-left"><div class="logo"><img src="images/logo.png" alt="Skallstuggu"></div><nav class="menu-tabs" id="adminNavLinks"><a href="admin.html" class="admin-tab active">Bookinger</a><a href="administrasjon.html" class="admin-tab">Administrasjon</a><a href="overview.html" class="admin-tab">Oversikt</a></nav></div><div class="menu-right"><button onclick="logoutAdmin()" class="logout-btn">Logg ut</button><div class="admin-hamburger" id="adminHamburger">☰</div></div></div></div>
+  <div class="admin-top-menu"><div class="menu-container"><div class="menu-left"><div class="logo"><img src="images/logo.png" alt="Skallstuggu"></div><nav class="menu-tabs" id="adminNavLinks"><a href="admin.html" class="admin-tab active">Bookinger</a><a href="administrasjon.html" class="admin-tab">Administrasjon</a><a href="priser.html" class="admin-tab">Priser</a><a href="overview.html" class="admin-tab">Oversikt</a></nav></div><div class="menu-right"><button onclick="logoutAdmin()" class="logout-btn">Logg ut</button><div class="admin-hamburger" id="adminHamburger">☰</div></div></div></div>
   <section class="page" id="adminContent" style="display:none"><div class="admin-page-wrap"><div class="admin-main-grid"><div class="left-column"><div class="search-panel"><h3>Søk bookinger</h3><p>Søk etter navn, e-post eller telefon.</p><input id="search" placeholder="Søk bookinger..."></div><div class="admin-card"><h2>Bookingoversikt</h2><h3 class="section-header" onclick="toggle('foresporsler')">📩 Forespørsler</h3><div id="foresporsler"></div><h3 class="section-header" onclick="toggle('godkjente')">🏡 Kommende bookinger</h3><div id="godkjente"></div><h3 class="section-header" onclick="toggle('avslatte')">❌ Avslåtte</h3><div id="avslatte" class="hidden"></div></div></div><div class="right-column"><div class="admin-card"><h2>Kalender</h2><div class="calendar-nav"><button onclick="changeMonth(-1)">← Forrige måned</button><h3 id="monthTitle"></h3><button onclick="changeMonth(1)">Neste måned →</button></div><div class="calendar-grid" id="calendar"></div></div></div></div></div></section>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js?v=20260913-2"></script>
   <script src="booking-editor.js?v=20260917-2"></script>
   <script src="admin.js?v=20260917-1"></script>
   <script src="overlap-fix.js?v=20260913-1"></script>
-  <script src="manual-booking.js?v=20260913-1"></script>
-  <script type="module" src="booking-pricing.js?v=20260917-1"></script>
+  <script src="manual-booking.js?v=season1"></script>
+  <script type="module" src="booking-pricing.js?v=season1"></script>
   <script>
     function checkPassword(){const input=document.getElementById('adminPassword').value.trim(),error=document.getElementById('passwordError');if(input===ADMIN_CONFIG.password){localStorage.setItem('adminLoggedIn','true');document.getElementById('passwordScreen').style.display='none';document.getElementById('adminContent').style.display='block'}else{error.textContent='Feil kode. Prøv igjen.';document.getElementById('adminPassword').value=''}}
     function checkIfAlreadyLoggedIn(){if(localStorage.getItem('adminLoggedIn')==='true'){document.getElementById('passwordScreen').style.display='none';document.getElementById('adminContent').style.display='block'}}

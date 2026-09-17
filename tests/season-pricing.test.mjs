@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {calculateQuote,validateSettings} from '../pricing.mjs';
+import {makeHandler} from '../supabase/functions/pricing-admin/index.ts';
+import {createHash} from 'node:crypto';
+const settings={weekday:900000,weekend:1400000,seasons:[{name:'Sommer',start:'2027-06-20',end:'2027-08-15',weekday:1100000,weekend:1600000}]};
+test('Thursday through Monday splits Friday/Saturday weekend and Sunday weekday',()=>{const q=calculateQuote({start:'2027-01-07',end:'2027-01-11',settings});assert.equal(q.total,4600000);assert.deepEqual(q.lines.map(l=>l.quantity),[2,2]);});
+test('season boundary, inclusive last night, checkout excluded and extras',()=>{const q=calculateQuote({start:'2027-08-14',end:'2027-08-17',settings,linen:2,towels:2,cleaning:true});assert.equal(q.total,3990000);assert.equal(q.vat,798000);});
+test('overlapping seasons and fractional prices rejected',()=>{assert.throws(()=>validateSettings({...settings,seasons:[...settings.seasons,{...settings.seasons[0]}]}),/overlapp/);assert.throws(()=>validateSettings({...settings,weekday:900001}));});
+test('saved snapshot and legacy rates do not change with new configuration',()=>{const snap=structuredClone(settings);const revised={...settings,weekday:1500000};assert.equal(calculateQuote({start:'2027-01-04',end:'2027-01-05',settings:snap}).total,900000);assert.equal(calculateQuote({start:'2027-01-04',end:'2027-01-05',settings:revised}).total,1500000);assert.equal(calculateQuote({start:'2027-01-04',end:'2027-01-05'}).total,1400000);});
+const code='private-test-access-at-least-32-characters',accessHash=createHash('sha256').update(code).digest('hex');
+test('price writes require private code and validate overlaps before DB access',async()=>{let calls=0;const h=makeHandler({env:()=>'',accessHash,request:()=>{calls++;}});assert.equal((await h(new Request('http://test',{method:'POST'}))).status,403);const r=await h(new Request('http://test',{method:'POST',headers:{'x-test-access':code},body:JSON.stringify({revision:1,settings:{...settings,seasons:[...settings.seasons,...settings.seasons]}})}));assert.equal(r.status,400);assert.equal(calls,0);});
+test('stale editor cannot overwrite settings',async()=>{const h=makeHandler({env:()=> 'server',accessHash,request:async(url,init)=>{assert.match(url,/revision=eq.1$/);assert.equal(JSON.parse(init.body).revision,2);return Response.json([]);}});const r=await h(new Request('http://test',{method:'POST',headers:{'x-test-access':code},body:JSON.stringify({revision:1,settings})}));assert.equal(r.status,409);});
