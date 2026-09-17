@@ -1,0 +1,11 @@
+.booking-extras{border:1px solid #d6cfc6;border-radius:12px;padding:20px;margin:24px 0;background:#fffaf3}
+.booking-extras legend{font-weight:700;color:#8b4a2b;padding:0 8px}
+.booking-extras-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.booking-extras-grid label{margin:0}
+.booking-extras-grid input{display:block;box-sizing:border-box;width:100%;padding:12px;margin-top:8px;border:1px solid #ccc;border-radius:6px;font:inherit}
+.booking-cleaning{display:flex;align-items:center;gap:10px}
+.booking-cleaning input{width:20px!important;height:20px;flex:0 0 20px}
+.booking-price-summary{border-top:1px solid #e5ddd4;padding-top:12px;margin-top:20px;line-height:1.6}
+.booking-price-summary p{margin:5px 0}
+.booking-price-summary strong{display:block;margin-top:10px;font-size:1.15em}
+@media(max-width:600px){.booking-extras-grid{grid-template-columns:1fr}.booking-extras{padding:14px}}
