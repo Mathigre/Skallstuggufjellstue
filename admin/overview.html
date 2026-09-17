@@ -252,9 +252,9 @@
         <div class="stat-number" id="pendingBookings" style="color:#ff9800;">0</div>
       </div>
       <div class="stat-card">
-        <h3>Anslått omsetning</h3>
+        <h3>Bookingverdi i år</h3>
         <div class="stat-number" id="estimatedRevenue">0 kr</div>
-        <small style="color:#666;">(basert på gjennomsnitt 12 500 kr per booking)</small>
+        <small id="revenueNote" style="color:#666;">Godkjente opphold med ankomst i år, inkl. tillegg og mva. Samme prisgrunnlag som Fiken-utkastet.</small>
       </div>
     </div>
 
@@ -344,19 +344,21 @@ async function loadOverviewData() {
 
     if (bookingError) throw bookingError;
 
-    const { data: pageViews, error: pageViewError } = await supabaseClient
-      .from("page_views")
-      .select("*");
 
-    if (pageViewError) throw pageViewError;
 
-    let total = 0, approved = 0, pending = 0;
+    let total = 0, approved = 0, pending = 0, revenueOre = 0, missingPrice = 0;
     let monthlyBookingCounts = new Array(12).fill(0);
 
     bookings.forEach(b => {
+      // Use the agreed total, never today's tariff or an assumed average.
+      if (!b.start_date || Number(b.start_date.slice(0, 4)) !== currentYear) return;
       total++;
-      if (b.status === "approved") approved++;
-      else if (b.status === "pending") pending++;
+      if (b.status === "approved" && !b.cancelled_at) {
+        approved++;
+        const amount = Number(b.booking_total_ore);
+        if (b.booking_total_ore != null && b.booking_total_ore !== '' && Number.isSafeInteger(amount) && amount >= 0) revenueOre += amount;
+        else missingPrice++;
+      } else if (b.status === "pending" && !b.cancelled_at) pending++;
 
       if (b.start_date) {
         const date = new Date(b.start_date);
@@ -370,10 +372,16 @@ async function loadOverviewData() {
     document.getElementById("approvedBookings").textContent = approved;
     document.getElementById("pendingBookings").textContent = pending;
 
-    const estimated = approved * 12500;
-    document.getElementById("estimatedRevenue").textContent = estimated.toLocaleString('no-NO') + " kr";
+    document.getElementById("estimatedRevenue").textContent = (revenueOre / 100).toLocaleString('nb-NO', {maximumFractionDigits: 2}) + " kr";
+    document.getElementById("revenueNote").textContent = 'Godkjente opphold med ankomst i år, inkl. tillegg og mva. Samme prisgrunnlag som Fiken-utkastet; ikke registrerte innbetalinger.' + (missingPrice ? ' ' + missingPrice + ' godkjente bookinger mangler lagret pris og er ikke med i summen.' : '');
 
     drawBookingsChart(monthlyBookingCounts);
+
+    const { data: pageViews, error: pageViewError } = await supabaseClient
+      .from("page_views")
+      .select("*");
+
+    if (pageViewError) throw pageViewError;
 
     let monthlyViewCounts = new Array(12).fill(0);
     let visitsThisMonth = 0;
