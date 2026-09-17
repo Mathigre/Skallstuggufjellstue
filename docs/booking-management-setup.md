@@ -1,5 +1,7 @@
 # Redigering og avbestilling av bookinger
 
+Status 17. september 2026: Migreringen er lagt inn i prosjektet `rbphgvnwmzjeuvyrasvy`, og `booking-cancellation-email` versjon 1 er aktiv med JWT-verifisering. En transaksjonstest av redigering, avbestilling, sendestatus og vern mot reaktivering bestod og ble rullet tilbake. Ingen testbooking ble beholdt. Funksjonskontrollen med en ikke-eksisterende booking viste at `RESEND_API_KEY` fortsatt mangler. Nettsideendringen skal ikke publiseres før hemmeligheten er konfigurert og funksjonen er kontrollert igjen.
+
 ## Endringen
 
 På `/admin/admin.html` åpner eier et eksisterende bookingkort og velger **Rediger booking** eller **Avbestill booking**. Layout, manuell booking, fakturaopplasting og kundesamtaler beholdes.
@@ -29,10 +31,10 @@ Samme avbestilling bruker samme Resend-idempotensnøkkel og uendret meldingsinnh
 
 Kjør `node --test tests/booking-management.test.mjs` med Node 24. Testene bruker falske bookinger og et simulert e-postsystem. Ingen virkelige bookinger endres, og ingen kundemail sendes av testene.
 
-Lokal nettleserkontroll med simulerte data dekker redigeringsdialog, lagring, mobilbredde, avbestilling, kalender og sendefeil. SQL-migreringen og funksjonen må fortsatt verifiseres mot det faktiske Supabase-oppsettet før sammenslåing. RLS-reglene, eventuelle eksisterende triggere og leveranse gjennom Resend er ikke tilgjengelige i dette repositoriet.
+Lokal nettleserkontroll med simulerte data dekker redigeringsdialog, lagring, mobilbredde, avbestilling, kalender og sendefeil. SQL-migreringen er kontrollert i det faktiske Supabase-oppsettet med en transaksjon som ble rullet tilbake. Leveranse gjennom Resend er ikke testet mot en faktisk mottaker.
 
-Prosjektet bruker i dag en kodekontroll i nettleseren og en offentlig Supabase-anon-nøkkel. Dette er ikke serververifisert eierinnlogging. Funksjonen bruker samme databasekontekst som innringeren, uten service-role eller nye RLS-unntak. Kontroller at faktiske RLS-regler begrenser oppdateringer til eier før produksjonsbruk; frontendens passordskjerm alene gir ikke dette vernet.
+Prosjektet bruker i dag en kodekontroll i nettleseren og en offentlig Supabase-anon-nøkkel. Dette er ikke serververifisert eierinnlogging. Inspeksjon viste at bookingtabellen har RLS avslått og ingen policies. Funksjonen bruker samme databasekontekst som innringeren, uten service-role eller nye RLS-unntak. Eierinnlogging og RLS må etableres før produksjonsbruk; frontendens passordskjerm alene gir ikke dette vernet. Dette er en eksisterende svakhet og er ikke endret i denne avgrensede oppgaven.
 
-Overlapp kontrolleres med ferske data før redigering, men er ikke en databasegaranti mot to helt samtidige bestillinger. Eksisterende godkjenning/manuell booking har samme begrensning. En eventuell databasebegrensning må vurderes mot eksisterende bookingdata separat.
+Overlapp kontrolleres med ferske data før redigering. Databasen har også den eksisterende `check_booking_overlap`-triggeren, som beholdes. Den kontrollerer godkjente bookinger og hopper over avslag/avbestillinger. Triggerens SELECT-sjekk er ikke en full garanti mot to helt samtidige bestillinger; eventuell strengere samtidighetskontroll må vurderes separat.
 
 Referanser: [Supabase – RLS i Edge Functions](https://supabase.com/docs/guides/functions/auth-legacy-jwt), [Resend – idempotensnøkler](https://resend.com/changelog/idempotency-keys).

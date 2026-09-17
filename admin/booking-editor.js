@@ -129,7 +129,7 @@ async function sendCancellationEmail(bookingId) {
 async function cancelBooking(booking) {
   const id = String(booking.id);
   if (bookingOperations.has(id) || booking.cancelled_at || booking.status === "rejected") return;
-  if (!booking.email) return alert("Bookingen mangler e-post. Legg inn kundens e-post via «Rediger booking» først.");
+  if (!booking.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(booking.email)) return alert("Bookingen mangler gyldig e-post. Legg inn kundens e-post via «Rediger booking» først.");
   if (!confirm(`Avbestille bookingen til ${booking.name}, ${formatDate(booking.start_date)} → ${formatDate(booking.end_date)}?\n\nBookingen fjernes fra kalenderen, og kunden varsles på ${booking.email}. Historikken beholdes. Eventuell refusjon må håndteres separat.`)) return;
   bookingOperations.add(id);
   try {
