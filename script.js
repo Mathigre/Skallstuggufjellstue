@@ -179,7 +179,7 @@ async function checkMyBookings() {
     let html = `<h4>Dine bookinger (${data.length} stk):</h4><ul style="line-height:1.8; padding-left:20px;">`;
 
     data.forEach(b => {
-      const status = b.status === "approved" ? "✅ <strong>Godkjent</strong>" :
+      const status = b.cancelled_at ? "❌ Avbestilt" : b.status === "approved" ? "✅ <strong>Godkjent</strong>" :
                      b.status === "rejected" ? "❌ Avslått" : "⏳ Under behandling";
       
       html += `
