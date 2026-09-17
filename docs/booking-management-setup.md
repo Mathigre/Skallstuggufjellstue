@@ -1,6 +1,6 @@
 # Redigering og avbestilling av bookinger
 
-Status 17. september 2026: Migreringen er lagt inn i prosjektet `rbphgvnwmzjeuvyrasvy`, og `booking-cancellation-email` versjon 1 er aktiv med JWT-verifisering. En transaksjonstest av redigering, avbestilling, sendestatus og vern mot reaktivering bestod og ble rullet tilbake. Ingen testbooking ble beholdt. Funksjonskontrollen med en ikke-eksisterende booking viste at `RESEND_API_KEY` fortsatt mangler. Nettsideendringen skal ikke publiseres før hemmeligheten er konfigurert og funksjonen er kontrollert igjen.
+Status 17. september 2026: Migreringen er lagt inn i prosjektet `rbphgvnwmzjeuvyrasvy`, og `booking-cancellation-email` versjon 1 er aktiv med JWT-verifisering. En transaksjonstest av redigering, avbestilling, sendestatus og vern mot reaktivering bestod og ble rullet tilbake. Ingen testbooking ble beholdt. `RESEND_API_KEY` er nå konfigurert av eier. En ny funksjonskontroll nådde databasen og returnerte forventet 404 for en ikke-eksisterende booking. Eksisterende `resend-email` er oppdatert til versjon 34 med miljøvariabel i stedet for hardkodet nøkkel; øvrig kode og maler er beholdt. Reell e-postleveranse er ikke testet.
 
 ## Endringen
 
