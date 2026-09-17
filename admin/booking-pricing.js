@@ -1,5 +1,5 @@
 import { calculateQuote, formatMoney } from '../pricing.mjs?v=season1';
-import {ensureFikenAccess,getAccessCode,clearAccessCode} from './test-access.mjs';
+import {ensureFikenAccess,getAccessCode,clearAccessCode} from './test-access.mjs?v=remember1';
 window.ensureFikenAccess=ensureFikenAccess;
 const busy=new Set();
 async function exportBooking(id, action='sync') {

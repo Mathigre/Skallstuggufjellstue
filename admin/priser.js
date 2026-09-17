@@ -1,5 +1,5 @@
 import {validateSettings,calculateQuote,formatMoney} from '../pricing.mjs?v=season1';
-import {ensureFikenAccess,getAccessCode,clearAccessCode} from './test-access.mjs';
+import {ensureFikenAccess,getAccessCode,clearAccessCode} from './test-access.mjs?v=remember1';
 import {supabaseUrl,supabaseAnonKey} from './public-connection.mjs';
 const form=document.getElementById('pricesForm'),status=document.getElementById('status'),save=document.getElementById('save'),seasons=document.getElementById('seasons');
 let revision,dirty=false,saving=false;
