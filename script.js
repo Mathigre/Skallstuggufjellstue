@@ -68,6 +68,13 @@ document.getElementById("bookingForm").addEventListener("submit", async (e) => {
     return;
   }
 
+  let quote;
+  try {
+    if (typeof window.getBookingQuote !== "function") throw new Error("Priskalkulatoren er ikke klar. Last siden på nytt.");
+    quote = window.getBookingQuote();
+  } catch (error) { showError(error.message); return; }
+  const priceSummary = "Totalpris inkl. 25 % mva: " + (quote.total / 100) + " kr. " + quote.nights + " netter, " + quote.linenCount + " sett sengeklær, " + quote.towelCount + " håndklær, full vask: " + (quote.cleaning ? "ja" : "nei") + ".";
+
   try {
     console.log("📤 Forsøker å lagre booking...");
 
@@ -80,7 +87,10 @@ document.getElementById("bookingForm").addEventListener("submit", async (e) => {
         start_date: start,
         end_date: end,
         status: "pending",
-        message: customerMessage
+        message: customerMessage,
+        linen_count: quote.linenCount,
+        towel_count: quote.towelCount,
+        full_cleaning: quote.cleaning
       }])
       .select();
 
@@ -97,7 +107,7 @@ document.getElementById("bookingForm").addEventListener("submit", async (e) => {
       const res = await fetch(functionUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${supabaseAnonKey}` },
-        body: JSON.stringify({ type: "request_customer", name, email, phone, start, end, customerMessage })
+        body: JSON.stringify({ type: "request_customer", name, email, phone, start, end, customerMessage: [customerMessage, priceSummary].filter(Boolean).join("\n\n") })
       });
       if (!res.ok) emailsSent = false;
     } catch (err) {
@@ -110,7 +120,7 @@ document.getElementById("bookingForm").addEventListener("submit", async (e) => {
       const res = await fetch(functionUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${supabaseAnonKey}` },
-        body: JSON.stringify({ type: "request_owner", name, email, phone, start, end, customerMessage })
+        body: JSON.stringify({ type: "request_owner", name, email, phone, start, end, customerMessage: [customerMessage, priceSummary].filter(Boolean).join("\n\n") })
       });
       if (!res.ok) emailsSent = false;
     } catch (err) {
@@ -266,3 +276,4 @@ function drawCalendar() {
 
 // Start kalender
 loadCalendarBooking();
+

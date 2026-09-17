@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Booking - Skallstuggu</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="booking-extras.css?v=20260917-1">
   <meta name="google-site-verification" content="JwWL88YK_SVWs-GLOlMwqs8O9P8Jj-_bcUrGsZr8-HI" />
 
   
@@ -207,7 +208,7 @@
   <!-- SKJEMA -->
   <form id="bookingForm">
     <input type="text" id="name" placeholder="Navn" required><br><br>
-    <input type="email" id="email" placeholder="E-post" required><br><br>
+    <input type="email" id="email" placeholder="E-post / faktura-e-post" required><br><br>
     <input type="tel" id="phone" placeholder="Telefonnummer" required><br><br>
     
     <label>Fra dato:</label>
@@ -225,7 +226,8 @@
 </section>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="script.js"></script>
+<script type="module" src="booking-extras.js?v=20260917-1"></script>
+<script src="script.js?v=20260917-pricing-1"></script>
 <!-- FOOTER -->
 <footer style="background: #f8f1e3; padding: 60px 20px 30px; margin-top: 100px; border-top: 3px solid #8B4A2B;">
   <div style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 40px;">
