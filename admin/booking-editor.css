@@ -1,0 +1,10 @@
+.booking-editor{width:min(560px,calc(100% - 48px));max-height:85vh;overflow:auto;border:1px solid #e5dfd8;border-radius:18px;padding:24px;background:#fff;color:#2f2a26;box-shadow:0 12px 45px #0003}
+.booking-editor::backdrop{background:#0008}
+.booking-editor h2{margin-top:0}
+.booking-editor p{line-height:1.5}
+.booking-editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.booking-editor-grid label{display:flex;flex-direction:column;gap:6px;font-weight:600}
+.booking-editor-grid input{box-sizing:border-box;width:100%;min-width:0;padding:11px;border:1px solid #d6cfc6;border-radius:9px;font:inherit}
+.booking-editor-error{color:#a22b2b}
+.booking-editor button:disabled{opacity:.6;cursor:wait}
+@media(max-width:600px){.booking-editor-grid{grid-template-columns:1fr}.booking-editor{padding:18px}}
