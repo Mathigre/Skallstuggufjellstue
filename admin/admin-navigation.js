@@ -8,5 +8,5 @@
   links.addEventListener('click',event=>{if(event.target.closest('a'))setOpen(false);});
   document.addEventListener('click',event=>{if(!header.contains(event.target))setOpen(false);});
   matchMedia('(max-width:1000px)').addEventListener('change',()=>setOpen(false));
-  header.querySelector('.admin-site-logout').addEventListener('click',()=>{if(confirm('Vil du logge ut fra admin?')){localStorage.removeItem('adminLoggedIn');location.href='admin.html';}});
+  header.querySelector('.admin-site-logout').addEventListener('click',()=>{if(confirm('Vil du logge ut fra admin?')){localStorage.removeItem('adminLoggedIn');localStorage.removeItem('skallstugguFikenTestAccess');location.href='admin.html';}});
 })();
