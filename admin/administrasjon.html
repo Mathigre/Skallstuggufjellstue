@@ -252,6 +252,7 @@
       }
     }
   </style>
+<link rel="stylesheet" href="admin-navigation.css?v=1"><script defer src="admin-navigation.js?v=1"></script>
 </head>
 <body>
 
@@ -272,28 +273,7 @@
   </div>
 
   <!-- TOPP MENY -->
-  <div class="admin-top-menu">
-    <div class="menu-container">
-      <div class="menu-left">
-        <div class="logo">
-          <img src="images/logo.png" alt="Skallstuggu">
-        </div>
-
-        <nav class="menu-tabs" id="adminNavLinks">
-          <a href="admin.html" class="admin-tab">Bookinger</a>
-          <a href="administrasjon.html" class="admin-tab active">Administrasjon</a>
-          <a href="overview.html" class="admin-tab">Oversikt</a>
-        </nav>
-      </div>
-
-      <div class="menu-right">
-        <button onclick="logoutAdmin()" class="logout-btn">
-          Logg ut
-        </button>
-        <div class="admin-hamburger" id="adminHamburger">☰</div>
-      </div>
-    </div>
-  </div>
+  <header class="admin-site-header"><div class="admin-site-bar"><a class="admin-site-logo" href="admin.html" aria-label="Skallstuggu – bookinger"><img src="https://rbphgvnwmzjeuvyrasvy.supabase.co/storage/v1/object/public/leiebetingelser/logo.png" alt="Skallstuggu" width="150" height="58"></a><nav class="admin-site-links" id="adminSiteLinks" aria-label="Adminmeny"><a href="admin.html">Bookinger</a><a href="administrasjon.html" aria-current="page">Administrasjon</a><a href="priser.html">Priser</a><a href="overview.html">Oversikt</a></nav><div class="admin-site-controls"><button type="button" class="admin-site-logout">Logg ut</button><button type="button" class="admin-site-toggle" aria-label="Åpne meny" aria-controls="adminSiteLinks" aria-expanded="false">☰</button></div></div></header>
 
   <!-- HOVEDINNHOLD -->
   <section class="page" id="adminContent" style="display:none;">
