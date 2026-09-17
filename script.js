@@ -90,7 +90,8 @@ document.getElementById("bookingForm").addEventListener("submit", async (e) => {
         message: customerMessage,
         linen_count: quote.linenCount,
         towel_count: quote.towelCount,
-        full_cleaning: quote.cleaning
+        full_cleaning: quote.cleaning,
+        pricing_revision: quote.pricingRevision
       }])
       .select();
 
@@ -276,4 +277,3 @@ function drawCalendar() {
 
 // Start kalender
 loadCalendarBooking();
-

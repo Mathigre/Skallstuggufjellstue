@@ -34,12 +34,13 @@ export function makeHandler({ env, request=fetch, accessHash=ACCESS_HASH, pause=
       const claim=await db('fiken_test_lock?id=eq.1&request_id=is.null','PATCH',{request_id:requestId,locked_at:new Date().toISOString()});
       if(!claim.length)return json({error:'En Fiken-operasjon pågår. Vent og prøv igjen. Hvis dette vedvarer, må testlåsen kontrolleres.'},409);
       locked=true;
-      const [booking]=await db(`bookings?id=eq.${bookingId}&select=id,name,email,phone,start_date,end_date,status,cancelled_at,linen_count,towel_count,full_cleaning,price_version,booking_total_ore`);
+      const [booking]=await db(`bookings?id=eq.${bookingId}&select=id,name,email,phone,start_date,end_date,status,cancelled_at,linen_count,towel_count,full_cleaning,price_version,booking_total_ore,pricing_snapshot`);
       if(!booking)return json({error:'Bookingen finnes ikke.'},404);
       if(body.action==='sync'&&(booking.status!=='approved'||booking.cancelled_at))return json({error:'Bare godkjente bookinger kan få fakturautkast.'},409);
       if(body.action==='cancel'&&!booking.cancelled_at)return json({error:'Bookingen må avbestilles først.'},409);
-      if(booking.price_version!=='2026-09-17')return json({error:'Dette er en eldre booking uten den nye prisavtalen. Lag faktura manuelt.'},409);
-      const quote=calculateQuote({start:booking.start_date,end:booking.end_date,linen:booking.linen_count,towels:booking.towel_count,cleaning:booking.full_cleaning});
+      if(!['2026-09-17','season-v1'].includes(booking.price_version))return json({error:'Dette er en eldre booking uten den nye prisavtalen. Lag faktura manuelt.'},409);
+      if(booking.price_version==='season-v1'&&!booking.pricing_snapshot)return json({error:'Prisavtalen mangler.'},409);
+      const quote=calculateQuote({start:booking.start_date,end:booking.end_date,linen:booking.linen_count,towels:booking.towel_count,cleaning:booking.full_cleaning,settings:booking.pricing_snapshot||null});
       if(quote.total!==Number(booking.booking_total_ore))return json({error:'Prisgrunnlaget stemmer ikke. Kontroller bookingen.'},409);
       if(body.action==='sync'&&(!booking.name?.trim()||!booking.email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(booking.email)))return json({error:'Kunden må ha navn og gyldig faktura-e-post.'},422);
       [state]=await db(`fiken_booking_exports?booking_id=eq.${bookingId}`);

@@ -65,11 +65,22 @@
     if (end <= start) return alert("Til-dato må være etter fra-dato.");
     const overlap = approvedOverlap(start, end);
     if (overlap) return alert(`❌ Kan ikke legge inn booking.\nPerioden overlapper med ${overlap.name || "en eksisterende godkjent booking"} (${overlap.start_date} → ${overlap.end_date}).`);
-    if (!confirm(`Legge inn ${name} som godkjent booking ${start} → ${end} og sende bekreftelse til ${email}?`)) return;
+    let pricingRevision, total;
+    try {
+      const {data:prices,error:priceError}=await supabaseClient.from('booking_price_settings').select('revision,settings').eq('id',1).single();
+      if(priceError||!prices)throw new Error('Kunne ikke hente priser. Prøv igjen.');
+      const {calculateQuote,formatMoney}=await import('../pricing.mjs?v=season1');
+      total=formatMoney(calculateQuote({start,end,settings:prices.settings}).total);pricingRevision=prices.revision;
+      if(!window.ensureFikenAccess||!window.exportBookingToFiken)throw new Error('Fiken-integrasjonen er ikke lastet. Last siden på nytt.');
+      if(!await window.ensureFikenAccess())return;
+    } catch(error){return alert(error.message);}
+    if (!confirm(`Legge inn ${name} som godkjent booking ${start} → ${end} for ${total} inkl. mva, lage Fiken-utkast og sende bekreftelse til ${email}?`)) return;
 
-    const row = {name, email, phone, start_date:start, end_date:end, status:"approved", payment_status:payment, paid_at:payment === "paid" ? new Date().toISOString() : null, message};
+    const row = {name, email, phone, start_date:start, end_date:end, status:"approved", payment_status:payment, paid_at:payment === "paid" ? new Date().toISOString() : null, message, pricing_revision:pricingRevision};
     const {data:created,error} = await supabaseClient.from("bookings").insert(row).select("id").single();
     if (error) { console.error(error); return alert("Kunne ikke legge inn bookingen: " + error.message); }
+    try { await window.exportBookingToFiken(String(created.id)); }
+    catch(error){alert('Bookingen er lagret, men Fiken-utkastet må oppdateres via knappen på bookingen.\n'+error.message);}
 
     let emailSent = false;
     try {

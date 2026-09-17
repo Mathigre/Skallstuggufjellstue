@@ -15,13 +15,35 @@ function count(value, label) {
   return number;
 }
 
-export function calculateQuote({ start, end, linen = 0, towels = 0, cleaning = false }) {
+export function validateSettings(settings) {
+  const price = value => { if (!Number.isSafeInteger(value) || value < 100 || value > 100000000 || value % 100) throw new Error('Priser må være hele kroner mellom 1 og 1 000 000.'); return value; };
+  if (!settings || !Array.isArray(settings.seasons) || settings.seasons.length > 100) throw new Error('Ugyldig sesongoppsett.');
+  const result = { weekday:price(settings.weekday), weekend:price(settings.weekend), seasons:settings.seasons.map(s => {
+    if (typeof s.name !== 'string' || !s.name.trim() || s.name.length > 80 || day(s.end) < day(s.start)) throw new Error('Fyll inn sesongnavn og gyldige datoer.');
+    return {name:s.name.trim(), start:s.start, end:s.end, weekday:price(s.weekday), weekend:price(s.weekend)};
+  }).sort((a,b)=>a.start.localeCompare(b.start)) };
+  for(let i=1;i<result.seasons.length;i++) if(result.seasons[i].start<=result.seasons[i-1].end) throw new Error('Sesongene kan ikke ha overlappende datoer.');
+  return result;
+}
+
+export function calculateQuote({ start, end, linen = 0, towels = 0, cleaning = false, settings = null }) {
   const nights = day(end) - day(start);
   if (nights < 1 || nights > 366) throw new Error('Velg et opphold på mellom 1 og 366 netter.');
   const linenCount = count(linen, 'sett sengeklær');
   const towelCount = count(towels, 'håndklær');
   if (typeof cleaning !== 'boolean') throw new Error('Ugyldig valg for full vask.');
-  const lines = [{ key: 'night', label: 'Overnatting', quantity: nights, unitPrice: RATES.night }];
+  const lines = [];
+  if (settings) {
+    settings = validateSettings(settings);
+    for(let n=day(start);n<day(end);n++) {
+      const date=new Date(n*86400000), iso=date.toISOString().slice(0,10), weekend=[5,6].includes(date.getUTCDay());
+      const season=settings.seasons.find(s=>iso>=s.start && iso<=s.end);
+      const rate=(season||settings)[weekend?'weekend':'weekday'];
+      const label=`Overnatting – ${season?.name||'Grunnpris'} (${weekend?'helg':'hverdag'})`;
+      const line=lines.find(l=>l.label===label && l.unitPrice===rate);
+      if(line)line.quantity++;else lines.push({key:'night',label,quantity:1,unitPrice:rate});
+    }
+  } else lines.push({ key: 'night', label: 'Overnatting', quantity: nights, unitPrice: RATES.night });
   if (linenCount) lines.push({ key: 'linen', label: 'Sengeklær', quantity: linenCount, unitPrice: RATES.linen });
   if (towelCount) lines.push({ key: 'towel', label: 'Håndklær', quantity: towelCount, unitPrice: RATES.towel });
   if (cleaning) lines.push({ key: 'cleaning', label: 'Full vask', quantity: 1, unitPrice: RATES.cleaning });
