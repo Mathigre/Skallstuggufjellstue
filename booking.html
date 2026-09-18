@@ -203,7 +203,7 @@
     <small style="color:#555;">Kun godkjente bookinger vises i kalenderen.</small>
   </div>
 
-  <div id="messageBox"></div>
+  <div id="messageBox" role="status" aria-live="polite" aria-atomic="true" tabindex="-1"></div>
 
   <!-- SKJEMA -->
   <form id="bookingForm">
@@ -227,7 +227,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script type="module" src="booking-extras.js?v=season1"></script>
-<script src="script.js?v=security1"></script>
+<script src="script.js?v=feedback1"></script>
 <!-- FOOTER -->
 <footer style="background: #f8f1e3; padding: 60px 20px 30px; margin-top: 100px; border-top: 3px solid #8B4A2B;">
   <div style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 40px;">

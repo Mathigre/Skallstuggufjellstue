@@ -1,2 +1,18 @@
 document.getElementById('loginForm').onsubmit=async event=>{event.preventDefault();const button=event.target.querySelector('button'),status=document.getElementById('status');button.disabled=true;status.textContent='Logger inn …';try{const {data,error}=await adminClient.auth.signInWithPassword({email:document.getElementById('email').value.trim(),password:document.getElementById('password').value});if(error)throw new Error('Feil e-post eller passord.');const membership=await adminClient.from('admin_users').select('user_id').eq('user_id',data.user.id).maybeSingle();if(membership.error||!membership.data){await adminClient.auth.signOut();throw new Error('Kontoen har ikke administratortilgang.');}location.replace('admin.html');}catch(error){status.textContent=error.message;}finally{button.disabled=false;}};
 document.getElementById('forgotPassword').onclick=async()=>{const status=document.getElementById('status');const email=document.getElementById('email').value.trim();if(!email){status.textContent='Skriv inn e-postadressen din først.';document.getElementById('email').focus();return;}const button=document.getElementById('forgotPassword');button.disabled=true;status.textContent='Sender reset-lenke …';try{const redirectTo=new URL('reset-password.html',window.location.href).href;const {error}=await adminClient.auth.resetPasswordForEmail(email,{redirectTo});if(error)throw error;status.textContent='Hvis e-postadressen finnes, er en lenke for å velge nytt passord sendt.';}catch(error){console.error('Password reset error:',error);const code=error?.code?(' ['+error.code+']'):'';const http=error?.status?(' HTTP '+error.status):'';status.textContent='Supabase-feil'+code+http+': '+(error?.message||String(error));}finally{button.disabled=false;}};
+
+async function resumeAdminSession() {
+  const button=document.querySelector('#loginForm button');
+  button.disabled=true;
+  try {
+    const session=await adminClient.auth.getSession();
+    if(session.error||!session.data.session)return;
+    const {data,error}=await adminClient.auth.getUser();
+    if(error||!data.user)return;
+    const membership=await adminClient.from('admin_users').select('user_id').eq('user_id',data.user.id).maybeSingle();
+    if(!membership.error&&membership.data)location.replace('admin.html');
+  } catch {
+    // Leave the login form available if the saved session cannot be verified.
+  } finally { button.disabled=false; }
+}
+resumeAdminSession();

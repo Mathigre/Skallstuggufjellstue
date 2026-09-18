@@ -8,6 +8,13 @@ const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey
 
 const publicApi=async body=>{const r=await fetch(supabaseUrl+'/functions/v1/booking-public',{method:'POST',headers:{apikey:supabaseAnonKey,Authorization:'Bearer '+supabaseAnonKey,'Content-Type':'application/json'},body:JSON.stringify(body)});const data=await r.json();if(!r.ok)throw new Error(data.error||'Forespørselen feilet.');return data;};
 const messageBox=document.getElementById('messageBox');
+function focusBookingMessage(){
+ messageBox.tabIndex=-1;
+ messageBox.focus({preventScroll:true});
+ const header=document.querySelector('header');
+ messageBox.style.scrollMarginTop=((header?.getBoundingClientRect().height||0)+24)+'px';
+ messageBox.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});
+}
 function showError(message){messageBox.className='message-error';messageBox.textContent=message;messageBox.style.display='block';}
 let submitting=false;
 document.getElementById('bookingForm').addEventListener('submit',async event=>{
@@ -19,7 +26,8 @@ document.getElementById('bookingForm').addEventListener('submit',async event=>{
   messageBox.className='message-success';messageBox.style.display='block';messageBox.replaceChildren();
   const text=document.createElement('p');text.textContent=result.emailsSent?'Takk! Forespørselen er registrert. Du får en privat bookinglenke på e-post.':'Forespørselen er registrert, men e-post kunne ikke sendes. Ta vare på den private lenken under, eller kontakt oss på 906 88 873.';
   const link=document.createElement('a');link.href=result.replyUrl;link.textContent='Åpne din booking og samtale';messageBox.append(text,link);event.target.reset();
- }catch(error){showError(error.message);}finally{submitting=false;button.disabled=false;}
+  focusBookingMessage();
+ }catch(error){showError(error.message);focusBookingMessage();}finally{submitting=false;button.disabled=false;}
 });
 function checkMyBookings(){const result=document.getElementById('myBookingsResult');try{const url=new URL(document.getElementById('checkEmail').value.trim());const token=new URLSearchParams(url.hash.slice(1)).get('token');if(url.origin!==location.origin||url.pathname!=='/reply.html'||!/^[a-f0-9]{64}$/.test(token||''))throw new Error();location.href='reply.html#token='+token;}catch{result.textContent='Lim inn den private bookinglenken fra e-posten. Har du bare en eldre lenke, kontakt Skallstuggu for en ny.';}}
 
