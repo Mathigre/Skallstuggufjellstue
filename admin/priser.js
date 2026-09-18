@@ -1,9 +1,10 @@
 import {validateSettings,calculateQuote,formatMoney} from '../pricing.mjs?v=season1';
-import {ensureFikenAccess,getAccessCode,clearAccessCode} from './test-access.mjs?v=remember1';
+import {ensureFikenAccess,getAccessCode,clearAccessCode} from './test-access.mjs?v=security1';
 import {supabaseUrl,supabaseAnonKey} from './public-connection.mjs';
 const form=document.getElementById('pricesForm'),status=document.getElementById('status'),save=document.getElementById('save'),seasons=document.getElementById('seasons');
 let revision,dirty=false,saving=false;
 const headers={apikey:supabaseAnonKey,Authorization:`Bearer ${supabaseAnonKey}`};
+await window.adminReady;
 function message(text,error=false){status.textContent=text;status.className=error?'error':'';}
 function addSeason(s={name:'Ny sesong',start:'',end:'',weekday:900000,weekend:1400000}) {
  const row=document.createElement('fieldset');row.className='season';
@@ -19,7 +20,7 @@ for(const id of ['previewStart','previewEnd'])document.getElementById(id).addEve
 window.addEventListener('beforeunload',event=>{if(dirty){event.preventDefault();event.returnValue='';}});
 form.onsubmit=async event=>{event.preventDefault();if(saving)return;saving=true;save.disabled=true;
  try{const next=settings();if(!await ensureFikenAccess())return;
-  const response=await fetch(`${supabaseUrl}/functions/v1/pricing-admin`,{method:'POST',headers:{...headers,'Content-Type':'application/json','x-test-access':getAccessCode()},body:JSON.stringify({revision,settings:next})});
+  const response=await fetch(`${supabaseUrl}/functions/v1/pricing-admin`,{method:'POST',headers:await window.adminHeaders(),body:JSON.stringify({revision,settings:next})});
   const result=await response.json();if(!response.ok){if(response.status===403)clearAccessCode();throw new Error(result.error||'Lagring feilet.');}
   revision=result.revision;dirty=false;message('Prisene er lagret og gjelder nå for nye bookinger.');
  }catch(error){message(error.message,true);}finally{saving=false;save.disabled=!revision;}

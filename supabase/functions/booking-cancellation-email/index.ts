@@ -1,3 +1,4 @@
+import {requireAdmin} from './auth.ts';
 // Standalone function: the existing resend-email and its templates stay intact.
 // No service-role key: database calls retain the caller's existing RLS context.
 const corsHeaders = {
@@ -43,6 +44,7 @@ export function createHandler({ env, request = fetch, now = () => new Date() }) 
     const authorization = req.headers.get("Authorization");
     if (!authorization?.startsWith("Bearer ")) return json({ error: "Mangler tilgangstoken." }, 401);
     try {
+      await requireAdmin(req,env,request);
       const { bookingId } = await req.json();
       if (typeof bookingId !== "string" || !/^[a-zA-Z0-9-]{1,100}$/.test(bookingId)) return json({ error: "Ugyldig bookingreferanse." }, 400);
       const url = env("SUPABASE_URL"), anonKey = env("SUPABASE_ANON_KEY"), resendKey = env("RESEND_API_KEY");
@@ -100,3 +102,4 @@ export function createHandler({ env, request = fetch, now = () => new Date() }) 
 
 // JavaScript-compatible TypeScript keeps the handler testable without Deno.
 if (typeof Deno !== "undefined") Deno.serve(createHandler({ env: key => Deno.env.get(key) }));
+

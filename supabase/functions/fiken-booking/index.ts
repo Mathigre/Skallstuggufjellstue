@@ -1,5 +1,5 @@
 import { calculateQuote } from './pricing.mjs';
-import { ACCESS_HASH } from './test-config.ts';
+import { requireAdmin } from './auth.ts';
 const COMPANY = 'apiskallstuggu';
 const API = 'https://api.fiken.no/api/v2';
 const cors = { 'Access-Control-Allow-Origin':'https://skallstuggu-test.no', 'Access-Control-Allow-Headers':'authorization,apikey,content-type,x-test-access', 'Access-Control-Allow-Methods':'POST,OPTIONS' };
@@ -8,15 +8,12 @@ export function invoiceLines(quote) {
   return quote.lines.map(line => ({ description:line.label, quantity:line.quantity, unitPrice:line.unitPrice * 4 / 5, vatType:'HIGH', incomeAccount:'3000' }));
 }
 
-export function makeHandler({ env, request=fetch, accessHash=ACCESS_HASH, pause=ms=>new Promise(resolve=>setTimeout(resolve,ms)) }) {
+export function makeHandler({ env, request=fetch, pause=ms=>new Promise(resolve=>setTimeout(resolve,ms)) }) {
   return async req => {
     const json = (body,status=200) => Response.json(body,{status,headers:cors});
     if(req.method==='OPTIONS')return new Response('ok',{headers:cors});
     if(req.method!=='POST')return json({error:'Kun POST er tillatt.'},405);
-    const access=req.headers.get('x-test-access')||'';
-    if(access.length<32||access.length>128)return json({error:'Fiken-testkoden mangler eller er feil.'},403);
-    const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(access))),b=>b.toString(16).padStart(2,'0')).join('');
-    if(digest!==accessHash)return json({error:'Fiken-testkoden er feil.'},403);
+    try { await requireAdmin(req,env,request); } catch { return json({error:'Admininnlogging kreves.'},403); }
     const token=env('FIKEN_TOKEN'), dbUrl=env('SUPABASE_URL'), key=env('SUPABASE_SERVICE_ROLE_KEY');
     if(!token||!dbUrl||!key)return json({error:'Fiken-integrasjonen mangler serveroppsett.'},503);
     const dbHeaders={apikey:key,Authorization:`Bearer ${key}`,'Content-Type':'application/json',Prefer:'return=representation'};
@@ -97,3 +94,4 @@ export function makeHandler({ env, request=fetch, accessHash=ACCESS_HASH, pause=
   };
 }
 if(typeof Deno!=='undefined')Deno.serve(makeHandler({env:name=>Deno.env.get(name)}));
+

@@ -6,223 +6,29 @@ const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 
 const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
-// =========================
-// MESSAGE FUNCTIONS
-// =========================
-const messageBox = document.getElementById("messageBox");
-
-function showError(msg) {
-  messageBox.className = "message-error";
-  messageBox.innerHTML = msg;
-  messageBox.style.display = "block";
-}
-
-function showSuccess(msg) {
-  messageBox.className = "message-success";
-  messageBox.innerHTML = msg;
-  messageBox.style.display = "block";
-}
-
-function clearMessage() {
-  messageBox.style.display = "none";
-}
-
-// =========================
-// OVERLAP SJekk (Dobbeltbooking-perre)
-// =========================
-function hasOverlap(newStart, newEnd) {
-  return approvedBookings.some(b => {
-    const existingStart = b.start_date;
-    const existingEnd = b.end_date;
-    // Overlap hvis ikke (newEnd <= existingStart eller newStart >= existingEnd)
-    return !(newEnd <= existingStart || newStart >= existingEnd);
-  });
-}
-
-// =========================
-// BOOKING FORM
-// =========================
-document.getElementById("bookingForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  clearMessage();
-
-  const name  = document.getElementById("name").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const phone = document.getElementById("phone").value.trim();
-  const start = document.getElementById("start").value;
-  const end   = document.getElementById("end").value;
-  const customerMessage = document.getElementById("customerMessage")?.value.trim() || "";
-
-  if (!name || !email || !phone || !start || !end) {
-    showError("❌ Fyll inn alle felter!");
-    return;
-  }
-  if (start >= end) {
-    showError("❌ Startdato må være før sluttdato!");
-    return;
-  }
-
-  // === DOBBELTBOOKING SJekk ===
-  if (hasOverlap(start, end)) {
-    showError("❌ Disse datoene er allerede booket av en annen gjest.<br>Velg en annen periode.");
-    return;
-  }
-
-  let quote;
-  try {
-    if (typeof window.getBookingQuote !== "function") throw new Error("Priskalkulatoren er ikke klar. Last siden på nytt.");
-    quote = window.getBookingQuote();
-  } catch (error) { showError(error.message); return; }
-  const priceSummary = "Totalpris inkl. 25 % mva: " + (quote.total / 100) + " kr. " + quote.nights + " netter, " + quote.linenCount + " sett sengeklær, " + quote.towelCount + " håndklær, full vask: " + (quote.cleaning ? "ja" : "nei") + ".";
-
-  try {
-    console.log("📤 Forsøker å lagre booking...");
-
-    const { data, error: insertError } = await supabaseClient
-      .from("bookings")
-      .insert([{
-        name,
-        email,
-        phone,
-        start_date: start,
-        end_date: end,
-        status: "pending",
-        message: customerMessage,
-        linen_count: quote.linenCount,
-        towel_count: quote.towelCount,
-        full_cleaning: quote.cleaning,
-        pricing_revision: quote.pricingRevision
-      }])
-      .select();
-
-    if (insertError) throw insertError;
-
-    console.log("✅ Booking lagret vellykket");
-
-    // SEND E-POSTER
-    const functionUrl = "https://rbphgvnwmzjeuvyrasvy.supabase.co/functions/v1/resend-email";
-    let emailsSent = true;
-
-    // Kunde-e-post
-    try {
-      const res = await fetch(functionUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${supabaseAnonKey}` },
-        body: JSON.stringify({ type: "request_customer", name, email, phone, start, end, customerMessage: [customerMessage, priceSummary].filter(Boolean).join("\n\n") })
-      });
-      if (!res.ok) emailsSent = false;
-    } catch (err) {
-      console.error("Kunde-epost feilet:", err);
-      emailsSent = false;
-    }
-
-    // Eier-e-post
-    try {
-      const res = await fetch(functionUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${supabaseAnonKey}` },
-        body: JSON.stringify({ type: "request_owner", name, email, phone, start, end, customerMessage: [customerMessage, priceSummary].filter(Boolean).join("\n\n") })
-      });
-      if (!res.ok) emailsSent = false;
-    } catch (err) {
-      console.error("Eier-epost feilet:", err);
-      emailsSent = false;
-    }
-
-    if (emailsSent) {
-  showSuccess(`
-    <strong>✅ Takk for din forespørsel!</strong><br><br>
-    Vi har mottatt din booking og melding.<br>
-    Du vil få svar på e-post så snart som mulig.<br><br>
-    
-    Hvis du ikke har fått svar i løpet av 24 timer, 
-    sjekk søppelmappen i e-postprogrammet ditt.<br><br>
-    
-    Du kan også ringe oss på <strong>906 88 873</strong>.
-  `);
-} else {
-  showSuccess(`
-    <strong>✅ Booking registrert!</strong><br><br>
-    Forespørselen er lagret, men e-post kunne ikke sendes akkurat nå.<br>
-    Vi kontakter deg likevel så snart som mulig.<br><br>
-    
-    Hvis du ikke hører fra oss innen 24 timer, sjekk søppelmappen.<br>
-    Du kan også ringe oss på <strong>906 88 873</strong>.
-  `);
-}
-
-    document.getElementById("bookingForm").reset();
-
-  } catch (err) {
-    console.error("Feil ved innsending:", err);
-    showError("❌ Noe gikk galt. Prøv igjen.");
-  }
+const publicApi=async body=>{const r=await fetch(supabaseUrl+'/functions/v1/booking-public',{method:'POST',headers:{apikey:supabaseAnonKey,Authorization:'Bearer '+supabaseAnonKey,'Content-Type':'application/json'},body:JSON.stringify(body)});const data=await r.json();if(!r.ok)throw new Error(data.error||'Forespørselen feilet.');return data;};
+const messageBox=document.getElementById('messageBox');
+function showError(message){messageBox.className='message-error';messageBox.textContent=message;messageBox.style.display='block';}
+let submitting=false;
+document.getElementById('bookingForm').addEventListener('submit',async event=>{
+ event.preventDefault();if(submitting)return;submitting=true;const button=event.target.querySelector('button[type="submit"]');button.disabled=true;
+ try{
+  const q=window.getBookingQuote();
+  const value=id=>document.getElementById(id).value.trim();
+  const result=await publicApi({action:'create',booking:{name:value('name'),email:value('email'),phone:value('phone'),start_date:value('start'),end_date:value('end'),message:value('customerMessage'),linen_count:q.linenCount,towel_count:q.towelCount,full_cleaning:q.cleaning,pricing_revision:q.pricingRevision}});
+  messageBox.className='message-success';messageBox.style.display='block';messageBox.replaceChildren();
+  const text=document.createElement('p');text.textContent=result.emailsSent?'Takk! Forespørselen er registrert. Du får en privat bookinglenke på e-post.':'Forespørselen er registrert, men e-post kunne ikke sendes. Ta vare på den private lenken under, eller kontakt oss på 906 88 873.';
+  const link=document.createElement('a');link.href=result.replyUrl;link.textContent='Åpne din booking og samtale';messageBox.append(text,link);event.target.reset();
+ }catch(error){showError(error.message);}finally{submitting=false;button.disabled=false;}
 });
+function checkMyBookings(){const result=document.getElementById('myBookingsResult');try{const url=new URL(document.getElementById('checkEmail').value.trim());const token=new URLSearchParams(url.hash.slice(1)).get('token');if(url.origin!==location.origin||url.pathname!=='/reply.html'||!/^[a-f0-9]{64}$/.test(token||''))throw new Error();location.href='reply.html#token='+token;}catch{result.textContent='Lim inn den private bookinglenken fra e-posten. Har du bare en eldre lenke, kontakt Skallstuggu for en ny.';}}
 
-// =========================
-// SJekk mine bookinger
-// =========================
-async function checkMyBookings() {
-  const email = document.getElementById("checkEmail").value.trim();
-  const resultDiv = document.getElementById("myBookingsResult");
-
-  if (!email) {
-    resultDiv.innerHTML = `<p style="color:red;">Vennligst skriv inn en e-postadresse.</p>`;
-    return;
-  }
-
-  resultDiv.innerHTML = `<p>Søker etter dine bookinger...</p>`;
-
-  try {
-    const { data, error } = await supabaseClient
-      .from("bookings")
-      .select("*")
-      .eq("email", email)
-      .order("start_date", { ascending: true });
-
-    if (error) throw error;
-
-    if (!data || data.length === 0) {
-      resultDiv.innerHTML = `<p style="color:#555;">Ingen bookinger funnet på denne e-posten.</p>`;
-      return;
-    }
-
-    let html = `<h4>Dine bookinger (${data.length} stk):</h4><ul style="line-height:1.8; padding-left:20px;">`;
-
-    data.forEach(b => {
-      const status = b.cancelled_at ? "❌ Avbestilt" : b.status === "approved" ? "✅ <strong>Godkjent</strong>" :
-                     b.status === "rejected" ? "❌ Avslått" : "⏳ Under behandling";
-      
-      html += `
-        <li style="margin-bottom:15px;">
-          <strong>${b.start_date} → ${b.end_date}</strong><br>
-          Status: ${status}<br>
-          ${b.message ? `Melding: "${b.message}"` : ''}
-        </li>`;
-    });
-
-    html += `</ul>`;
-    resultDiv.innerHTML = html;
-
-  } catch (err) {
-    console.error(err);
-    resultDiv.innerHTML = `<p style="color:red;">Noe gikk galt ved henting av bookinger. Prøv igjen.</p>`;
-  }
-}
-
-// =========================
-// KALENDER (ren versjon - ingen navn vises)
-// =========================
 let currentDate = new Date();
 let approvedBookings = [];
 
 async function loadCalendarBooking() {
-  const { data } = await supabaseClient
-    .from("bookings")
-    .select("*")
-    .eq("status", "approved");
-
-  approvedBookings = data || [];
+  try { const {dates}=await publicApi({action:'calendar'}); approvedBookings=dates; }
+  catch(error){showError('Kalenderen kunne ikke lastes. Prøv å laste siden på nytt.');return;}
   drawCalendar();
 }
 

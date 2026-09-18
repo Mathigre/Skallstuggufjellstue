@@ -1,0 +1,17 @@
+# Admin Auth and booking privacy
+
+Admin uses Supabase Auth email/password with persistent refreshable sessions. `public.admin_users` is the server-managed allowlist; user metadata and the previous localStorage flags grant no access. The three requested accounts were created using Auth Admin API. Passwords are delivered privately outside the repository; each owner can change their password on `/admin/konto.html`. No invitation or test email was sent.
+
+RLS on bookings and booking_messages restricts all direct reads/writes to allowlisted authenticated users. Anonymous users cannot directly insert bookings or read conversations. Public site-content writes, page-view reads and invoice-storage listing/upload were also closed. Public legal documents and images remain public. Existing signed invoice URLs remain valid until their original expiry.
+
+Public booking creation is handled by `booking-public`, with allowed fields, pending status, rate limits and server-computed prices. The service-only `create_secure_booking` transaction writes booking and hashed access token together. The public calendar returns only start/end dates. The browser never selects booking rows. The customer portal uses a random 256-bit token in the URL fragment; only its SHA-256 hash is stored. Tokens expire after one year and stop working if the booking email changes. Customer message inserts are always bound to the token's booking and sender=customer. All customer text is rendered with textContent.
+
+Old links with only `?booking=UUID` no longer grant access. Existing customers can receive a new private link when admin uses Send svar til kunde; new requests and approvals include private links. Email lookup was removed rather than exposing bookings to anyone knowing an address. Keep customer links private.
+
+Fiken/pricing/cancellation endpoints verify the access token with Auth and recheck admin_users server-side. Shared test codes no longer grant access. Fiken remains restricted to the verified test company and drafts only. The unused `fiken-test` and legacy `create-fiken-invoice` endpoints return 410. The email endpoint accepts verified admins or internal service-role requests and reads recipient/booking data from the database. It no longer accepts anonymous arbitrary mail requests. The temporary account-provisioning endpoint is closed (410).
+
+Deployment: apply security-prepare.sql; provision authorized accounts via Auth Admin API; deploy the functions and static files; apply security-lockdown.sql. Do not revert RLS merely to accommodate old cached pages. Users should reload and sign in. Supabase JS for admin is pinned to 2.57.4. Auth refresh persists on the user's browser; signing out removes its session.
+
+Verification: Auth login for all three admins; browser checks of all admin pages, price API auth headers, booking form, safe token rendering and logout; eight security tests covering forged/missing tokens, membership, projection, token binding and whitelisted creation; transactional RLS tests cover anonymous denial, nonadmin denial and self-promotion denial. Additional live checks must confirm deployed endpoint denials and private invoice storage before sign-off.
+
+This is a focused access-control repair, not a full independent penetration test. Public submission still needs abuse monitoring; request limits are basic and depend on gateway IP headers. Clear expired booking_access_tokens and old booking_request_limits periodically according to the site's retention policy. Signup alone does not confer admin rights.
