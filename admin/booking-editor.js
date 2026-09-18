@@ -126,7 +126,7 @@ async function saveBookingChanges(booking, values) {
 async function sendCancellationEmail(bookingId) {
   const response = await fetch(`${supabaseUrl}/functions/v1/booking-cancellation-email`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${supabaseAnonKey}`, "apikey": supabaseAnonKey },
+    headers:await window.adminHeaders(),
     body: JSON.stringify({ bookingId: String(bookingId) })
   });
   const result = await response.json().catch(() => ({}));

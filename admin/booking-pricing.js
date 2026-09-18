@@ -1,11 +1,11 @@
 import { calculateQuote, formatMoney } from '../pricing.mjs?v=season1';
-import {ensureFikenAccess,getAccessCode,clearAccessCode} from './test-access.mjs?v=remember1';
+import {ensureFikenAccess,getAccessCode,clearAccessCode} from './test-access.mjs?v=security1';
 window.ensureFikenAccess=ensureFikenAccess;
 const busy=new Set();
 async function exportBooking(id, action='sync') {
   if (!await window.ensureFikenAccess()) throw new Error('Fiken-utkastet er ikke oppdatert: testtilgangen ble avbrutt.');
   const response = await fetch(`${supabaseUrl}/functions/v1/fiken-booking`, {
-    method:'POST', headers:{'Content-Type':'application/json', Authorization:`Bearer ${supabaseAnonKey}`, apikey:supabaseAnonKey,'x-test-access':getAccessCode()},
+    method:'POST', headers:await window.adminHeaders(),
     body:JSON.stringify({bookingId:String(id),action})
   });
   const result = await response.json().catch(()=>({}));

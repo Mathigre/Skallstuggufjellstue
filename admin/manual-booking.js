@@ -88,7 +88,7 @@
       const replyUrl = `${location.origin}/reply.html?booking=${encodeURIComponent(bookingId)}`;
       const response = await fetch(`${supabaseUrl}/functions/v1/resend-email`, {
         method:"POST",
-        headers:{"Content-Type":"application/json","Authorization":`Bearer ${supabaseAnonKey}`},
+        headers:await window.adminHeaders(),
         body:JSON.stringify({type:"approved",name,email,phone:phone||"",start,end,invoiceUrl:null,bookingId,replyUrl})
       });
       emailSent = response.ok;

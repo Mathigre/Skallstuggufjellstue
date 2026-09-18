@@ -172,13 +172,13 @@
 <section class="page">
   <h1>Send bookingforespørsel</h1>
 
-  <!-- Sjekk mine bookinger -->
+  <!-- Åpne din booking -->
   <div class="check-bookings">
-    <h3 style="margin-top: 0; color: #8B4A2B;">Sjekk mine bookinger</h3>
-    <p style="margin-bottom: 12px;">Skriv inn e-postadressen din for å se dine forespørsler:</p>
+    <h3 style="margin-top: 0; color: #8B4A2B;">Åpne din booking</h3>
+    <p style="margin-bottom: 12px;">Bruk den private bookinglenken du fikk på e-post.</p>
    
     <div style="display: flex; gap: 12px;">
-      <input type="email" id="checkEmail" placeholder="din@email.com"
+      <input type="url" id="checkEmail" placeholder="Lim inn privat bookinglenke"
              style="flex: 1; padding: 14px; border: 1px solid #ccc; border-radius: 8px; font-size: 1em;">
       <button onclick="checkMyBookings()"
               style="padding: 14px 28px; background: #8B4A2B; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; white-space: nowrap;">
@@ -227,7 +227,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script type="module" src="booking-extras.js?v=season1"></script>
-<script src="script.js?v=season1"></script>
+<script src="script.js?v=security1"></script>
 <!-- FOOTER -->
 <footer style="background: #f8f1e3; padding: 60px 20px 30px; margin-top: 100px; border-top: 3px solid #8B4A2B;">
   <div style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 40px;">

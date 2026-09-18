@@ -215,23 +215,12 @@
       }
     }
   </style>
-<link rel="stylesheet" href="admin-navigation.css?v=1"><script defer src="admin-navigation.js?v=2"></script>
-</head>
+<link rel="stylesheet" href="admin-navigation.css?v=1"><script defer src="admin-navigation.js?v=security1"></script>
+<style>body{visibility:hidden}.admin-authorized body{visibility:visible}</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.js"></script><script src="auth.js?v=security1"></script></head>
 <body>
 
 <!-- PASSORD-SKJERM -->
-<div id="passwordScreen" class="password-screen">
-  <div class="password-box">
-    <h2>Admin tilgang</h2>
-    <p>Skriv inn admin-koden:</p>
-    <input type="password" id="adminPassword" class="password-input" placeholder="Skriv kode her...">
-    <button onclick="checkPassword()" class="login-btn">Logg inn</button>
-    <p id="passwordError" style="color:red; margin-top:12px;"></p>
-  </div>
-</div>
-
-<!-- TOPP MENY -->
-<header class="admin-site-header"><div class="admin-site-bar"><a class="admin-site-logo" href="admin.html" aria-label="Skallstuggu – bookinger"><img src="https://rbphgvnwmzjeuvyrasvy.supabase.co/storage/v1/object/public/leiebetingelser/logo.png" alt="Skallstuggu" width="150" height="58"></a><nav class="admin-site-links" id="adminSiteLinks" aria-label="Adminmeny"><a href="admin.html">Bookinger</a><a href="administrasjon.html">Administrasjon</a><a href="priser.html">Priser</a><a href="overview.html" aria-current="page">Oversikt</a></nav><div class="admin-site-controls"><button type="button" class="admin-site-logout">Logg ut</button><button type="button" class="admin-site-toggle" aria-label="Åpne meny" aria-controls="adminSiteLinks" aria-expanded="false">☰</button></div></div></header>
+<header class="admin-site-header"><div class="admin-site-bar"><a class="admin-site-logo" href="admin.html" aria-label="Skallstuggu – bookinger"><img src="https://rbphgvnwmzjeuvyrasvy.supabase.co/storage/v1/object/public/leiebetingelser/logo.png" alt="Skallstuggu" width="150" height="58"></a><nav class="admin-site-links" id="adminSiteLinks" aria-label="Adminmeny"><a href="admin.html">Bookinger</a><a href="administrasjon.html">Administrasjon</a><a href="priser.html">Priser</a><a href="overview.html" aria-current="page">Oversikt</a></nav><div class="admin-site-controls"><a href="konto.html" style="color:#8b4a2b">Konto</a><button type="button" class="admin-site-logout">Logg ut</button><button type="button" class="admin-site-toggle" aria-label="Åpne meny" aria-controls="adminSiteLinks" aria-expanded="false">☰</button></div></div></header>
 
 <!-- HOVEDINNHOLD -->
 <section class="page" id="adminContent" style="display:none;">
@@ -293,44 +282,14 @@
   </div>
 </section>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
-<script src="admin.js"></script>
+
+
+<script src="admin.js?v=security1"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
 let bookingsChartInstance = null;
 let viewsChartInstance = null;
-
-// Passord og innlogging
-function checkPassword() {
-  const input = document.getElementById("adminPassword").value.trim();
-  const error = document.getElementById("passwordError");
-  if (input === ADMIN_CONFIG.password) {
-    localStorage.setItem("adminLoggedIn", "true");
-    document.getElementById("passwordScreen").style.display = "none";
-    document.getElementById("adminContent").style.display = "block";
-    loadOverviewData();
-  } else {
-    error.textContent = "Feil kode. Prøv igjen.";
-    document.getElementById("adminPassword").value = "";
-  }
-}
-
-function checkIfAlreadyLoggedIn() {
-  if (localStorage.getItem("adminLoggedIn") === "true") {
-    document.getElementById("passwordScreen").style.display = "none";
-    document.getElementById("adminContent").style.display = "block";
-    loadOverviewData();
-  }
-}
-
-function logoutAdmin() {
-  if (confirm("Vil du logge ut fra admin?")) {
-    localStorage.removeItem("adminLoggedIn");
-    location.reload();
-  }
-}
 
 // Hovedfunksjon
 async function loadOverviewData() {
@@ -538,21 +497,6 @@ function drawViewsChart(counts) {
   });
 }
 
-window.addEventListener("load", checkIfAlreadyLoggedIn);
-
-document.getElementById("adminPassword").addEventListener("keypress", function(e) {
-  if (e.key === "Enter") checkPassword();
-});
-
-const adminHamburger = document.getElementById('adminHamburger');
-const adminNavLinks = document.getElementById('adminNavLinks');
-
-if (adminHamburger && adminNavLinks) {
-  adminHamburger.addEventListener('click', () => {
-    adminNavLinks.classList.toggle('active');
-  });
-}
+adminReady.then(user=>{if(user)loadOverviewData();});
 </script>
-
-</body>
-</html>
+</body></html>
