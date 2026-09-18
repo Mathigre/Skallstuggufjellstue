@@ -1,0 +1,8 @@
+const url='https://rbphgvnwmzjeuvyrasvy.supabase.co';
+const key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJicGhndm53bXpqZXV2eXJhc3Z5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MjM3MjksImV4cCI6MjA4OTk5OTcyOX0.ug7k4jDtYwudivBJaWyKuCdwbt3GVnLXtWtpsBUhvEQ";
+const client=window.supabase.createClient(url,key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const status=document.getElementById('status');
+let recoveryReady=false;
+client.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'||session){recoveryReady=true;status.textContent='';}});
+setTimeout(async()=>{const {data}=await client.auth.getSession();if(data.session)recoveryReady=true;if(!recoveryReady)status.textContent='Reset-lenken er ugyldig eller utløpt. Send en ny passordreset fra Supabase.';},1200);
+document.getElementById('resetForm').onsubmit=async event=>{event.preventDefault();const button=event.target.querySelector('button');const p=document.getElementById('password').value,p2=document.getElementById('password2').value;if(p!==p2){status.textContent='Passordene er ikke like.';return;}if(p.length<8){status.textContent='Passordet må ha minst 8 tegn.';return;}button.disabled=true;status.textContent='Lagrer …';try{const {data}=await client.auth.getSession();if(!data.session)throw new Error('Reset-lenken er ugyldig eller utløpt. Send en ny passordreset.');const {error}=await client.auth.updateUser({password:p});if(error)throw error;status.textContent='Passordet er endret. Sender deg til innlogging …';await client.auth.signOut();setTimeout(()=>location.replace('login.html'),900);}catch(error){status.textContent=error.message||'Kunne ikke endre passordet.';}finally{button.disabled=false;}};
