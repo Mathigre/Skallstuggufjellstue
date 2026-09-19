@@ -1,6 +1,14 @@
 // Booking management uses the existing Supabase client and dashboard layout.
 const bookingOperations = new Set();
 
+function isCalendarImport(booking) {
+  return !booking.price_version && (booking.message || '').startsWith('Importert fra Booking Skallstuggu (Google Kalender).');
+}
+function validBookingDates(booking, values) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(values.start_date) && /^\d{4}-\d{2}-\d{2}$/.test(values.end_date) &&
+    (values.end_date > values.start_date || (isCalendarImport(booking) && values.end_date === values.start_date));
+}
+
 function bookingEditorButton(label, action, className = "btn-neutral") {
   const button = document.createElement("button");
   button.type = "button";
@@ -43,7 +51,7 @@ function openBookingEditor(booking) {
   dialog.innerHTML = `<form><h2 id="bookingEditorTitle">Rediger booking</h2>
     <div class="booking-editor-grid">
       <label>Navn<input name="name" required maxlength="200" autocomplete="name"></label>
-      <label>E-post<input name="email" type="email" required maxlength="254" autocomplete="email"></label>
+      <label>E-post<input name="email" type="email" ${isCalendarImport(booking) ? "" : "required"} maxlength="254" autocomplete="email"></label>
       <label>Telefon<input name="phone" type="tel" maxlength="50" autocomplete="tel"></label>
       <label>Fra dato<input name="start_date" type="date" required></label>
       <label>Til dato<input name="end_date" type="date" required></label>
@@ -70,8 +78,8 @@ function openBookingEditor(booking) {
     if (booking.price_version) { values.linen_count = Number(values.linen_count); values.towel_count = Number(values.towel_count); values.full_cleaning = form.elements.namedItem("full_cleaning").checked; }
     else { delete values.linen_count; delete values.towel_count; delete values.full_cleaning; }
     const errorBox = dialog.querySelector(".booking-editor-error");
-    if (!values.name || !values.email) { errorBox.textContent = "Fyll inn navn og e-post."; return; }
-    if (values.end_date <= values.start_date) { errorBox.textContent = "Til-dato må være etter fra-dato."; return; }
+    if (!values.name || (!isCalendarImport(booking) && !values.email)) { errorBox.textContent = "Fyll inn navn og e-post."; return; }
+    if (!validBookingDates(booking, values)) { errorBox.textContent = isCalendarImport(booking) ? "Til-dato kan ikke være før fra-dato." : "Til-dato må være etter fra-dato."; return; }
     saving = true;
     form.querySelectorAll("button").forEach(button => { button.disabled = true; });
     errorBox.textContent = "";
@@ -102,7 +110,7 @@ async function saveBookingChanges(booking, values) {
   const id = String(booking.id);
   if (bookingOperations.has(id)) throw new Error("Denne bookingen blir allerede oppdatert.");
   if (booking.cancelled_at) throw new Error("Avbestilte bookinger kan ikke redigeres.");
-  if (!values.name?.trim() || !values.email?.trim() || !/^\d{4}-\d{2}-\d{2}$/.test(values.start_date) || !/^\d{4}-\d{2}-\d{2}$/.test(values.end_date) || values.end_date <= values.start_date) throw new Error("Kontroller navn, e-post og datoer.");
+  if (!values.name?.trim() || (!isCalendarImport(booking) && !values.email?.trim()) || (values.email?.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim())) || !validBookingDates(booking, values)) throw new Error("Kontroller navn, e-post og datoer.");
   bookingOperations.add(id);
   try {
     if (booking.status === "approved") {
