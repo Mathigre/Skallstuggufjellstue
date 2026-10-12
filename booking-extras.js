@@ -1,5 +1,25 @@
 import { calculateQuote, formatMoney, validateSettings } from './pricing.mjs?v=season1';
 
+function bookingToday(now = new Date()) {
+  return new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Oslo' }).format(now);
+}
+function refreshBookingDateLimits() {
+  const start = document.getElementById('start');
+  const end = document.getElementById('end');
+  const today = bookingToday();
+  start.min = today;
+  const earliestStart = start.value && start.value >= today ? start.value : today;
+  const nextDay = new Date(earliestStart + 'T00:00:00Z');
+  nextDay.setUTCDate(nextDay.getUTCDate() + 1);
+  end.min = nextDay.toISOString().slice(0, 10);
+  start.setCustomValidity(start.value && start.value < today ? 'Ankomstdato kan ikke være i fortiden.' : '');
+}
+function validateNewBookingDate() {
+  refreshBookingDateLimits();
+  if (document.getElementById('start').value && document.getElementById('start').value < bookingToday()) {
+    throw new Error('Ankomstdato kan ikke være i fortiden. Velg dagens dato eller en senere dato.');
+  }
+}
 const form = document.getElementById('bookingForm');
 if (form) {
   const section = document.createElement('fieldset');
@@ -16,6 +36,7 @@ if (form) {
 
   let published;
   window.getBookingQuote = () => {
+    validateNewBookingDate();
     if(!published)throw new Error('Prisene er ikke lastet. Vent litt eller last siden på nytt.');
     return {...calculateQuote({
     start: document.getElementById('start').value,
@@ -44,6 +65,9 @@ if (form) {
     } catch (error) { summary.textContent = error.message; }
   };
   for (const id of ['start', 'end', 'linenCount', 'towelCount', 'fullCleaning']) document.getElementById(id).addEventListener('input', render);
+  window.addEventListener('pageshow', render);
+  window.addEventListener('focus', render);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) render(); });
   form.addEventListener('reset', () => setTimeout(render, 0));
   render();
   try {
