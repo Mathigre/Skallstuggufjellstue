@@ -11,9 +11,16 @@ const corsHeaders = {
 
 const ADMIN_URL = "https://skallstuggu-test.no/admin/admin.html";
 
-const PDF_URL =
+const CURRENT_PDF_URL =
   "https://skallstuggu-test.no/dokumenter/Leiebetingelser_Skallstuggu.pdf";
 
+const LEGACY_PDF_URL = "https://rbphgvnwmzjeuvyrasvy.supabase.co/storage/v1/object/public/leiebetingelser/Leiebetingelse_Skallstuggu.pdf";
+const TERMS_CUTOVER = Date.parse("2026-10-12T14:05:11Z");
+function termsUrlForBooking(booking) {
+  const created = Date.parse(booking.created_at || "");
+  return !String(booking.message || "").startsWith("Importert fra Booking Skallstuggu") &&
+    Number.isFinite(created) && created >= TERMS_CUTOVER ? CURRENT_PDF_URL : LEGACY_PDF_URL;
+}
 const LOGO_URL =
   "https://rbphgvnwmzjeuvyrasvy.supabase.co/storage/v1/object/public/leiebetingelser/logo.png";
 
@@ -104,8 +111,9 @@ Deno.serve(async (req) => {
     if(!['request_customer','request_owner','admin_reply','approved'].includes(body.type))throw new Error('Ukjent e-posttype.');
     if(!service && ['request_customer','request_owner'].includes(body.type))throw new Error('Kun bookingtjenesten kan sende forespørselsmail.');
     if(!/^[a-f0-9-]{36}$/i.test(body.bookingId||''))throw new Error('Bookingreferanse mangler.');
-    const [booking]=await db('bookings?id=eq.'+body.bookingId+'&select=id,name,email,phone,start_date,end_date,message,status,booking_total_ore,invoice_url',env);
+    const [booking]=await db('bookings?id=eq.'+body.bookingId+'&select=id,created_at,name,email,phone,start_date,end_date,message,status,booking_total_ore,invoice_url',env);
     if(!booking || !booking.email)throw new Error('Bookingen finnes ikke eller mangler e-post.');
+    const PDF_URL = termsUrlForBooking(booking);
     if(body.type==='approved'&&booking.status!=='approved')throw new Error('Bookingen er ikke godkjent.');
     Object.assign(body,{name:esc(booking.name),email:booking.email,phone:esc(booking.phone),start:booking.start_date,end:booking.end_date,customerMessage:esc((booking.message||'')+(booking.booking_total_ore!=null?'\nTotalpris inkl. mva: '+booking.booking_total_ore/100+' kr.':'')),message:esc(body.message||''),adminReply:esc(body.adminReply||'')});
     body.invoiceUrl=booking.invoice_url&&booking.invoice_url.startsWith(env('SUPABASE_URL')+'/storage/v1/object/sign/fakturaer/')?esc(booking.invoice_url):null;
