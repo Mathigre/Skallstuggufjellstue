@@ -12,7 +12,7 @@ const corsHeaders = {
 const ADMIN_URL = "https://skallstuggu-test.no/admin/admin.html";
 
 const PDF_URL =
-  "https://rbphgvnwmzjeuvyrasvy.supabase.co/storage/v1/object/public/leiebetingelser/Leiebetingelse_Skallstuggu.pdf";
+  "https://skallstuggu-test.no/dokumenter/Leiebetingelser_Skallstuggu.pdf";
 
 const LOGO_URL =
   "https://rbphgvnwmzjeuvyrasvy.supabase.co/storage/v1/object/public/leiebetingelser/logo.png";
