@@ -142,9 +142,10 @@
     <!-- VENSTRE KOLONNE -->
     <div class="box">
       <h2 style="color: #8B4A2B;">Priser</h2>
-      <p><strong>Helg (fredag–søndag):</strong> 13.000 kr (opptil 25 personer)</p>
-      <p><strong>Ukedager:</strong> 6.000 kr</p>
-      <p><strong>Selskap / festkveld:</strong> 5.000 kr</p>
+      <div id="publishedPrices" aria-live="polite"><p>Henter priser …</p></div>
+      <noscript><p>Slå på JavaScript eller kontakt oss for gjeldende priser.</p></noscript>
+      <p><a href="booking.html">Velg datoer og se totalpris</a></p>
+      <p><strong>Dagsarrangement / festkveld:</strong> Kontakt oss for pris.</p>
       
       <h2 style="color: #8B4A2B; margin-top: 35px;">Fasiliteter</h2>
       <ul style="line-height: 2.1;">
@@ -161,7 +162,7 @@
       <h2 style="color: #8B4A2B;">Leieprisen inkluderer</h2>
       <p>Fri bruk av hele Skallstuggu og alt utstyr i leieperioden.</p>
       <p>Ekstra rom og kjellerstue kan leies i tillegg.</p>
-      <p>Sluttrengjøring kan bestilles for kr 3.000,-</p>
+      <p>Sluttrengjøring kan bestilles som tillegg. Se prisoversikten.</p>
      
       <p style="margin-top: 25px; font-weight: 500;">
         <strong>Leietaker er ansvarlig</strong> for rydding, oppvask og søppel.
@@ -247,6 +248,65 @@ const navLinks = document.getElementById('navLinks');
 hamburger.addEventListener('click', () => {
   navLinks.classList.toggle('active');
 });
+</script>
+
+
+<script type="module">
+import { formatMoney, validateSettings, RATES } from './pricing.mjs?v=season1';
+
+const prices = document.getElementById('publishedPrices');
+const paragraph = (parent, text) => {
+  const p = document.createElement('p');
+  p.textContent = text;
+  parent.appendChild(p);
+};
+async function loadPrices() {
+  try {
+    const response = await fetch('https://rbphgvnwmzjeuvyrasvy.supabase.co/rest/v1/booking_price_settings?select=revision,settings&id=eq.1', {
+      headers: { apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJicGhndm53bXpqZXV2eXJhc3Z5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MjM3MjksImV4cCI6MjA4OTk5OTcyOX0.ug7k4jDtYwudivBJaWyKuCdwbt3GVnLXtWtpsBUhvEQ' },
+      cache: 'no-store'
+    });
+    if (!response.ok) throw new Error('Price request failed');
+    const rows = await response.json();
+    if (rows.length !== 1) throw new Error('Missing price settings');
+    const settings = validateSettings(rows[0].settings);
+    const fragment = document.createDocumentFragment();
+    paragraph(fragment, 'Grunnpris søndag–torsdag: ' + formatMoney(settings.weekday) + ' per natt.');
+    paragraph(fragment, 'Grunnpris fredag–lørdag: ' + formatMoney(settings.weekend) + ' per natt.');
+    paragraph(fragment, 'Alle priser inkluderer 25 % mva. Sesongpris erstatter grunnprisen for netter innenfor perioden.');
+    const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Oslo' }).format(new Date());
+    const date = value => new Intl.DateTimeFormat('nb-NO', { timeZone: 'UTC' }).format(new Date(value + 'T00:00:00Z'));
+    const seasons = settings.seasons.filter(season => season.end >= today);
+    if (seasons.length) {
+      const heading = document.createElement('h3');
+      heading.textContent = 'Sesongpriser';
+      fragment.appendChild(heading);
+      for (const season of seasons) {
+        const title = document.createElement('strong');
+        title.textContent = season.name + ' (' + date(season.start) + '–' + date(season.end) + ')';
+        fragment.appendChild(title);
+        paragraph(fragment, 'Søndag–torsdag: ' + formatMoney(season.weekday) + ' per natt. Fredag–lørdag: ' + formatMoney(season.weekend) + ' per natt.');
+      }
+    }
+    const heading = document.createElement('h3');
+    heading.textContent = 'Tillegg';
+    fragment.appendChild(heading);
+    paragraph(fragment, 'Sengeklær: ' + formatMoney(RATES.linen) + ' per sett.');
+    paragraph(fragment, 'Håndklær: ' + formatMoney(RATES.towel) + ' per håndkle.');
+    paragraph(fragment, 'Sluttrengjøring: ' + formatMoney(RATES.cleaning) + ' per opphold.');
+    prices.replaceChildren(fragment);
+  } catch {
+    prices.replaceChildren();
+    paragraph(prices, 'Kunne ikke hente gjeldende priser. Prøv igjen eller kontakt oss.');
+    const retry = document.createElement('button');
+    retry.type = 'button';
+    retry.textContent = 'Prøv igjen';
+    retry.addEventListener('click', () => { retry.disabled = true; loadPrices(); });
+    prices.appendChild(retry);
+  }
+}
+loadPrices();
+window.addEventListener('pageshow', event => { if (event.persisted) loadPrices(); });
 </script>
 
 </body>
