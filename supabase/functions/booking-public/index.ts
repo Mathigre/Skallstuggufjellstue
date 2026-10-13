@@ -1,6 +1,10 @@
 import {db,hashToken,newToken} from './auth.ts';
 const cors={'Access-Control-Allow-Origin':'https://skallstuggu-test.no','Access-Control-Allow-Headers':'authorization,apikey,content-type','Access-Control-Allow-Methods':'POST,OPTIONS','Cache-Control':'no-store'};
 const env=name=>Deno.env.get(name);
+function notifyAdmins(kind,bookingId){
+ const task=(async()=>{try{const key=env('SUPABASE_SERVICE_ROLE_KEY');const response=await fetch(env('SUPABASE_URL')+'/functions/v1/admin-push',{method:'POST',headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({action:'dispatch',kind,bookingId}),signal:AbortSignal.timeout(25000)});if(!response.ok)console.warn('Admin push dispatch failed: '+response.status);}catch{console.warn('Admin push dispatch unavailable');}})();
+ EdgeRuntime.waitUntil(task);
+}
 const fields='id,name,start_date,end_date,status,message,cancelled_at,created_at,booking_total_ore,linen_count,towel_count,full_cleaning';
 export async function handler(req) {
  const json=(body,status=200)=>Response.json(body,{status,headers:cors});
@@ -30,6 +34,7 @@ export async function handler(req) {
    if(overlaps.length)return json({error:'Perioden er allerede booket.'},409);
    const token=newToken();
    const booking=await db('rpc/create_secure_booking',env,'POST',{access_hash:await hashToken(token),payload:{name,email,phone,message,start_date:p.start_date,end_date:p.end_date,linen_count:p.linen_count,towel_count:p.towel_count,full_cleaning:p.full_cleaning,pricing_revision:p.pricing_revision}});
+   notifyAdmins('booking',booking.id);
    const replyUrl='https://skallstuggu-test.no/reply.html#token='+token;
    let emailsSent=true;
    for(const type of ['request_customer','request_owner']){
@@ -47,6 +52,7 @@ export async function handler(req) {
    if(typeof body.message!=='string'||!body.message.trim()||body.message.length>2000)return json({error:'Meldingen må ha mellom 1 og 2 000 tegn.'},400);
    if(!await limit('message:'+access.booking_id,10,600))return json({error:'For mange meldinger. Prøv igjen senere.'},429);
    await db('booking_messages',env,'POST',{booking_id:access.booking_id,sender:'customer',message:body.message.trim()});
+   notifyAdmins('message',access.booking_id);
    return json({success:true});
   }
   delete booking.email;

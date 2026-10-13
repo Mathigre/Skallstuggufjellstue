@@ -68,6 +68,7 @@ async function loadData() {
     const {data,error}=await supabaseClient.from("bookings").select("*").order("start_date",{ascending:true}); if(error)throw error;
     allBookings=data||[]; approvedBookings=allBookings.filter(b=>b.status==="approved");
     await renderDashboard(); loadCalendar();
+    openNotificationBooking();
   } catch(err){console.error("Feil ved henting av data:",err);}
 }
 
@@ -86,7 +87,7 @@ function renderSummary() {
 
 async function renderBookingCard(b) {
   const messages=await getMessages(b.id), payment=b.payment_status||"unpaid", overlap=b.cancelled_at?null:checkOverlap(b), isApproved=b.status==="approved";
-  const div=document.createElement("div"); div.className=`menu booking-card ${b.status==="approved"?"approved":b.status==="rejected"?"rejected":"pending"}`;
+  const div=document.createElement("div"); div.dataset.bookingId=b.id; div.className=`menu booking-card ${b.status==="approved"?"approved":b.status==="rejected"?"rejected":"pending"}`;
   const paidDate=b.paid_at?new Date(b.paid_at).toLocaleDateString("no-NO"):"";
   div.innerHTML=`<div class="booking-summary" onclick="this.parentElement.classList.toggle('open')"><div class="booking-main"><div class="booking-name">${escapeHtml(b.name||"Ukjent")}</div><div class="booking-period">${formatDate(b.start_date)} → ${formatDate(b.end_date)}</div></div><div class="booking-badges"><span class="badge badge-status">${b.cancelled_at ? "Avbestilt" : statusText(b.status)}</span>${isApproved?`<span class="badge ${paymentClass(payment)}">${paymentText(payment)}</span>`:""}<span class="badge badge-status">Åpne ▾</span></div></div><div class="booking-details"><p><strong>E-post:</strong> <a href="mailto:${escapeHtml(b.email)}" class="contact-link">${escapeHtml(b.email||"-")}</a><br><strong>Telefon:</strong> <a href="tel:${escapeHtml(b.phone)}" class="contact-link">${escapeHtml(b.phone||"-")}</a></p>${b.message?`<div class="customer-message"><strong>Melding fra kunde:</strong><br>${escapeHtml(b.message)}</div>`:""}${overlap?`<div class="warning">⚠️ Dobbelbooking med ${escapeHtml(overlap.name||"en annen forespørsel")}</div>`:""}${isApproved?`<div class="payment-box"><strong>Betaling:</strong> <span class="badge ${paymentClass(payment)}">${paymentText(payment)}</span>${paidDate?` <span class="archive-note">registrert ${paidDate}</span>`:""}${b.invoice_url?`<br><a class="invoice-link" href="${escapeHtml(b.invoice_url)}" target="_blank">Åpne faktura</a>`:""}<div class="payment-actions">${payment!=="paid"?`<button class="btn-success" onclick='setPaymentStatus(${JSON.stringify(String(b.id))},"paid")'>Marker som betalt</button>`:""}${payment!=="partial"?`<button class="btn-neutral" onclick='setPaymentStatus(${JSON.stringify(String(b.id))},"partial")'>Delvis betalt</button>`:""}${payment!=="unpaid"?`<button class="btn-neutral" onclick='setPaymentStatus(${JSON.stringify(String(b.id))},"unpaid")'>Marker ubetalt</button>`:""}</div></div>`:""}<div class="conversation"><strong>Samtale</strong>${renderMessages(messages)}</div><div style="margin:12px 0 10px;"><textarea id="reply-${b.id}" rows="3" placeholder="Skriv svar til kunden her..." style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;resize:vertical;box-sizing:border-box"></textarea><div style="margin-top:10px;"><label style="display:block;margin-bottom:6px;font-weight:600;">Legg ved faktura (PDF)</label><input type="file" id="invoice-${b.id}" accept=".pdf,application/pdf" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;background:white;box-sizing:border-box"></div><div class="booking-actions"><button class="btn-primary" onclick='sendReply(${JSON.stringify(String(b.id))},${escapeHtml(JSON.stringify(b.email||""))},${escapeHtml(JSON.stringify(b.name||""))})'>Send svar til kunde</button>${b.status!=="approved"&&!b.cancelled_at?`<button class="btn-success" onclick='approve(${JSON.stringify(String(b.id))})'>Godkjenn</button>`:""}${b.status!=="rejected"&&b.status!=="approved"?`<button class="btn-danger" onclick='reject(${JSON.stringify(String(b.id))})'>Avslå</button>`:""}</div></div></div>`;
   if (typeof addBookingManagement === "function") addBookingManagement(div, b);
@@ -144,3 +145,10 @@ function showDayInfo(dateStr,bookings){let html=`<h3>${escapeHtml(dateStr)}</h3>
 
 setupDashboardShell();
 if(document.getElementById("foresporsler"))window.adminReady.then(user=>{if(user)loadData();});
+
+function openNotificationBooking(){
+ const id=new URLSearchParams(location.search).get('booking');
+ if(!/^[0-9a-f-]{36}$/i.test(id||''))return;
+ const card=document.querySelector('[data-booking-id="'+id+'"]');
+ if(card){card.parentElement.classList.remove('hidden');card.classList.add('open');card.style.scrollMarginTop='110px';card.scrollIntoView({block:'start'});history.replaceState(null,'',location.pathname);}
+}
