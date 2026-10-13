@@ -119,7 +119,7 @@ Deno.serve(async (req) => {
     body.invoiceUrl=booking.invoice_url&&booking.invoice_url.startsWith(env('SUPABASE_URL')+'/storage/v1/object/sign/fakturaer/')?esc(booking.invoice_url):null;
     if(body.type!=='request_owner'){
       const token=newToken();
-      await db('booking_access_tokens',env,'POST',{token_hash:await hashToken(token),booking_id:booking.id,email:booking.email,expires_at:new Date(Date.now()+365*86400000).toISOString()});
+      await db('booking_access_tokens',env,'POST',{token_hash:await hashToken(token),booking_id:booking.id,email:booking.email,expires_at:new Date(Math.max(Date.now()+365*86400000,(Date.parse(booking.end_date+'T12:00:00Z')||Date.now())+30*86400000)).toISOString()});
       body.replyUrl='https://skallstuggu-test.no/reply.html#token='+token;
     }
 
@@ -161,7 +161,16 @@ Deno.serve(async (req) => {
     let html = "";
     let to: string[] = [];
 
-    const signature = (type!=='request_owner' ? '<p><a href="'+replyUrl+'">Se din booking og send melding</a></p><p>Lenken er privat. Ikke del den med andre.</p>' : '') + getEmailSignature();
+    const signature = (type!=='request_owner' ? `
+      <div style="margin:32px 0;padding:24px;background:#f8f1e3;border-radius:8px;">
+        <h3 style="margin-top:0;color:${MAIN_COLOR};">Min bestilling</h3>
+        <p>Se datoer, pris og status for oppholdet, og send oss en melding.</p>
+        <p><a href="${replyUrl}" style="display:inline-block;background:${MAIN_COLOR};color:#fff;padding:14px 24px;border-radius:6px;text-decoration:none;font-weight:bold;">Se min bestilling</a></p>
+        <p style="font-size:13px;">Knappen åpner bestillingen direkte. Du kan også bruke e-postadressen din og koden nedenfor på siden «Min bestilling».</p>
+        <p style="font-size:13px;"><strong>Bestillingskode:</strong><br><span style="font-family:monospace;word-break:break-all;">${esc(new URL(replyUrl).hash.slice(7))}</span></p>
+        <p style="font-size:13px;">Hvis knappen ikke virker: <a href="${replyUrl}">Åpne den private bookinglenken</a>.</p>
+        <p style="font-size:13px;">Lenken og koden er private. Ikke del dem med andre.</p>
+      </div>` : '') + getEmailSignature();
 
 
     // ============================================================
