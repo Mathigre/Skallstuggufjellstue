@@ -170,6 +170,21 @@
         grid-template-columns: 1fr;
       }
     }
+
+    .social-section {max-width:1100px;margin:90px auto 0;padding:0 20px;}
+    .social-heading {text-align:center;margin-bottom:30px;}
+    .social-heading h2,.social-card h3 {color:#8B4A2B;}
+    .social-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px;}
+    .social-card {min-width:0;padding:22px;background:#fffaf0;border:1px solid #e3d3c2;border-radius:16px;}
+    .social-card h3 {margin:0 0 8px;font-size:1.5rem;}
+    .social-card a {color:#754027;text-underline-offset:3px;}
+    .social-placeholder {padding:36px 12px;text-align:center;line-height:1.6;}
+    .social-card button {background:#8B4A2B;color:white;border:0;border-radius:8px;padding:13px 20px;font:inherit;cursor:pointer;}
+    .social-card button:focus-visible {outline:3px solid #333;outline-offset:4px;}
+    .social-frame {display:block;width:100%;max-width:500px;height:600px;border:0;margin:20px auto 0;background:white;border-radius:8px;}
+    .social-note {font-size:.9rem;line-height:1.6;color:#555;}
+    .social-disable {margin-top:14px;}
+    @media(max-width:720px) {.social-grid{grid-template-columns:1fr;}.social-card{padding:16px;}}
   </style>
 </head>
 <body>
@@ -315,6 +330,71 @@
     
   </div>
 </section>
+
+
+<!-- SOSIALE MEDIER -->
+<section class="social-section" id="sosiale-medier" aria-labelledby="social-title">
+  <div class="social-heading">
+    <h2 id="social-title">Små og store øyeblikk fra Skallstuggu</h2>
+    <p>Følg med på hverdagen på fjellet, turer og nyheter fra oss.</p>
+  </div>
+  <div class="social-grid">
+    <article class="social-card">
+      <h3>Facebook</h3>
+      <a href="https://www.facebook.com/Skallstuggu/" target="_blank" rel="noopener noreferrer">Besøk Skallstuggu på Facebook ↗</a>
+      <div class="social-placeholder">
+        <p>Se oppdateringer fra Facebook-siden vår her.</p>
+        <button type="button" data-social="facebook">Vis Facebook-innlegg</button>
+      </div>
+      <div class="social-content"></div>
+    </article>
+    <article class="social-card">
+      <h3>Instagram</h3>
+      <a href="https://www.instagram.com/skallstuggu/" target="_blank" rel="noopener noreferrer">Følg @skallstuggu på Instagram ↗</a>
+      <div class="social-placeholder">
+        <p>Se bilder og videoer fra Instagram-profilen vår her.</p>
+        <button type="button" data-social="instagram">Vis Instagram-innlegg</button>
+      </div>
+      <div class="social-content"></div>
+    </article>
+  </div>
+  <p class="social-note">Innlegg lastes først når du velger «Vis innlegg». Da kobles nettleseren til Meta, som mottar blant annet IP-adressen din og kan bruke informasjonskapsler.
+    Valget gjelder bare denne sidevisningen. <a href="https://www.facebook.com/privacy/policy/" target="_blank" rel="noopener noreferrer">Les Metas personvernerklæring</a>.
+    Hvis innleggene ikke vises, kan du åpne profilene via lenkene over. Meta bestemmer hvilke innlegg som vises og kan kreve innlogging.</p>
+  <noscript><p>Åpne lenkene over for å se innlegg på Facebook og Instagram.</p></noscript>
+</section>
+<script>
+document.querySelectorAll('[data-social]').forEach(function(button) {
+  button.addEventListener('click', function() {
+    const card = button.closest('.social-card');
+    const content = card.querySelector('.social-content');
+    const placeholder = card.querySelector('.social-placeholder');
+    const frame = document.createElement('iframe');
+    frame.className = 'social-frame';
+    frame.title = button.dataset.social === 'facebook' ? 'Skallstuggu på Facebook' : 'Skallstuggu på Instagram';
+    frame.referrerPolicy = 'strict-origin-when-cross-origin';
+    frame.allow = 'encrypted-media; picture-in-picture';
+    if (button.dataset.social === 'facebook') {
+      const width = Math.min(500, Math.floor(content.getBoundingClientRect().width));
+      frame.src = 'https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2FSkallstuggu%2F&tabs=timeline&width=' + width + '&height=600&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=false';
+    } else {
+      frame.src = 'https://www.instagram.com/skallstuggu/embed/';
+    }
+    const stop = document.createElement('button');
+    stop.type = 'button';
+    stop.className = 'social-disable';
+    stop.textContent = 'Skjul innlegg';
+    stop.addEventListener('click', function() {
+      content.replaceChildren();
+      placeholder.hidden = false;
+      button.focus();
+    });
+    content.replaceChildren(frame, stop);
+    placeholder.hidden = true;
+    stop.focus({preventScroll:true});
+  });
+});
+</script>
 
 <!-- FOOTER -->
 <footer style="background: #f8f1e3; padding: 60px 20px 30px; margin-top: 100px; border-top: 3px solid #8B4A2B;">
