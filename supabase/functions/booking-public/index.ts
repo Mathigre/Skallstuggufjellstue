@@ -1,7 +1,7 @@
 import {db,hashToken,newToken} from './auth.ts';
 const cors={'Access-Control-Allow-Origin':'https://skallstuggu-test.no','Access-Control-Allow-Headers':'authorization,apikey,content-type','Access-Control-Allow-Methods':'POST,OPTIONS','Cache-Control':'no-store'};
 const env=name=>Deno.env.get(name);
-const fields='id,name,start_date,end_date,status,message,cancelled_at,booking_total_ore,linen_count,towel_count,full_cleaning';
+const fields='id,name,start_date,end_date,status,message,cancelled_at,created_at,booking_total_ore,linen_count,towel_count,full_cleaning';
 export async function handler(req) {
  const json=(body,status=200)=>Response.json(body,{status,headers:cors});
  if(req.method==='OPTIONS')return new Response('ok',{headers:cors});
@@ -23,7 +23,7 @@ export async function handler(req) {
    if(!name||!phone||!/^\S+@\S+\.\S+$/.test(email)||!/^\d{4}-\d{2}-\d{2}$/.test(p.start_date||'')||!/^\d{4}-\d{2}-\d{2}$/.test(p.end_date||''))return json({error:'Fyll inn gyldig navn, e-post, telefon og datoer.'},400);
    const nights=(Date.parse(p.end_date)-Date.parse(p.start_date))/86400000;
    if(!Number.isInteger(nights)||nights<1||nights>366||p.start_date<new Date().toISOString().slice(0,10)||![p.linen_count,p.towel_count].every(n=>Number.isInteger(n)&&n>=0&&n<=1000)||typeof p.full_cleaning!=='boolean'||!Number.isInteger(p.pricing_revision))return json({error:'Kontroller datoer og tillegg.'},400);
-   if(!await limit('create:'+ip,6,3600)||!await limit('email:'+email,3,3600))return json({error:'For mange bookingforsøk. Prøv igjen senere eller kontakt oss.'},429);
+   if(!await limit('create:'+ip,100,3600)||!await limit('email:'+email,100,3600))return json({error:'For mange bookingforsøk. Prøv igjen senere eller kontakt oss.'},429);
    const [prices]=await db('booking_price_settings?id=eq.1&select=revision',env);
    if(prices.revision!==p.pricing_revision)return json({error:'Prisene er endret. Last siden på nytt og kontroller totalen.'},409);
    const overlaps=await db('bookings?select=start_date&status=eq.approved&cancelled_at=is.null&start_date=lt.'+p.end_date+'&end_date=gt.'+p.start_date+'&limit=1',env);
@@ -37,11 +37,12 @@ export async function handler(req) {
    }
    return json({success:true,replyUrl,emailsSent,totalOre:booking.total});
   }
-  if(!['get','message'].includes(body.action)||!/^[a-f0-9]{64}$/.test(body.token||''))return json({error:'Ugyldig bookinglenke. Bruk den private lenken fra e-posten.'},403);
+  if(body.action==='login'&&!await limit('login:'+ip,10,600))return json({error:'For mange innloggingsforsøk. Prøv igjen om noen minutter.'},429);
+  if(!['get','message','login'].includes(body.action)||!/^[a-f0-9]{64}$/.test(body.token||''))return json({error:'Ugyldig bookinglenke. Bruk den private lenken fra e-posten.'},403);
   const [access]=await db('booking_access_tokens?token_hash=eq.'+await hashToken(body.token)+'&expires_at=gt.'+encodeURIComponent(new Date().toISOString())+'&select=booking_id,email',env);
   if(!access)return json({error:'Lenken er ugyldig eller utløpt. Kontakt Skallstuggu for en ny lenke.'},403);
   const [booking]=await db('bookings?id=eq.'+access.booking_id+'&select='+fields+',email',env);
-  if(!booking||booking.email!==access.email)return json({error:'Lenken er ugyldig eller utløpt.'},403);
+  if(!booking||booking.email!==access.email||(body.action==='login'&&(typeof body.email!=='string'||body.email.trim().toLowerCase()!==String(booking.email).trim().toLowerCase())))return json({error:'Lenken er ugyldig eller utløpt.'},403);
   if(body.action==='message'){
    if(typeof body.message!=='string'||!body.message.trim()||body.message.length>2000)return json({error:'Meldingen må ha mellom 1 og 2 000 tegn.'},400);
    if(!await limit('message:'+access.booking_id,10,600))return json({error:'For mange meldinger. Prøv igjen senere.'},429);

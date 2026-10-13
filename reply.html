@@ -1,30 +1,21 @@
-<!DOCTYPE html>
-<html lang="no">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Samtale om booking - Skallstuggu</title>
-  <link rel="stylesheet" href="style.css">
-  <style>
-    .conversation-wrap{max-width:760px;margin:50px auto;padding:0 20px}.conversation-card{background:#fff;border:1px solid #e2e2e2;border-radius:12px;padding:24px;box-shadow:0 5px 20px rgba(0,0,0,.06)}
-    .message{padding:12px 15px;border-radius:10px;margin:10px 0;white-space:pre-wrap}.message.admin{background:#eef4ff;margin-right:40px}.message.customer{background:#f4efe9;margin-left:40px}.meta{font-size:.82rem;color:#777;margin-bottom:4px}
-    #replyMessage{width:100%;min-height:110px;padding:12px;border:1px solid #ccc;border-radius:8px;font:inherit;resize:vertical}.send-btn{background:#8B4A2B;color:#fff;border:0;border-radius:7px;padding:12px 22px;font-weight:600;cursor:pointer}.status{margin:12px 0;color:#555}
-  </style>
-<meta name="referrer" content="no-referrer"></head>
-<body>
-<header class="navbar"><div class="nav-container"><a href="index.html" class="logo"><img src="images/Logo.png" alt="Skallstuggu"></a></div></header>
-<main class="conversation-wrap">
-  <h1>Samtale om booking</h1>
-  <div class="conversation-card">
-    <div id="bookingInfo"></div>
-    <hr>
-    <div id="messages"><p>Laster samtale...</p></div>
-    <hr>
-    <h3>Svar Skallstuggu</h3>
-    <textarea id="replyMessage" maxlength="2000" placeholder="Skriv svaret ditt her..."></textarea>
-    <div><button class="send-btn" id="sendBtn">Send svar</button></div>
-    <div class="status" id="status"></div>
-  </div>
-</main>
-<script src="customer-booking.js?v=security1"></script>
-</body></html>
+<!doctype html>
+<html lang="nb"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Min bestilling | Skallstuggu</title><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
+<link rel="icon" href="favicon.svg"><link rel="stylesheet" href="customer-booking.css?v=2"></head>
+<body><main class="wrap">
+<a class="brand" href="index.html"><img src="images/Logo.png" alt="Skallstuggu – til forsiden"></a>
+<section class="card" id="loginPanel"><a class="back" href="booking.html">← Gå tilbake til booking</a>
+<p class="eyebrow">SKALLSTUGGU FJELLSTUE</p><h1>Pålogging til bestilling</h1><p>Se oppholdet ditt og hold kontakten med oss.</p>
+<form id="loginForm"><label for="loginEmail">E-postadresse</label><input id="loginEmail" type="email" autocomplete="email" placeholder="E-postadressen du bestilte med" required maxlength="254">
+<label for="bookingCode">Bestillingskode eller privat bookinglenke</label><input id="bookingCode" type="text" autocomplete="off" spellcheck="false" placeholder="Lim inn koden eller lenken fra e-posten" required maxlength="2048">
+<button id="loginButton" type="submit">Åpne min bestilling →</button><p id="loginStatus" role="alert"></p></form>
+<div class="help"><h2>Finner du ikke bestillingen?</h2><p>I e-posten fra oss finner du en privat bookinglenke. Du kan åpne lenken direkte eller lime den inn over sammen med e-postadressen din. Koden er den lange teksten etter «token=» i lenken.</p><p>Sjekk også søppelpost. Trenger du hjelp? <a href="mailto:post@skallstuggu.no">Kontakt oss</a> eller ring <a href="tel:90688873">906 88 873</a>.</p></div></section>
+<section class="card" id="bookingPanel" hidden><div class="topline"><a class="back" href="index.html">← Til forsiden</a><button class="secondary" id="logout" type="button">Lukk bestilling</button></div>
+<p class="eyebrow">DITT OPPHOLD PÅ FJELLET</p><h1 tabindex="-1" id="overviewTitle">Min bestilling</h1><p id="guestName"></p><p class="badge" id="bookingStatus"></p><p id="statusExplanation"></p>
+<div class="summary" id="bookingInfo"></div>
+<h2>Tillegg til oppholdet</h2><p id="extras"></p><div id="bookingMessage"></div>
+<div class="help"><h2>Meldinger med Skallstuggu</h2><div id="messages"></div>
+<form id="messageForm"><label for="replyMessage">Din melding</label><textarea id="replyMessage" maxlength="2000" required placeholder="Har du spørsmål om oppholdet?"></textarea><button id="sendBtn" type="submit">Send melding</button><p id="status" role="status"></p></form></div>
+<p class="footnote">Ønsker du å endre eller avbestille? Kontakt oss på <a href="mailto:post@skallstuggu.no">post@skallstuggu.no</a> eller <a href="tel:90688873">906 88 873</a>. En melding her endrer ikke bestillingen automatisk.</p></section>
+<p class="page-footer">Skallstuggu Fjellstue · Frolfjellet, Levanger</p>
+</main><script src="customer-booking.js?v=portal2"></script></body></html>
