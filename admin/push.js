@@ -1,17 +1,17 @@
 (async()=>{
  if(!await window.adminReady)return;
  const panel=document.createElement('section');panel.className='push-panel';panel.setAttribute('aria-label','Varsler på denne enheten');
- panel.innerHTML='<div><strong>Varsler på denne enheten</strong><p id="pushStatus" role="status">Sjekker støtte for varsler …</p></div><div class="push-actions"><button type="button" id="pushEnable" disabled>Aktiver varsler</button><button type="button" id="pushTest" hidden>Send testvarsel</button><button type="button" id="pushDisable" hidden>Deaktiver</button></div>';
+ panel.innerHTML='<div><strong>Varsler på denne enheten</strong><p id="pushStatus" role="status">Sjekker støtte for varsler …</p></div><div class="push-actions"><button type="button" id="pushEnable" disabled>Aktiver varsler</button><button type="button" id="pushDisable" hidden>Deaktiver</button></div>';
  const header=document.querySelector('.admin-site-header');if(header)header.after(panel);else document.body.prepend(panel);
- const status=panel.querySelector('#pushStatus'),enable=panel.querySelector('#pushEnable'),test=panel.querySelector('#pushTest'),disable=panel.querySelector('#pushDisable');
+ const status=panel.querySelector('#pushStatus'),enable=panel.querySelector('#pushEnable'),disable=panel.querySelector('#pushDisable');
  const api=async body=>{const r=await fetch('https://rbphgvnwmzjeuvyrasvy.supabase.co/functions/v1/admin-push',{method:'POST',headers:await window.adminHeaders(),body:JSON.stringify(body),signal:AbortSignal.timeout(20000)});const data=await r.json();if(!r.ok)throw new Error(data.error||'Kunne ikke endre varsling.');return data;};
  const ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
  const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
  if(ios&&!standalone){status.textContent='På iPhone: Legg admin til på Hjem-skjermen via Del-menyen. Åpne ikonet og aktiver varsler der (iOS 16.4 eller nyere).';return;}
  if(!('serviceWorker' in navigator)||!('PushManager' in window)||!('Notification' in window)){status.textContent='Denne nettleseren støtter ikke pushvarsler. Prøv en oppdatert nettleser eller åpne admin fra hjemskjermen.';return;}
  let registration,publicKey;
- const active=value=>{enable.hidden=value;test.hidden=!value;disable.hidden=!value;enable.disabled=false;};
- const busy=value=>{[enable,test,disable].forEach(button=>button.disabled=value);};
+ const active=value=>{enable.hidden=value;disable.hidden=!value;enable.disabled=false;};
+ const busy=value=>{[enable,disable].forEach(button=>button.disabled=value);};
  const error=e=>{status.textContent=e.message||'Kunne ikke aktivere varsler.';};
  window.disableAdminPush=async()=>{
   const sub=await registration?.pushManager.getSubscription();
@@ -35,9 +35,8 @@
    const key=Uint8Array.from(atob(publicKey.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
    const sub=await registration.pushManager.getSubscription()||await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:key});
    try{await api({action:'subscribe',subscription:sub.toJSON()});}catch(e){await sub.unsubscribe();throw e;}
-   active(true);status.textContent='Varsler er aktivert. Trykk «Send testvarsel» for å kontrollere telefonen.';
+   active(true);status.textContent='Varsler er aktivert for nye bookingforespørsler og meldinger fra gjester.';
   }catch(e){error(e);}finally{busy(false);}
  });
  disable.addEventListener('click',async()=>{busy(true);try{await window.disableAdminPush();}catch(e){error(e);}finally{busy(false);}});
- test.addEventListener('click',async()=>{busy(true);try{await api({action:'test',endpoint:(await registration.pushManager.getSubscription())?.endpoint});status.textContent='Testvarselet er sendt til varslingstjenesten. Sjekk telefonens varsler; Fokus/Ikke forstyrr kan skjule dem.';}catch(e){error(e);}finally{busy(false);}});
 })();
