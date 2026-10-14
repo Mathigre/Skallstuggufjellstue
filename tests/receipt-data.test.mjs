@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {emptyData,normalizeData,validateData,estimateCost} from '../admin/receipt-data.mjs';
+const receipt=()=>({...emptyData(),vendor:'Syntetisk butikk',purchase_date:'2026-10-13',currency:'NOK',net:200,vat:40,gross:240,vat_rates:[{rate:25,net:100,vat:25,gross:125},{rate:15,net:100,vat:15,gross:115}]});
+test('mixed VAT rates reconcile in øre',()=>assert.deepEqual(validateData(receipt()).errors,[]));
+test('missing numbers stay unknown, never zero',()=>{assert.equal(normalizeData({}).gross,null);assert.ok(validateData({}).errors.length>=6);});
+test('wrong total and wrong VAT split block approval',()=>{assert.ok(validateData({...receipt(),gross:241}).errors.length);assert.ok(validateData({...receipt(),vat_rates:[{rate:25,net:200,vat:50,gross:250}]}).errors.length);});
+test('explicit rounding reconciles totals',()=>assert.deepEqual(validateData({...receipt(),rounding:0.5,gross:240.5}).errors,[]));
+test('missing split blocks nonzero VAT',()=>assert.ok(validateData({...receipt(),vat_rates:[]}).errors.includes('MVA-fordeling mangler.')));
+test('invalid date, nonfinite and excessive rows rejected',()=>{assert.throws(()=>normalizeData({...receipt(),purchase_date:'2026-02-30'}));assert.throws(()=>normalizeData({gross:Infinity}));assert.throws(()=>normalizeData({items:Array(151).fill({})}));});
+test('no provider usage means unknown cost',()=>assert.equal(estimateCost(null,.1,.4).cost,null));
+test('cost includes thinking tokens if returned',()=>assert.deepEqual(estimateCost({promptTokenCount:1000,candidatesTokenCount:200,thoughtsTokenCount:50},.1,.4),{input:1000,output:250,cost:0.0002}));
+test('zero-rated receipt can be reviewed; warnings preserve uncertainty',()=>{const d={...receipt(),net:240,vat:0,vat_rates:[],uncertainties:['Kontroller dato']};assert.deepEqual(validateData(d).errors,[]);assert.ok(validateData(d).warnings.includes('Kontroller dato'));});

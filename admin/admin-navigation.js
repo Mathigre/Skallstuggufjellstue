@@ -1,6 +1,8 @@
 (() => {
   const header=document.querySelector('.admin-site-header');
   if(!header)return;
+  const menu=header.querySelector('.admin-site-links');
+  if(menu&&!menu.querySelector('[href="kvitteringer.html"]')){const link=document.createElement('a');link.href='kvitteringer.html';link.textContent='Kvitteringer';menu.append(link);}
   const toggle=header.querySelector('.admin-site-toggle'),links=header.querySelector('.admin-site-links');
   const setOpen=open=>{links.classList.toggle('is-open',open);toggle.setAttribute('aria-expanded',String(open));toggle.setAttribute('aria-label',open?'Lukk meny':'Åpne meny');};
   toggle.addEventListener('click',()=>setOpen(toggle.getAttribute('aria-expanded')!=='true'));
@@ -10,3 +12,4 @@
   matchMedia('(max-width:1000px)').addEventListener('change',()=>setOpen(false));
   header.querySelector('.admin-site-logout').addEventListener('click',()=>{if(confirm('Vil du logge ut fra admin?'))window.logoutAdmin();});
 })();
+
