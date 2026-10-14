@@ -1,3 +1,5 @@
+import {parseReceiptText} from './receipt-ocr.mjs';
+import {loadOCR,recognizeReceipt} from './receipt-ocr-engine.mjs';
 import {emptyData,normalizeData,validateData,textFields,moneyFields} from './receipt-data.mjs';
 const $=id=>document.getElementById(id),endpoint='https://rbphgvnwmzjeuvyrasvy.supabase.co/functions/v1/receipt-analyze';
 let receipts=[],current=null,runs=[],settings={},dirty=false,busy=false;
@@ -20,10 +22,10 @@ function syncButtons(){
  $('recover').hidden=!processing;
  $('delete').hidden=deleted;$('restore').hidden=!deleted;
  $('analyze').disabled=busy||deleted||processing||current.review_status==='approved';
- $('analyze').textContent=runs.length?'Analyser på nytt (nytt API-kall)':'Analyser med Gemini';
+ $('analyze').textContent='Les tekst gratis';
  $('receiptForm').querySelectorAll('input,textarea,button').forEach(e=>e.disabled=e.hasAttribute('data-permanent-disabled')||busy||deleted||processing);
  $('applyAI').hidden=!current.ai_data||!current.reviewed_data;
- $('analysisHint').textContent=processing?'Analyse pågår. Oppdater listen for å hente resultatet.':runs.length?'Å åpne og redigere denne kvitteringen koster ingen AI-kall. En ny analyse krever bekreftelse.':'Opplasting alene bruker ingen AI-kall.';
+ $('analysisHint').textContent='Tekstlesingen skjer på enheten. Forslag må kontrolleres og lagres manuelt.';
 }
 function elem(tag,text,cls){const e=document.createElement(tag);if(text!=null)e.textContent=text;if(cls)e.className=cls;return e;}
 function renderList(){
@@ -31,7 +33,7 @@ function renderList(){
  const visible=receipts.filter(r=>{
  const d=r.reviewed_data||r.ai_data||{};
  return (filter==='deleted'?r.deleted_at:!r.deleted_at)&&
- (filter==='approved'?r.review_status==='approved':filter==='new'?r.ai_status==='new':filter==='draft'?r.review_status!=='approved':true)&&
+ (filter==='approved'?r.review_status==='approved':filter==='new'?r.ai_status==='new'&&!r.reviewed_data:filter==='draft'?r.review_status!=='approved':true)&&
  [r.original_name,d.vendor,d.purchase_date,d.category].join(' ').toLocaleLowerCase('nb').includes(q);
  });
  $('receiptList').replaceChildren();
@@ -39,7 +41,7 @@ function renderList(){
  const d=r.reviewed_data||r.ai_data||{},row=elem('div',null,'receipt-row'),title=elem('div');
  title.append(elem('strong',d.vendor||r.original_name),elem('small',[d.purchase_date||'Dato mangler',d.gross!=null?d.gross.toLocaleString('nb-NO',{minimumFractionDigits:2})+' '+(d.currency||''):'Beløp mangler',r.synthetic?'Testbilag':''].filter(Boolean).join(' · ')));
  const button=elem('button','Åpne','secondary');button.onclick=()=>{if(canLeave())run(()=>openReceipt(r.id));};
- row.append(title,elem('span',r.deleted_at?'Papirkurv':r.review_status==='approved'?'Kontrollert':statusLabels[r.ai_status],'badge'),button);$('receiptList').append(row);
+ row.append(title,elem('span',r.deleted_at?'Papirkurv':r.review_status==='approved'?'Kontrollert':r.reviewed_data?'Til kontroll':statusLabels[r.ai_status],'badge'),button);$('receiptList').append(row);
  }
  if(!visible.length)$('receiptList').append(elem('p','Ingen kvitteringer i denne visningen.'));
 }
@@ -49,7 +51,7 @@ async function loadList(){
  while(more){const r=await api({action:'list',page});receipts.push(...r.receipts);settings=r.settings;usage=r.usage;more=r.more;page++;}
  $('mode').textContent=settings.real_documents_enabled?'Kvitteringsarkiv':'Testmodus – bruk kun syntetiske bilag';
  $('testConsent').hidden=settings.real_documents_enabled;
- $('quota').textContent=usage?'I dag: '+usage.admin+' / '+settings.admin_daily_limit+' analyser for deg · '+usage.total+' / '+settings.total_daily_limit+' totalt. Nullstilles ved midnatt, norsk tid.':'';
+ $('quota').textContent='Tesseract · ingen betaling per skanning. Privat lagring bruker fortsatt Supabase.';
  renderList();
 }
 const rowFields={vat:['rate','net','vat','gross'],item:['description','quantity','unit_price','gross','vat_rate']};
@@ -95,7 +97,7 @@ async function openReceipt(id,keepForm=false){
  else $('preview').append(elem('p','HEIC-forhåndsvisning støttes ikke i alle nettlesere. Åpne originalfilen for kontroll.'));
  $('analysisHistory').replaceChildren(elem('h3','Analysehistorikk'));
  for(const r of runs)$('analysisHistory').append(elem('p',new Date(r.started_at).toLocaleString('nb-NO')+' · '+r.model+' · '+r.status+' · '+(r.input_tokens??'?')+' inn / '+(r.output_tokens??'?')+' ut · '+(r.estimated_usd==null?'kostnad ukjent':'est. $'+Number(r.estimated_usd).toFixed(6))));
- if(!keepForm)renderForm(current.reviewed_data||current.ai_data||emptyData());
+ if(!keepForm){renderForm(current.reviewed_data||current.ai_data||emptyData());$('ocrResult').hidden=true;$('ocrText').value='';}
  syncButtons();$('detail').focus({preventScroll:true});
 }
 async function analysisCopy(file){
@@ -138,12 +140,17 @@ $('renewPreview').onclick=()=>run(()=>openReceipt(current.id,true));
 $('addVat').onclick=()=>{addRow('vat');changed();};$('addItem').onclick=()=>{addRow('item');changed();};
 $('applyAI').onclick=()=>{if(confirm('Bytt skjemaet til det nyeste AI-forslaget? Lagrede rettelser erstattes først når du lagrer.')){renderForm(current.ai_data);dirty=true;}};
 $('analyze').onclick=()=>{
- if(dirty&&!confirm('Lagre rettelsene først hvis du vil beholde dem. Fortsette uten å lagre?'))return;
- if(!confirm(runs.length?'Dette starter ett nytt betalt API-kall. Fortsette?':'Send denne kvitteringen til Google Gemini for én analyse?'))return;
+ if(!canLeave())return;
  run(async()=>{
- say('Analyserer … Dette kan ta opptil 90 sekunder.');
- try{await api({action:'analyze',id:current.id,revision:current.revision,reanalyze:runs.length>0});say('Analysen er klar. Kontroller opplysningene.');}
- finally{await openReceipt(current.id);await loadList();}
+ say('Starter lokal tekstlesing …');
+ const fresh=await api({action:'get',id:current.id});
+ const response=await fetch(fresh.url);
+ if(!response.ok)throw Error('Kunne ikke hente originalen. Åpne kvitteringen på nytt.');
+ const text=await recognizeReceipt(await response.blob(),current.mime_type,say);
+ if(!text.trim())throw Error('Ingen lesbar tekst funnet. Ta et tydeligere bilde eller fyll inn manuelt.');
+ renderForm(parseReceiptText(text));dirty=true;
+ $('ocrText').value=text;$('ocrResult').hidden=false;
+ say('Teksten er lest lokalt. Kontroller forslagene, fyll inn manglende felt og lagre.');
  });
 };
 async function save(action){
@@ -154,7 +161,7 @@ async function save(action){
 }
 $('receiptForm').onsubmit=e=>{e.preventDefault();run(()=>save('save'));};$('approve').onclick=()=>run(()=>save('approve'));
 for(const action of ['delete','restore'])$(action).onclick=()=>{if(canLeave()&&confirm(action==='delete'?'Flytt kvitteringen til papirkurven? Originalfilen beholdes.':'Gjenopprette kvitteringen?'))run(async()=>{await api({action,id:current.id,revision:current.revision});dirty=false;await openReceipt(current.id);await loadList();say(action==='delete'?'Flyttet til papirkurven.':'Gjenopprettet.');});};
-$('checkModel').onclick=()=>run(async()=>{const r=await api({action:'model'});$('modelStatus').textContent=r.available?' '+r.model+' finnes i Googles modelloversikt. Full tilgang bekreftes ved analyse.':' Modellen støtter ikke analyse.';});
+$('checkModel').onclick=()=>run(async()=>{await loadOCR();$('modelStatus').textContent=' Tekstleseren er lastet. Ingen API-nøkkel nødvendig.';});
 $('recover').onclick=()=>run(async()=>{await api({action:'recover',id:current.id,revision:current.revision});await openReceipt(current.id);await loadList();say('Avbrutt analyse frigjort. Ingen nytt AI-kall er startet.');});
 window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
 if(await window.adminReady)run(async()=>{await loadList();say('Klar. Last opp en kvittering for å begynne.');});
