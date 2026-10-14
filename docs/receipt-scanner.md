@@ -22,3 +22,6 @@ SQL-integrasjonstestene fra første versjon bestod med rollback. De krever aktiv
 Fysisk mobilkamera/HEIC er ikke verifisert på alle enheter.
 
 Nettlesertest 2026-10-14: faktisk Tesseract på syntetisk PNG leste 2026-10-13, NOK, netto200, MVA40 og total240 korrekt. Utkast lagret i Supabase og åpnet igjen med samme verdier. Antall Gemini-kall forble3 (alle fra tidligere tester). PDF-rasterisering og fysisk mobil/HEIC må fortsatt verifiseres praktisk.
+
+## Publisering 2026-10-14
+Eier har bedt om publisering og ekte bilag. real_documents_enabled=true; enabled=false (betalt Gemini fortsatt sperret). Syntetiske testbilag er flyttet til papirkurven. Varsler pauser serverlevering ved utlogging, men beholder nettleserabonnementet for automatisk gjenopptak ved neste innlogging. Deaktiver-knappen avslutter abonnementet. Ny test tests/push-logout.test.mjs verifiserer dette uten nye tillatelsesforespørsler.
