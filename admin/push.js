@@ -13,10 +13,14 @@
  const active=value=>{enable.hidden=value;disable.hidden=!value;enable.disabled=false;};
  const busy=value=>{[enable,disable].forEach(button=>button.disabled=value);};
  const error=e=>{status.textContent=e.message||'Kunne ikke aktivere varsler.';};
- window.disableAdminPush=async()=>{
+ window.disableAdminPush=async({preserveSubscription=false}={})=>{
   const sub=await registration?.pushManager.getSubscription();
-  if(sub){let serverError;try{await api({action:'unsubscribe',endpoint:sub.endpoint});}catch(e){serverError=e;}const removed=await sub.unsubscribe();if(!removed&&serverError)throw serverError;}
-  active(false);status.textContent='Varsler er deaktivert på denne enheten.';
+  if(sub){
+   try{await api({action:'unsubscribe',endpoint:sub.endpoint});}
+   catch(e){await sub.unsubscribe();throw e;}
+   if(!preserveSubscription)await sub.unsubscribe();
+  }
+  active(false);status.textContent=preserveSubscription?'Varsler er pauset til neste innlogging.':'Varsler er deaktivert på denne enheten.';
  };
  try{
   registration=await navigator.serviceWorker.register('/admin/push-sw.js',{scope:'/admin/'});
