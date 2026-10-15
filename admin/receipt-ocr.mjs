@@ -1,15 +1,40 @@
 import {emptyData} from './receipt-data.mjs';
 export function parseReceiptText(text){
- const d=emptyData(),lines=text.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);let conflictingTotals=false;
+ const d=emptyData(),lines=text.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);let conflictingTotals=false;let totalCandidates=[];
  // Sparse OCR sometimes puts a label and its value on separate lines.
  for(let i=0;i<lines.length-1;i++)if(/^(?:total(?:t|beløp)?|netto|mva)\s*:?$/i.test(lines[i])&&/^(?:NOK\s*)?-?\d[\d .]*[,.]\s*\d{2}\s*(?:NOK|kr)?$/i.test(lines[i+1]))lines[i]+=' '+lines[i+1];
  const numbers=s=>[...s.replace(/([,.])\s+(?=\d{2}\b)/g,'$1').matchAll(/-?(?:\d{1,3}(?:[ .]\d{3})+|\d+)[,.]\d{2}(?!\d)/g)].map(m=>Number(m[0].slice(0,-3).replace(/[ .]/g,'')+'.'+m[0].slice(-2)));
  const amount=s=>{const values=numbers(s);return values.length===1?values[0]:null;};
  for(const [key,re] of [['gross',/^(?:total(?:t|beløp|belep)?(?:\s+nok)?|sum|å betale|a betale)\s*[: ]/i],['net',/^(?:netto|sum eks(?:kl)?\.?\s*mva)\s*[: ]/i],['vat',/^(?:mva|mva-beløp|sum mva)\s*[: ]/i]]){
  const values=lines.filter(l=>re.test(l)&&!/%/.test(l)).map(amount).filter(v=>v!==null);
- const unique=[...new Set(values)];if(unique.length===1)d[key]=unique[0];if(key==='gross'&&unique.length>1)conflictingTotals=true;
+ const unique=[...new Set(values)];if(unique.length===1)d[key]=unique[0];if(key==='gross'){totalCandidates=unique;if(unique.length>1)conflictingTotals=true;}
  }
  const agrees=(a,b)=>Math.abs(Math.round(a*100)-Math.round(b*100))<=2;
+ // A validated purchase VAT table can corroborate one of conflicting OCR totals.
+ // Stop at savings/loyalty sections: those contain a separate, unrelated VAT table.
+ const purchaseTables=[];
+ for(let h=0;h<lines.length;h++){
+ if(/spart|medlemsfordel|utbytte|andre rabatter/i.test(lines[h]))break;
+ if(!/[mh]va[- ]?[ag]runnlag/i.test(lines[h])||!/[mh]va\s*[-%]/i.test(lines[h])||!/sum/i.test(lines[h]))continue;
+ const rows=[];
+ for(const line of lines.slice(h+1,h+7)){
+ if(/spart|medlems|utbytte|rabatt|^sum\b/i.test(line))break;
+ const rateMatch=line.match(/\b(\d{1,2})(?:[,.]0{1,2})?\s*%/);if(!rateMatch)continue;
+ // Remove only stray quote marks next to a decimal separator; never guess digits.
+ const cleaned=line.replace(/(?<=\d)["“”']+(?=[,.])/g,'');
+ const before=numbers(cleaned.slice(0,cleaned.indexOf(rateMatch[0])));
+ const after=numbers(cleaned.slice(cleaned.indexOf(rateMatch[0])+rateMatch[0].length));
+ if(before.length!==1||after.length!==2)continue;
+ const rate=Number(rateMatch[1]),net=before[0],[vat,gross]=after;
+ if([0,10,12,15,25].includes(rate)&&agrees(net+vat,gross)&&agrees(net*rate/100,vat))rows.push({rate,net,vat,gross});
+ }
+ const gross=Math.round(rows.reduce((s,r)=>s+r.gross,0)*100)/100;
+ if(rows.length&&totalCandidates.some(v=>agrees(v,gross)))purchaseTables.push({rows,gross});
+ }
+ if(purchaseTables.length===1){
+ const {rows,gross}=purchaseTables[0];d.gross=gross;d.vat_rates=rows;
+ d.net=Math.round(rows.reduce((s,r)=>s+r.net,0)*100)/100;d.vat=Math.round(rows.reduce((s,r)=>s+r.vat,0)*100)/100;
+ }
  const sums=lines.filter(l=>/^sum\s/i.test(l)).map(numbers).filter(v=>v.length===3&&agrees(v[0]+v[1],v[2]));
  if(sums.length===1&&!conflictingTotals){const [net,vat,gross]=sums[0];if(d.gross===null||agrees(d.gross,gross)){d.net=net;d.vat=vat;d.gross=gross;}}
  // Only parse rate rows beneath an explicit VAT table heading.
@@ -45,14 +70,15 @@ export function parseReceiptText(text){
  }
  const dates=[...text.matchAll(/\b(20\d{2})-(\d{2})-(\d{2})\b|\b(\d{2})[./ °-](\d{2})[./ °-](20\d{2}|\d{2})\b/g)].map(m=>m[1]?m[1]+'-'+m[2]+'-'+m[3]:(m[6].length===2?'20'+m[6]:m[6])+'-'+m[5]+'-'+m[4]);
  const unique=[...new Set(dates.filter(date=>!isNaN(Date.parse(date))&&new Date(date).toISOString().slice(0,10)===date))];if(unique.length===1)d.purchase_date=unique[0];
- const org=text.match(/[od]rg(?:anisasjons)?\.?\s*(?:nr|nummer)?\.?\s*:?\s*(\d{3})\s?(\d{3})\s?(\d{3})\b/i);if(org){
+ const org=text.match(/[od]r[gas](?:anisasjons)?\.?\s*(?:nr|nummer)?\.?\s*:?\s*(\d{3})\s?(\d{3})\s?(\d{3})\b/i);if(org){
  const value=org.slice(1).join(''),weights=[3,2,7,6,5,4,3,2],remainder=value.slice(0,8).split('').reduce((s,n,i)=>s+Number(n)*weights[i],0)%11,control=remainder===0?0:11-remainder;
  if(control===Number(value[8]))d.organization_number=value;
  }
- const companies=lines.slice(0,10).filter(l=>/\b(?:AS|ASA|ENK)\b/.test(l)&&!/[\d%]/.test(l));if(companies.length===1)d.vendor=companies[0];
+ const companies=lines.slice(0,12).filter(l=>/\b(?:AS|ASA|SA|ENK)\b/.test(l)&&!/[\d%]/.test(l));if(companies.length===1)d.vendor=companies[0].replace(/\s*[|]+\s*$/,'');
  if(/\bNOK\b/.test(text))d.currency='NOK';
  if(/\b(?:BANK|bankkort|Visa|Mastercard|BankAxept|Contactless|PIN OK)\b/i.test(text))d.payment_method='Kort';
- d.notes='Tesseract OCR – ukontrollert tekst:\n'+text.slice(0,1750)+(text.length>1750?'\n[Avkortet; se originalfil]':'');
+ // Raw OCR is shown separately in the UI, not stored as the user's bookkeeping note.
+ d.notes=null;
  d.uncertainties=['Tekstlest lokalt. Kontroller alle foreslåtte verdier mot originalen.',d.vendor?'Kontroller leverandørnavnet. Varelinjer og regnskapskonto må fylles ut manuelt.':'Leverandør, varelinjer og regnskapskonto må fylles ut manuelt.'];
  if(!d.vat_rates.length)d.uncertainties.push('MVA-fordeling må fylles ut manuelt.');
  if(/midlertidig\s+kvittering/i.test(text))d.uncertainties.push('Dokumentet er merket midlertidig kvittering. Skaff og kontroller endelig kvittering før bokføring.');
