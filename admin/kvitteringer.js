@@ -2,7 +2,18 @@ import {parseReceiptText} from './receipt-ocr.mjs?v=20261015c';
 import {loadOCR,recognizeReceipt} from './receipt-ocr-engine.mjs?v=20261015c';
 import {emptyData,normalizeData,validateData,textFields,moneyFields} from './receipt-data.mjs';
 const $=id=>document.getElementById(id),endpoint='https://rbphgvnwmzjeuvyrasvy.supabase.co/functions/v1/receipt-analyze';
-let receipts=[],current=null,runs=[],settings={},dirty=false,busy=false;
+const fikenEndpoint='https://rbphgvnwmzjeuvyrasvy.supabase.co/functions/v1/fiken-receipt';
+let receipts=[],current=null,runs=[],settings={},dirty=false,busy=false,fikenState=null,fikenLoaded=false;
+async function fikenApi(body){
+ const response=await fetch(fikenEndpoint,{method:'POST',headers:await window.adminHeaders(),body:JSON.stringify(body)});
+ const result=await response.json();if(!response.ok)throw Error(result.error||'Fiken-eksporten feilet.');return result;
+}
+async function loadFikenStatus(){
+ fikenLoaded=false;syncButtons();
+ try{const result=await fikenApi({action:'status',id:current.id});fikenState=result.export;fikenLoaded=true;}
+ catch{$('fikenStatus').textContent='Kunne ikke hente eksportstatus. Sending deaktivert.';return;}
+ syncButtons();
+}
 const labels={vendor:'Leverandør',organization_number:'Organisasjonsnummer',purchase_date:'Kjøpsdato',currency:'Valuta',payment_method:'Betalingsmetode',category:'Kategori (forslag)',account:'Konto (forslag)',notes:'Notater',net:'Beløp ekskl. MVA',vat:'MVA',gross:'Totalbeløp inkl. MVA',rounding:'Avrunding'};
 const statusLabels={new:'Ikke analysert',processing:'Analyserer',ready:'Til kontroll',error:'Analyse feilet'};
 const say=(message,error=false)=>{$('status').textContent=message;$('status').className=error?'error':'';};
@@ -26,6 +37,8 @@ function syncButtons(){
  $('receiptForm').querySelectorAll('input,textarea,button').forEach(e=>e.disabled=e.hasAttribute('data-permanent-disabled')||busy||deleted||processing);
  $('applyAI').hidden=!current.ai_data||!current.reviewed_data;
  $('analysisHint').textContent='Tekstlesingen skjer på enheten. Forslag må kontrolleres og lagres manuelt.';
+ $('fikenExport').disabled=!fikenLoaded||busy||dirty||deleted||processing||current.review_status!=='approved'||fikenState!==null;
+ $('fikenStatus').textContent=fikenState?'Fiken: '+({processing:'Sending pågår',draft_created:'Utkast opprettet – kontroller vedlegg',ready:'Kjøpsutkast med vedlegg opprettet',uncertain:'Usikker sending – kontroller Fiken',error:'Sending avbrutt – kontroller status'}[fikenState.state]||fikenState.state):'Testforetak: apiskallstuggu. Oppretter bare et utkast.';
 }
 function elem(tag,text,cls){const e=document.createElement(tag);if(text!=null)e.textContent=text;if(cls)e.className=cls;return e;}
 function renderList(){
@@ -85,11 +98,11 @@ function showValidation(){
  if(!result.errors.length)$('validation').append(elem('p','Beløpene summerer. Kontroller opplysningene mot originalen.'));
  }catch(e){$('validation').append(elem('p',e.message,'error'));}
 }
-function changed(){dirty=true;$('confirmed').checked=false;showValidation();}
+function changed(){dirty=true;$('confirmed').checked=false;showValidation();syncButtons();}
 $('receiptForm').addEventListener('input',e=>{if(e.target.id!=='confirmed')changed();});
 function canLeave(){return !dirty||confirm('Du har ulagrede rettelser. Vil du forkaste dem?');}
 async function openReceipt(id,keepForm=false){
- const result=await api({action:'get',id});current=result.receipt;runs=result.runs;
+ const result=await api({action:'get',id});current=result.receipt;runs=result.runs;fikenState=null;fikenLoaded=false;
  $('detail').hidden=false;$('fileTitle').textContent=current.original_name;
  $('original').href=result.url;$('preview').replaceChildren();
  if(['image/jpeg','image/png'].includes(current.mime_type)){const img=elem('img');img.src=result.url;img.alt='Original kvittering';$('preview').append(img);}
@@ -98,7 +111,7 @@ async function openReceipt(id,keepForm=false){
  $('analysisHistory').replaceChildren(elem('h3','Analysehistorikk'));
  for(const r of runs)$('analysisHistory').append(elem('p',new Date(r.started_at).toLocaleString('nb-NO')+' · '+r.model+' · '+r.status+' · '+(r.input_tokens??'?')+' inn / '+(r.output_tokens??'?')+' ut · '+(r.estimated_usd==null?'kostnad ukjent':'est. $'+Number(r.estimated_usd).toFixed(6))));
  if(!keepForm){renderForm(current.reviewed_data||current.ai_data||emptyData());$('ocrResult').hidden=true;$('ocrText').value='';}
- syncButtons();$('detail').focus({preventScroll:true});
+ syncButtons();await loadFikenStatus();$('detail').focus({preventScroll:true});
 }
 async function analysisCopy(file){
  if(!/\.(jpe?g|png|heic|heif)$/i.test(file.name))return null;
@@ -160,6 +173,11 @@ async function save(action){
  const result=await api({action,id:current.id,revision:current.revision,data,confirmed:$('confirmed').checked});
  current=result.receipt;dirty=false;await loadList();await openReceipt(current.id);say(action==='approve'?'Lagret som kontrollert. Ikke sendt til Fiken.':'Utkastet er lagret.');
 }
+$('fikenExport').onclick=()=>{
+ if(!current||!fikenLoaded||dirty||current.review_status!=='approved'||fikenState)return;
+ if(!confirm('Opprette kjøpsutkast med originalbilaget i apiskallstuggu (test)? Ingen bokføring eller betaling utføres.'))return;
+ run(async()=>{try{const result=await fikenApi({action:'create_draft',id:current.id,revision:current.revision});say('Kjøpsutkast #'+result.draftId+' med vedlegg er bekreftet i apiskallstuggu.');}finally{await loadFikenStatus();}});
+};
 $('receiptForm').onsubmit=e=>{e.preventDefault();run(()=>save('save'));};$('approve').onclick=()=>run(()=>save('approve'));
 for(const action of ['delete','restore'])$(action).onclick=()=>{if(canLeave()&&confirm(action==='delete'?'Flytt kvitteringen til papirkurven? Originalfilen beholdes.':'Gjenopprette kvitteringen?'))run(async()=>{await api({action,id:current.id,revision:current.revision});dirty=false;await openReceipt(current.id);await loadList();say(action==='delete'?'Flyttet til papirkurven.':'Gjenopprettet.');});};
 $('checkModel').onclick=()=>run(async()=>{await loadOCR();$('modelStatus').textContent=' Tekstleseren er lastet. Ingen API-nøkkel nødvendig.';});
