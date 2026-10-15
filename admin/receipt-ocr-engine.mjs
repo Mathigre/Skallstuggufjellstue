@@ -1,3 +1,5 @@
+import {prepareReceipt} from './receipt-image.mjs?v=20261015';
+import {parseReceiptText} from './receipt-ocr.mjs?v=20261015';
 const VERSION='6.0.1';
 let loading;
 export function loadOCR(){
@@ -11,6 +13,39 @@ export function loadOCR(){
 }
 export async function recognizeReceipt(blob,mime,onProgress=()=>{}){
  const T=await loadOCR();let worker,pdf,timer,expired=false;
+ const check=()=>{if(expired)throw Error('Tekstlesingen ble avbrutt.');};
+ async function readImage(image){
+ const canvas=prepareReceipt(image);
+ try{
+ check();await worker.setParameters({tessedit_pageseg_mode:'4',preserve_interword_spaces:'1',user_defined_dpi:'300'});
+ const first=(await worker.recognize(canvas)).data;
+ const rank=r=>{const d=parseReceiptText(r.text);return (r.confidence||0)+[d.purchase_date,d.gross,d.net,d.vat].filter(v=>v!==null).length*12;};
+ if(first.confidence>=85&&parseReceiptText(first.text).gross!==null)return first.text;
+ check();onProgress('Forbedrer lesingen i mindre deler …');
+ await worker.setParameters({tessedit_pageseg_mode:'6'});
+ // Split at whitespace so no printed line is cut between two passes.
+ const ctx=canvas.getContext('2d',{willReadFrequently:true}),pixels=ctx.getImageData(0,0,canvas.width,canvas.height).data;
+ const cuts=[0];const parts=Math.min(4,Math.max(1,Math.ceil(canvas.height/(canvas.width*1.3))));
+ for(let p=1;p<parts;p++){
+ const center=Math.round(canvas.height*p/parts),radius=Math.round(Math.min(100,canvas.height/parts*.12));let best=center,score=Infinity;
+ for(let y=Math.max(1,center-radius);y<Math.min(canvas.height-1,center+radius);y++){
+ let ink=0;for(let x=0;x<canvas.width;x++)if(pixels[(y*canvas.width+x)*4]<140)ink++;
+ const cost=ink+Math.abs(y-center)*.005;if(cost<score){score=cost;best=y;}
+ }cuts.push(best);
+ }cuts.push(canvas.height);
+ let text='',confidence=0;
+ for(let i=0;i<cuts.length-1;i++){check();onProgress('Leser del '+(i+1)+' av '+(cuts.length-1));const result=(await worker.recognize(canvas,{rectangle:{left:0,top:cuts[i],width:canvas.width,height:cuts[i+1]-cuts[i]}})).data;text+=result.text+'\n';confidence+=(result.confidence||0)/(cuts.length-1);}
+ const second={text,confidence};let best=rank(second)>rank(first)?second:first;
+ if(parseReceiptText(best.text).net===null||parseReceiptText(best.text).vat===null){
+ check();onProgress('Forbedrer kontrast og kontrollerer beløp …');
+ // A separate monochrome pass helps small thermal-printer text.
+ const binary=ctx.getImageData(0,0,canvas.width,canvas.height);
+ for(let i=0;i<binary.data.length;i+=4){const v=binary.data[i]<175?0:255;binary.data[i]=binary.data[i+1]=binary.data[i+2]=v;}
+ ctx.putImageData(binary,0,0);
+ const third=(await worker.recognize(canvas)).data;if(rank(third)>rank(best))best=third;
+ }return best.text;
+ }finally{canvas.width=canvas.height=0;}
+ }
  const work=(async()=>{
  worker=await T.createWorker('nor+eng',1,{
  workerPath:'https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/worker.min.js',
@@ -30,7 +65,7 @@ export async function recognizeReceipt(blob,mime,onProgress=()=>{}){
  const page=await pdf.getPage(i),natural=page.getViewport({scale:1}),scale=Math.min(2,2200/natural.width,Math.sqrt(12000000/(natural.width*natural.height))),view=page.getViewport({scale});
  const canvas=document.createElement('canvas');canvas.width=Math.ceil(view.width);canvas.height=Math.ceil(view.height);
  await page.render({canvasContext:canvas.getContext('2d'),viewport:view}).promise;
- text+=(await worker.recognize(canvas)).data.text+'\n';canvas.width=canvas.height=0;page.cleanup();
+ try{text+=await readImage(canvas)+'\n';}finally{canvas.width=canvas.height=0;page.cleanup();}
  }
  return text;
  }
@@ -38,13 +73,11 @@ export async function recognizeReceipt(blob,mime,onProgress=()=>{}){
  let image;try{image=await createImageBitmap(blob);}catch{throw Error('Nettleseren kan ikke lese dette bildet. Last opp JPG eller PNG i stedet for HEIC.');}
  try{
  if(image.width*image.height>60000000)throw Error('Bildet er for stort. Bruk lavere oppløsning.');
- const scale=Math.min(1,2200/image.width,Math.sqrt(12000000/(image.width*image.height)));
- const canvas=document.createElement('canvas');canvas.width=Math.round(image.width*scale);canvas.height=Math.round(image.height*scale);
- const ctx=canvas.getContext('2d');ctx.fillStyle='white';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(image,0,0,canvas.width,canvas.height);
- try{return (await worker.recognize(canvas)).data.text;}finally{canvas.width=canvas.height=0;}
+ return await readImage(image);
  }finally{image.close();}
  })();
  try{
  return await Promise.race([work,new Promise((_,reject)=>{timer=setTimeout(()=>{expired=true;reject(Error('Tekstlesingen tok for lang tid. Prøv et tydeligere bilde.'));},120000);})]);
  }finally{clearTimeout(timer);await worker?.terminate();await pdf?.destroy();}
 }
+
