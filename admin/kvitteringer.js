@@ -131,8 +131,8 @@ async function upload(fileList){
  for(const message of failures)$('receiptList').prepend(elem('p',message,'error'));
  say((files.length-failed)+' av '+files.length+' filer lagret. '+(failed?'Noen filer feilet eller finnes allerede. ':'')+'Ingen AI-analyser er startet.',failed>0);
 }
-$('cameraButton').onclick=()=>{if(canLeave())$('camera').click();};$('uploadButton').onclick=()=>{if(canLeave())$('files').click();};
-for(const id of ['camera','files'])$(id).onchange=()=>{const files=Array.from($(id).files);$(id).value='';run(()=>upload(files));};
+$('uploadButton').onclick=()=>{if(canLeave())$('files').click();};
+for(const id of ['files'])$(id).onchange=()=>{const files=Array.from($(id).files);$(id).value='';run(()=>upload(files));};
 $('search').oninput=renderList;$('filter').onchange=renderList;
 $('refresh').onclick=()=>{if(canLeave())run(async()=>{await loadList();if(current)await openReceipt(current.id);say('Oppdatert.');});};
 $('closeDetail').onclick=()=>{if(canLeave()){$('detail').hidden=true;current=null;dirty=false;}};
