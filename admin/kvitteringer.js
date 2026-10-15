@@ -1,5 +1,5 @@
-import {parseReceiptText} from './receipt-ocr.mjs?v=20261015';
-import {loadOCR,recognizeReceipt} from './receipt-ocr-engine.mjs?v=20261015';
+import {parseReceiptText} from './receipt-ocr.mjs?v=20261015b';
+import {loadOCR,recognizeReceipt} from './receipt-ocr-engine.mjs?v=20261015b';
 import {emptyData,normalizeData,validateData,textFields,moneyFields} from './receipt-data.mjs';
 const $=id=>document.getElementById(id),endpoint='https://rbphgvnwmzjeuvyrasvy.supabase.co/functions/v1/receipt-analyze';
 let receipts=[],current=null,runs=[],settings={},dirty=false,busy=false;

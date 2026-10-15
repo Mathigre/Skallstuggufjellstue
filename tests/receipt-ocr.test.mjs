@@ -33,4 +33,16 @@ test('header supplier and checksum, invalid phone dates ignored',()=>{
 test('summary does not override conflicting explicit totals',()=>{
  assert.equal(parseReceiptText('TOTAL 100,00\nTOTAL 200,00\nSUM 80,00 20,00 100,00').gross,null);
 });
+test('terminal receipt has day-first hyphen date and VAT before net',()=>{
+ const d=parseReceiptText('Tiger AS Raglamyr Veiservice\nDato 11-06-2017 18:25\nTOTAL NOK 424,47\nMVA% MVA + Netto = Totalt\nMVA 2 25,0% 84,89 339,58 424,47\nORG:916759541');
+ assert.equal(d.purchase_date,'2017-06-11');assert.equal(d.vendor,'Tiger AS Raglamyr Veiservice');assert.equal(d.net,339.58);assert.equal(d.vat,84.89);assert.deepEqual(d.vat_rates,[{rate:25,net:339.58,vat:84.89,gross:424.47}]);
+});
+test('included VAT is verified, clipped decimals are never completed by guessing',()=>{
+ const d=parseReceiptText('Dato: 07.07.2013\nTotal 524,00\nHerav 25% (524,00) 104,80\nMidlertidig kvittering');assert.equal(d.net,419.2);assert.equal(d.vat,104.8);assert.equal(d.vat_rates.length,1);assert.ok(d.uncertainties.some(s=>s.includes('midlertidig')));
+ assert.equal(parseReceiptText('Total 524,00\nHerav 25% (524,00) 104,8').vat,null);
+ assert.equal(parseReceiptText('Total 524,00\nHerav 25% (524,00) 114,80').vat,null);
+});
+test('sparse total label can precede amount, but incomplete amounts stay blank',()=>{
+ assert.equal(parseReceiptText('Total\nNOK 524,00').gross,524);assert.equal(parseReceiptText('Total\n524,0').gross,null);assert.equal(parseReceiptText('Contactless\nPIN OK').payment_method,'Kort');
+});
 
