@@ -1,5 +1,6 @@
-import {prepareReceipt,normalizedReceipt} from './receipt-image.mjs?v=20261015b';
-import {parseReceiptText} from './receipt-ocr.mjs?v=20261015b';
+import {receiptLines} from './receipt-layout.mjs?v=20261015c';
+import {prepareReceipt,normalizedReceipt} from './receipt-image.mjs?v=20261015c';
+import {parseReceiptText} from './receipt-ocr.mjs?v=20261015c';
 const VERSION='6.0.1';
 let loading;
 export function loadOCR(){
@@ -16,10 +17,12 @@ export async function recognizeReceipt(blob,mime,onProgress=()=>{}){
  const check=()=>{if(expired)throw Error('Tekstlesingen ble avbrutt.');};
  async function readImage(image){
  const canvas=prepareReceipt(image);
+ const rank=r=>{const d=parseReceiptText(r.text);return (r.confidence||0)+[d.purchase_date,d.gross,d.net,d.vat,d.organization_number,d.vendor].filter(v=>v!==null).length*12+(d.vat_rates.length?24:0);};
+ const scan=async(source,options={})=>{const result=(await worker.recognize(source,options,{text:true,blocks:true})).data;const layout={...result,text:receiptLines(result.blocks)};return layout.text&&rank(layout)>rank(result)?layout:result;};
  try{
  check();await worker.setParameters({tessedit_pageseg_mode:'4',preserve_interword_spaces:'1',user_defined_dpi:'300'});
- const first=(await worker.recognize(canvas)).data;
- const rank=r=>{const d=parseReceiptText(r.text);return (r.confidence||0)+[d.purchase_date,d.gross,d.net,d.vat].filter(v=>v!==null).length*12;};
+ const first=await scan(canvas);
+
  if(first.confidence>=85&&['gross','vat','purchase_date'].every(k=>parseReceiptText(first.text)[k]!==null))return first.text;
  check();onProgress('Forbedrer lesingen i mindre deler …');
  await worker.setParameters({tessedit_pageseg_mode:'6'});
@@ -34,18 +37,18 @@ export async function recognizeReceipt(blob,mime,onProgress=()=>{}){
  }cuts.push(best);
  }cuts.push(canvas.height);pixels=null;
  let text='',confidence=0;
- for(let i=0;i<cuts.length-1;i++){check();onProgress('Leser del '+(i+1)+' av '+(cuts.length-1));const result=(await worker.recognize(canvas,{rectangle:{left:0,top:cuts[i],width:canvas.width,height:cuts[i+1]-cuts[i]}})).data;text+=result.text+'\n';confidence+=(result.confidence||0)/(cuts.length-1);}
+ for(let i=0;i<cuts.length-1;i++){check();onProgress('Leser del '+(i+1)+' av '+(cuts.length-1));const result=await scan(canvas,{rectangle:{left:0,top:cuts[i],width:canvas.width,height:cuts[i+1]-cuts[i]}});text+=result.text+'\n';confidence+=(result.confidence||0)/(cuts.length-1);}
  const second={text,confidence};let best=rank(second)>rank(first)?second:first;
  if(parseReceiptText(best.text).net===null||parseReceiptText(best.text).vat===null){
  check();onProgress('Forbedrer kontrast og kontrollerer beløp …');
  // Correct uneven lighting and align photographed receipts before retrying.
  const normalized=normalizedReceipt(canvas);
- try{await worker.setParameters({tessedit_pageseg_mode:'6'});const third=(await worker.recognize(normalized)).data;if(rank(third)>rank(best))best=third;
- if(parseReceiptText(best.text).gross===null){check();await worker.setParameters({tessedit_pageseg_mode:'11'});const sparse=(await worker.recognize(normalized)).data;if(rank(sparse)>rank(best))best=sparse;}
+ try{await worker.setParameters({tessedit_pageseg_mode:'6'});const third=await scan(normalized);if(rank(third)>rank(best))best=third;
+ if(parseReceiptText(best.text).gross===null){check();await worker.setParameters({tessedit_pageseg_mode:'11'});const sparse=await scan(normalized);if(rank(sparse)>rank(best))best=sparse;}
  }finally{normalized.width=normalized.height=0;}
  if(parseReceiptText(best.text).vat===null&&image.width<700){
  check();onProgress('Leser mørk tekst uten fargede markeringer …');const ink=prepareReceipt(image,true);
- try{await worker.setParameters({tessedit_pageseg_mode:'6'});const clean=(await worker.recognize(ink)).data;if(rank(clean)>rank(best))best=clean;}finally{ink.width=ink.height=0;}
+ try{await worker.setParameters({tessedit_pageseg_mode:'6'});const clean=await scan(ink);if(rank(clean)>rank(best))best=clean;}finally{ink.width=ink.height=0;}
  }
  }return best.text;
  }finally{canvas.width=canvas.height=0;}

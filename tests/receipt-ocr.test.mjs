@@ -10,7 +10,17 @@ test('ambiguous totals and dates remain blank',()=>{
 });
 test('VAT percentage lines never become total VAT',()=>assert.equal(parseReceiptText('MVA 25% netto 100,00 MVA 25,00').vat,null));
 test('thousands separators and missing data',()=>{assert.equal(parseReceiptText('TOTAL NOK 1 240,50').gross,1240.5);assert.equal(parseReceiptText('uklar tekst').gross,null);});
-test('notes are bounded and unusable dates ignored',()=>{assert.ok(parseReceiptText('a'.repeat(10000)).notes.length<2000);assert.equal(parseReceiptText('31.02.2026').purchase_date,null);});
+test('raw OCR does not populate notes and unusable dates ignored',()=>{assert.equal(parseReceiptText('a'.repeat(10000)).notes,null);assert.equal(parseReceiptText('31.02.2026').purchase_date,null);});
+
+test('purchase VAT table corroborates total without including loyalty benefits',()=>{
+ const d=parseReceiptText('Fiktiv Handel SA\nOra.nr 938 786 054 MVA\n14.09.2026\nTotalt (3 Artikler) 250.00\nTotalbeløp: NOK 1250,00\nMVA-arunnlag. MVA-% MVA Sum\n1000.00 25% 250.00 1250". 00\nSpart 37.50\nUtbytte MVA-grunnlag MVA-% MVA Sum\n30.00 25% 7.50 37.50');
+ assert.equal(d.vendor,'Fiktiv Handel SA');assert.equal(d.organization_number,'938786054');assert.equal(d.purchase_date,'2026-09-14');assert.equal(d.gross,1250);assert.equal(d.net,1000);assert.equal(d.vat,250);assert.equal(d.vat_rates.length,1);assert.equal(d.notes,null);
+});
+test('unreconciled VAT or loyalty table cannot resolve conflicting totals',()=>{
+ for(const section of ['MVA-grunnlag MVA-% MVA Sum\n1000,00 25% 240,00 1250,00','Spart 1250,00\nUtbytte MVA-grunnlag MVA-% MVA Sum\n1000,00 25% 250,00 1250,00']){
+ assert.equal(parseReceiptText('TOTAL 250,00\nTOTAL 1250,00\n'+section).gross,null);
+ }
+});
 test('receipt summary columns are separate amounts, never concatenated',()=>{
  const d=parseReceiptText('21.07.25 13:37\nSUM 845,53 194,67 1040,20\nTotalbeløp: NOK 1040,20');
  assert.equal(d.purchase_date,'2025-07-21');assert.equal(d.net,845.53);assert.equal(d.vat,194.67);assert.equal(d.gross,1040.2);
