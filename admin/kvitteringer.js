@@ -62,7 +62,7 @@ async function loadList(){
  let usage;
  while(more){const r=await api({action:'list',page});receipts.push(...r.receipts);settings=r.settings;usage=r.usage;more=r.more;page++;}
  $('mode').textContent=settings.real_documents_enabled?'Kvitteringsarkiv':'Testmodus – bruk kun syntetiske bilag';
- $('testConsent').hidden=settings.real_documents_enabled;
+ $('testConsent').hidden=false;
  $('quota').textContent='Tesseract · ingen betaling per skanning. Privat lagring bruker fortsatt Supabase.';
  renderList();
 }
