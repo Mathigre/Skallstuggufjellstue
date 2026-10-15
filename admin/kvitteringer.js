@@ -2,7 +2,8 @@ import {parseReceiptText} from './receipt-ocr.mjs?v=20261015c';
 import {loadOCR,recognizeReceipt} from './receipt-ocr-engine.mjs?v=20261015c';
 import {emptyData,normalizeData,validateData,textFields,moneyFields} from './receipt-data.mjs';
 const $=id=>document.getElementById(id),endpoint='https://rbphgvnwmzjeuvyrasvy.supabase.co/functions/v1/receipt-analyze';
-let receipts=[],current=null,runs=[],settings={},dirty=false,busy=false;
+const fikenEndpoint='https://rbphgvnwmzjeuvyrasvy.supabase.co/functions/v1/fiken-receipt';
+let receipts=[],current=null,runs=[],settings={},dirty=false,busy=false,fikenState=null,fikenLoaded=false;
 const labels={vendor:'Leverandør',organization_number:'Organisasjonsnummer',purchase_date:'Kjøpsdato',currency:'Valuta',payment_method:'Betalingsmetode',category:'Kategori (forslag)',account:'Konto (forslag)',notes:'Notater',net:'Beløp ekskl. MVA',vat:'MVA',gross:'Totalbeløp inkl. MVA',rounding:'Avrunding'};
 const statusLabels={new:'Ikke analysert',processing:'Analyserer',ready:'Til kontroll',error:'Analyse feilet'};
 const say=(message,error=false)=>{$('status').textContent=message;$('status').className=error?'error':'';};
@@ -11,6 +12,16 @@ async function api(body){
  const response=await fetch(endpoint,{method:'POST',headers,body:body instanceof FormData?body:JSON.stringify(body)});
  const result=await response.json();if(!response.ok)throw Error(result.error||'Forespørselen feilet.');return result;
 }
+async function fikenApi(body){
+ const response=await fetch(fikenEndpoint,{method:'POST',headers:await window.adminHeaders(),body:JSON.stringify(body)});
+ const result=await response.json();if(!response.ok)throw Error(result.error||'Fiken-eksporten feilet.');return result;
+}
+async function loadFikenStatus(){
+ fikenState=null;fikenLoaded=false;syncButtons();
+ try{const result=await fikenApi({action:'status',id:current.id});fikenState=result.export;fikenLoaded=true;}
+ catch(e){$('fikenStatus').textContent='Eksportstatus kunne ikke hentes. Sending er deaktivert.';return;}
+ syncButtons();
+}
 async function run(task){
  if(busy)return;busy=true;document.querySelectorAll('button:not(:disabled)').forEach(b=>{b.dataset.working='1';b.disabled=true;});
  syncButtons();
@@ -18,6 +29,7 @@ async function run(task){
 }
 function syncButtons(){
  if(!current)return;
+ const fiken=$('fikenExport');if(fiken){fiken.disabled=!fikenLoaded||busy||dirty||!!current.deleted_at||!current.synthetic||current.review_status!=='approved'||fikenState!==null; $('fikenStatus').textContent=fikenState?'Fiken: '+({processing:'Sending pågår',draft_created:'Utkast opprettet, kontroller vedlegg',ready:'Kjøpsutkast med vedlegg opprettet',uncertain:'Usikker sending – kontroller Fiken',error:'Sending avbrutt – kontroller status'}[fikenState.state]||fikenState.state):current.synthetic?'Kun testbilag. Ingen automatisk bokføring.':'Fiken-eksporten er kun aktiv for syntetiske testbilag.';}
  const deleted=!!current.deleted_at,processing=current.ai_status==='processing';
  $('recover').hidden=!processing;
  $('delete').hidden=deleted;$('restore').hidden=!deleted;
@@ -50,7 +62,7 @@ async function loadList(){
  let usage;
  while(more){const r=await api({action:'list',page});receipts.push(...r.receipts);settings=r.settings;usage=r.usage;more=r.more;page++;}
  $('mode').textContent=settings.real_documents_enabled?'Kvitteringsarkiv':'Testmodus – bruk kun syntetiske bilag';
- $('testConsent').hidden=settings.real_documents_enabled;
+ $('testConsent').hidden=false;
  $('quota').textContent='Tesseract · ingen betaling per skanning. Privat lagring bruker fortsatt Supabase.';
  renderList();
 }
@@ -89,7 +101,7 @@ function changed(){dirty=true;$('confirmed').checked=false;showValidation();}
 $('receiptForm').addEventListener('input',e=>{if(e.target.id!=='confirmed')changed();});
 function canLeave(){return !dirty||confirm('Du har ulagrede rettelser. Vil du forkaste dem?');}
 async function openReceipt(id,keepForm=false){
- const result=await api({action:'get',id});current=result.receipt;runs=result.runs;
+ const result=await api({action:'get',id});current=result.receipt;runs=result.runs;fikenState=null;fikenLoaded=false;
  $('detail').hidden=false;$('fileTitle').textContent=current.original_name;
  $('original').href=result.url;$('preview').replaceChildren();
  if(['image/jpeg','image/png'].includes(current.mime_type)){const img=elem('img');img.src=result.url;img.alt='Original kvittering';$('preview').append(img);}
@@ -98,7 +110,7 @@ async function openReceipt(id,keepForm=false){
  $('analysisHistory').replaceChildren(elem('h3','Analysehistorikk'));
  for(const r of runs)$('analysisHistory').append(elem('p',new Date(r.started_at).toLocaleString('nb-NO')+' · '+r.model+' · '+r.status+' · '+(r.input_tokens??'?')+' inn / '+(r.output_tokens??'?')+' ut · '+(r.estimated_usd==null?'kostnad ukjent':'est. $'+Number(r.estimated_usd).toFixed(6))));
  if(!keepForm){renderForm(current.reviewed_data||current.ai_data||emptyData());$('ocrResult').hidden=true;$('ocrText').value='';}
- syncButtons();$('detail').focus({preventScroll:true});
+ syncButtons();await loadFikenStatus();$('detail').focus({preventScroll:true});
 }
 async function analysisCopy(file){
  if(!/\.(jpe?g|png|heic|heif)$/i.test(file.name))return null;
@@ -160,6 +172,11 @@ async function save(action){
  const result=await api({action,id:current.id,revision:current.revision,data,confirmed:$('confirmed').checked});
  current=result.receipt;dirty=false;await loadList();await openReceipt(current.id);say(action==='approve'?'Lagret som kontrollert. Ikke sendt til Fiken.':'Utkastet er lagret.');
 }
+$('fikenExport').onclick=()=>{
+ if(!current||!fikenLoaded||dirty||current.review_status!=='approved'||fikenState||!current.synthetic)return;
+ if(!confirm('Opprette ett kjøpsutkast med vedlegg i Fikens TESTFORETAK? Ingen bokføring eller betaling utføres. Sendingen kan ikke gjentas automatisk.'))return;
+ run(async()=>{const result=await fikenApi({action:'create_draft',id:current.id,revision:current.revision});await loadFikenStatus();say('Kjøpsutkast #'+result.draftId+' opprettet med vedlegg i Fikens testforetak. Kontroller utkastet i Fiken.');});
+};
 $('receiptForm').onsubmit=e=>{e.preventDefault();run(()=>save('save'));};$('approve').onclick=()=>run(()=>save('approve'));
 for(const action of ['delete','restore'])$(action).onclick=()=>{if(canLeave()&&confirm(action==='delete'?'Flytt kvitteringen til papirkurven? Originalfilen beholdes.':'Gjenopprette kvitteringen?'))run(async()=>{await api({action,id:current.id,revision:current.revision});dirty=false;await openReceipt(current.id);await loadList();say(action==='delete'?'Flyttet til papirkurven.':'Gjenopprettet.');});};
 $('checkModel').onclick=()=>run(async()=>{await loadOCR();$('modelStatus').textContent=' Tekstleseren er lastet. Ingen API-nøkkel nødvendig.';});
