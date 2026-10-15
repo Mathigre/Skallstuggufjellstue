@@ -1,5 +1,5 @@
-import {parseReceiptText} from './receipt-ocr.mjs';
-import {loadOCR,recognizeReceipt} from './receipt-ocr-engine.mjs';
+import {parseReceiptText} from './receipt-ocr.mjs?v=20261015';
+import {loadOCR,recognizeReceipt} from './receipt-ocr-engine.mjs?v=20261015';
 import {emptyData,normalizeData,validateData,textFields,moneyFields} from './receipt-data.mjs';
 const $=id=>document.getElementById(id),endpoint='https://rbphgvnwmzjeuvyrasvy.supabase.co/functions/v1/receipt-analyze';
 let receipts=[],current=null,runs=[],settings={},dirty=false,busy=false;
@@ -148,9 +148,10 @@ $('analyze').onclick=()=>{
  if(!response.ok)throw Error('Kunne ikke hente originalen. Åpne kvitteringen på nytt.');
  const text=await recognizeReceipt(await response.blob(),current.mime_type,say);
  if(!text.trim())throw Error('Ingen lesbar tekst funnet. Ta et tydeligere bilde eller fyll inn manuelt.');
- renderForm(parseReceiptText(text));dirty=true;
+ const parsed=parseReceiptText(text);renderForm(parsed);dirty=true;
  $('ocrText').value=text;$('ocrResult').hidden=false;
- say('Teksten er lest lokalt. Kontroller forslagene, fyll inn manglende felt og lagre.');
+ const missing=[['purchase_date','dato'],['gross','totalbeløp'],['net','netto'],['vat','MVA']].filter(([key])=>parsed[key]===null).map(([,label])=>label);
+ say(missing.length?'Teksten er delvis lest. Mangler '+missing.join(', ')+'. Prøv et skarpere bilde eller fyll inn manuelt.':'Teksten er lest lokalt. Kontroller forslagene, MVA-fordelingen og leverandørnavnet før du lagrer.');
  });
 };
 async function save(action){
@@ -165,4 +166,3 @@ $('checkModel').onclick=()=>run(async()=>{await loadOCR();$('modelStatus').textC
 $('recover').onclick=()=>run(async()=>{await api({action:'recover',id:current.id,revision:current.revision});await openReceipt(current.id);await loadList();say('Avbrutt analyse frigjort. Ingen nytt AI-kall er startet.');});
 window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
 if(await window.adminReady)run(async()=>{await loadList();say('Klar. Last opp en kvittering for å begynne.');});
-
