@@ -25,3 +25,10 @@ Nettlesertest 2026-10-14: faktisk Tesseract på syntetisk PNG leste 2026-10-13, 
 
 ## Publisering 2026-10-14
 Eier har bedt om publisering og ekte bilag. real_documents_enabled=true; enabled=false (betalt Gemini fortsatt sperret). Syntetiske testbilag er flyttet til papirkurven. Varsler pauser serverlevering ved utlogging, men beholder nettleserabonnementet for automatisk gjenopptak ved neste innlogging. Deaktiver-knappen avslutter abonnementet. Ny test tests/push-logout.test.mjs verifiserer dette uten nye tillatelsesforespørsler.
+
+## Fiken-eksport i utviklingsbranchen (15. oktober 2026)
+Egen `fiken-receipt` Edge Function oppretter bare kjøps**utkast** via `POST /purchases/drafts` i bekreftet testforetak `apiskallstuggu`. Kvitteringen vedlegges via `POST /purchases/drafts/{draftId}/attachments`. Ingen postering, betalingsregistrering eller sending til ekte foretak utføres. Bare administratorer og eksplisitt syntetiske kvitteringer med status "kontrollert" kan eksporteres. Kostnadskonto må være kontrollert (fire siffer); NOK og eksplisitt MVA-fordeling (0/12/15/25 %) kreves. Utslagsgivende avrunding må rettes manuelt.
+Eksportloggen `receipt_fiken_exports` har en unik nøkkel per kvittering og reserveres atomisk i `receipt_fiken_claim`. En usikker sending kan ikke gjentas automatisk. `fiken_test_lock` deles med bookingutkastene (Fiken tillater kun én samtidig API-forespørsel).
+Originalfilen blir liggende privat i Supabase. JPG/PNG/PDF kan legges ved. HEIC krever en tilgjengelig konvertert JPG-analysekopi.
+Sikkerhetsvalg: Testbilag skal ikke inneholde ekte leverandør-/personopplysninger. Kontroller alltid utkastet og vedlegget i Fiken. Eksport av ekte bilag og eventuell automatisk bokføring er ikke aktivert.
+Database: migrasjonen `receipt_fiken_export_test_drafts` er lagt inn i Skallstuggu Supabase; kilde: `database/receipt-fiken-export.sql`. Frontendendringene ligger i PR #9 og må gjennomgås før publisering.
