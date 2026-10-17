@@ -1,3 +1,4 @@
+import {serveWithCloudflareOrigin} from '../shared/cloudflare-origin.ts';
 import {requireAdmin} from './auth.ts';
 // Standalone function: the existing resend-email and its templates stay intact.
 // No service-role key: database calls retain the caller's existing RLS context.
@@ -101,5 +102,5 @@ export function createHandler({ env, request = fetch, now = () => new Date() }) 
 }
 
 // JavaScript-compatible TypeScript keeps the handler testable without Deno.
-if (typeof Deno !== "undefined") Deno.serve(createHandler({ env: key => Deno.env.get(key) }));
+if (typeof Deno !== "undefined") serveWithCloudflareOrigin(createHandler({ env: key => Deno.env.get(key) }));
 

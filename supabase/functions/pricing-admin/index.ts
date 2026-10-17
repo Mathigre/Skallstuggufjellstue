@@ -1,3 +1,4 @@
+import {serveWithCloudflareOrigin} from '../shared/cloudflare-origin.ts';
 import {validateSettings} from './pricing.mjs';
 import {requireAdmin} from './auth.ts';
 const cors={'Access-Control-Allow-Origin':'https://skallstuggu-test.no','Access-Control-Allow-Headers':'authorization,apikey,content-type,x-test-access','Access-Control-Allow-Methods':'POST,OPTIONS'};
@@ -17,5 +18,5 @@ export function makeHandler({env,request=fetch}) {return async req=>{
   return reply({success:true,...rows[0]});
  }catch(error){return reply({error:error instanceof TypeError?'Nettverksfeil. Last siden på nytt for å kontrollere om prisene ble lagret.':error.message},400);}
 };}
-if(typeof Deno!=='undefined')Deno.serve(makeHandler({env:name=>Deno.env.get(name)}));
+if(typeof Deno!=='undefined')serveWithCloudflareOrigin(makeHandler({env:name=>Deno.env.get(name)}));
 

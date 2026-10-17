@@ -1,3 +1,4 @@
+import {serveWithCloudflareOrigin} from '../shared/cloudflare-origin.ts';
 // Admin-only receipt upload, management and explicit Gemini analysis.
 import { requireAdmin } from '../shared/auth.ts';
 import { normalizeData, validateData, estimateCost } from '../../../admin/receipt-data.mjs';
@@ -160,5 +161,5 @@ export async function handle(req:Request){
  return reply({error:e instanceof Fault||status===403?(e as Error).message:'Forespørselen kunne ikke fullføres. Åpne kvitteringen på nytt før du prøver igjen.',code:e instanceof Fault?e.code:'REQUEST_FAILED'},status);
  }
 }
-Deno.serve(handle);
+serveWithCloudflareOrigin(handle);
 

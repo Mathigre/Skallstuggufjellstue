@@ -1,3 +1,4 @@
+import {serveWithCloudflareOrigin} from '../shared/cloudflare-origin.ts';
 // Review-only Fiken purchase drafts. Test company + reviewed receipts only; never books a purchase.
 import { requireAdmin } from '../shared/auth.ts';
 import { validateData } from '../../../admin/receipt-data.mjs';
@@ -118,5 +119,4 @@ export function makeHandler({env,request=fetch}){
   }
  };
 }
-if(typeof Deno!=='undefined')Deno.serve(makeHandler({env:name=>Deno.env.get(name)}));
-
+if(typeof Deno!=='undefined')serveWithCloudflareOrigin(makeHandler({env:name=>Deno.env.get(name)}));

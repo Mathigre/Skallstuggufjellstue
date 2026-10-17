@@ -1,3 +1,4 @@
+import {serveWithCloudflareOrigin} from '../shared/cloudflare-origin.ts';
 import {requireAdmin,db,newToken,hashToken} from "./auth.ts";
 const env=name=>Deno.env.get(name);
 const esc=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;", "'":"&#39;"}[c]));
@@ -86,7 +87,7 @@ function getEmailSignature() {
   `;
 }
 
-Deno.serve(async (req) => {
+serveWithCloudflareOrigin(async (req) => {
 
   // ====================
   // CORS

@@ -1,3 +1,4 @@
+import {serveWithCloudflareOrigin} from '../shared/cloudflare-origin.ts';
 import { calculateQuote } from './pricing.mjs';
 import { requireAdmin } from './auth.ts';
 const COMPANY = 'apiskallstuggu';
@@ -93,5 +94,5 @@ export function makeHandler({ env, request=fetch, pause=ms=>new Promise(resolve=
     }
   };
 }
-if(typeof Deno!=='undefined')Deno.serve(makeHandler({env:name=>Deno.env.get(name)}));
+if(typeof Deno!=='undefined')serveWithCloudflareOrigin(makeHandler({env:name=>Deno.env.get(name)}));
 
