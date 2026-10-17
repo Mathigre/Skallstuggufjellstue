@@ -38,7 +38,10 @@ export function makeHandler({env,request=fetch}){
   const headers:Record<string,string>={Authorization:'Bearer '+token,'X-Request-ID':crypto.randomUUID()};
   if(body && !(body instanceof FormData))headers['Content-Type']='application/json';
   const response=await request(fikenBase+path,{method,headers,body:body instanceof FormData?body:body===undefined?undefined:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(25000)});
-  if(!response.ok)throw fail('Fiken svarte HTTP '+response.status+'. Sjekk utkast og vedlegg før et nytt forsøk.',502);
+  if(!response.ok){
+   const detail=(await response.text()).slice(0,1600);
+   throw Object.assign(fail('Fiken svarte HTTP '+response.status+': '+detail,502),{rejected:[400,401,403,404,422,429].includes(response.status)});
+  }
   return response;
  };
  const save=async(id,requestId,values)=>db('receipt_fiken_exports?receipt_id=eq.'+id+'&request_id=eq.'+requestId,'PATCH',{...values,updated_at:new Date().toISOString()});
@@ -104,7 +107,7 @@ export function makeHandler({env,request=fetch}){
    await save(id,requestId,{state:'ready',draft_id:draftId,error_code:null});
    return reply({success:true,draftId,company:company.name,state:'ready',posted:false,testOnly:true});
   }catch(e:any){
-   if(claimed){try{await save(id,requestId,{state:externalWrite?'uncertain':'error',...(draftId?{draft_id:draftId}:{}),error_code:externalWrite?'CHECK_FIKEN':'PREFLIGHT_FAILED'});}catch{}}
+   if(claimed){try{await save(id,requestId,{state:externalWrite&&!(e.rejected&&!draftId)?'uncertain':'error',...(draftId?{draft_id:draftId}:{}),error_code:e.rejected&&!draftId?'FIKEN_REJECTED':externalWrite?'CHECK_FIKEN':'PREFLIGHT_FAILED'});}catch{}}
    const msg=e?.message||'Ukjent feil';
    return reply({error:externalWrite?'Sendingen kan ha nådd Fiken. Kontroller testforetaket manuelt før ny handling. '+msg:msg,state:claimed?(externalWrite?'uncertain':'error'):null},e?.status||502);
   }finally{
