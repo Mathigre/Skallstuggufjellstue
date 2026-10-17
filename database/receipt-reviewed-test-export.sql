@@ -11,6 +11,9 @@ begin
  and duplicate.reviewed_data->>'organization_number'=r.reviewed_data->>'organization_number'
  and duplicate.reviewed_data->>'purchase_date'=r.reviewed_data->>'purchase_date'
  and duplicate.reviewed_data->>'gross'=r.reviewed_data->>'gross') then raise exception 'POSSIBLE_DUPLICATE'; end if;
+ update public.receipt_fiken_exports set request_id=p_request,receipt_revision=p_revision,requested_by=p_admin,state='processing',error_code=null,updated_at=now()
+ where receipt_id=p_receipt and state='error' and draft_id is null and error_code in ('FIKEN_REJECTED','CHECKED_NO_DRAFT');
+ if found then return; end if;
  insert into public.receipt_fiken_exports(receipt_id,request_id,receipt_revision,requested_by,state,company_slug)
  values(p_receipt,p_request,p_revision,p_admin,'processing','apiskallstuggu');
  exception when unique_violation then raise exception 'ALREADY_EXPORTED_OR_UNCERTAIN';

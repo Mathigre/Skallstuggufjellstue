@@ -4,6 +4,7 @@ import {emptyData,normalizeData,validateData,textFields,moneyFields} from './rec
 const $=id=>document.getElementById(id),endpoint='https://rbphgvnwmzjeuvyrasvy.supabase.co/functions/v1/receipt-analyze';
 const fikenEndpoint='https://rbphgvnwmzjeuvyrasvy.supabase.co/functions/v1/fiken-receipt';
 let receipts=[],current=null,runs=[],settings={},dirty=false,busy=false,fikenState=null,fikenLoaded=false;
+const retryableFiken=()=>fikenState?.state==='error'&&!fikenState.draft_id&&['FIKEN_REJECTED','CHECKED_NO_DRAFT'].includes(fikenState.error_code);
 async function fikenApi(body){
  const response=await fetch(fikenEndpoint,{method:'POST',headers:await window.adminHeaders(),body:JSON.stringify(body)});
  const result=await response.json();if(!response.ok)throw Error(result.error||'Fiken-eksporten feilet.');return result;
@@ -37,7 +38,7 @@ function syncButtons(){
  $('receiptForm').querySelectorAll('input,textarea,button').forEach(e=>e.disabled=e.hasAttribute('data-permanent-disabled')||busy||deleted||processing);
  $('applyAI').hidden=!current.ai_data||!current.reviewed_data;
  $('analysisHint').textContent='Tekstlesingen skjer på enheten. Forslag må kontrolleres og lagres manuelt.';
- $('fikenExport').disabled=!fikenLoaded||busy||dirty||deleted||processing||current.review_status!=='approved'||fikenState!==null;
+ $('fikenExport').disabled=!fikenLoaded||busy||dirty||deleted||processing||current.review_status!=='approved'||(fikenState!==null&&!retryableFiken());
  $('fikenStatus').textContent=fikenState?'Fiken: '+({processing:'Sending pågår',draft_created:'Utkast opprettet – kontroller vedlegg',ready:'Kjøpsutkast med vedlegg opprettet',uncertain:'Usikker sending – kontroller Fiken',error:'Sending avbrutt – kontroller status'}[fikenState.state]||fikenState.state):'Testforetak: apiskallstuggu. Oppretter bare et utkast.';
 }
 function elem(tag,text,cls){const e=document.createElement(tag);if(text!=null)e.textContent=text;if(cls)e.className=cls;return e;}
@@ -174,7 +175,7 @@ async function save(action){
  current=result.receipt;dirty=false;await loadList();await openReceipt(current.id);say(action==='approve'?'Lagret som kontrollert. Ikke sendt til Fiken.':'Utkastet er lagret.');
 }
 $('fikenExport').onclick=()=>{
- if(!current||!fikenLoaded||dirty||current.review_status!=='approved'||fikenState)return;
+ if(!current||!fikenLoaded||dirty||current.review_status!=='approved'||(fikenState&&!retryableFiken()))return;
  if(!confirm('Opprette kjøpsutkast med originalbilaget i apiskallstuggu (test)? Ingen bokføring eller betaling utføres.'))return;
  run(async()=>{try{const result=await fikenApi({action:'create_draft',id:current.id,revision:current.revision});say('Kjøpsutkast #'+result.draftId+' med vedlegg er bekreftet i apiskallstuggu.');}finally{await loadFikenStatus();}});
 };
