@@ -18,7 +18,9 @@ export function makeDraft(receipt){
  if(d.vat_rates.some(r=>ore(r.net)+ore(r.vat)!==ore(r.gross)))throw fail('Hver MVA-linje må stemme på øret før sending.');
  if(d.vat_rates.reduce((s,r)=>s+ore(r.gross),0)!==ore(d.gross))throw fail('Totalbeløp og MVA-fordeling må stemme nøyaktig. Håndter eventuell avrunding før eksport.');
  const lines=d.vat_rates.map(r=>({text:('Kvittering '+d.vendor+' ('+r.rate+' % MVA)').slice(0,200),net:ore(r.net!),gross:ore(r.gross!),vatType:rateType[Number(r.rate)],incomeAccount:d.account!}));
- return {invoiceIssueDate:d.purchase_date,cash:true,paid:false,currency:'NOK',lines};
+ // No bank/payment account is collected here. Leave payment unregistered in the
+ // review-only draft; cash purchases require an explicit payment in Fiken.
+ return {invoiceIssueDate:d.purchase_date,cash:false,paid:false,currency:'NOK',lines};
 }
 export function makeHandler({env,request=fetch}){
  const reply=(body,status=200)=>Response.json(body,{status,headers:{...cors,'Cache-Control':'no-store'}});
@@ -109,7 +111,8 @@ export function makeHandler({env,request=fetch}){
   }catch(e:any){
    if(claimed){try{await save(id,requestId,{state:externalWrite&&!(e.rejected&&!draftId)?'uncertain':'error',...(draftId?{draft_id:draftId}:{}),error_code:e.rejected&&!draftId?'FIKEN_REJECTED':externalWrite?'CHECK_FIKEN':'PREFLIGHT_FAILED'});}catch{}}
    const msg=e?.message||'Ukjent feil';
-   return reply({error:externalWrite?'Sendingen kan ha nådd Fiken. Kontroller testforetaket manuelt før ny handling. '+msg:msg,state:claimed?(externalWrite?'uncertain':'error'):null},e?.status||502);
+   const uncertain=externalWrite&&!(e.rejected&&!draftId);
+   return reply({error:uncertain?'Sendingen kan ha nådd Fiken. Kontroller testforetaket manuelt før ny handling. '+msg:msg,state:claimed?(uncertain?'uncertain':'error'):null},e?.status||502);
   }finally{
    if(locked){try{await db('fiken_test_lock?id=eq.1&request_id=eq.'+requestId,'PATCH',{request_id:null,locked_at:null});}catch{}}
   }
