@@ -1,3 +1,4 @@
+import {serveWithCloudflareOrigin} from '../shared/cloudflare-origin.ts';
 import * as pushModule from 'npm:web-push@3.6.7';
 import {requireAdmin,hashToken} from './auth.ts';
 const webpush=pushModule.default||pushModule;
@@ -78,4 +79,4 @@ export async function handler(req){
   return json({error:'Ukjent handling.'},400);
  }catch(error){return json({error:error.status===403?'Logg inn som administrator.':'Varslingstjenesten svarte ikke. Prøv igjen.'},error.status===403?403:500);}
 }
-Deno.serve(handler);
+serveWithCloudflareOrigin(handler);

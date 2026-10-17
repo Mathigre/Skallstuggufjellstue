@@ -1,3 +1,4 @@
+import {serveWithCloudflareOrigin} from '../shared/cloudflare-origin.ts';
 import {db,hashToken,newToken} from './auth.ts';
 const cors={'Access-Control-Allow-Origin':'https://skallstuggu-test.no','Access-Control-Allow-Headers':'authorization,apikey,content-type','Access-Control-Allow-Methods':'POST,OPTIONS','Cache-Control':'no-store'};
 const env=name=>Deno.env.get(name);
@@ -60,4 +61,4 @@ export async function handler(req) {
   return json({booking,messages});
  }catch{return json({error:'Forespørselen kunne ikke behandles. Prøv igjen eller kontakt Skallstuggu.'},400);}
 }
-Deno.serve(handler);
+serveWithCloudflareOrigin(handler);

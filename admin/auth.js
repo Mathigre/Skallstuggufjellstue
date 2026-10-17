@@ -8,7 +8,7 @@
   localStorage.removeItem('adminLoggedIn');localStorage.removeItem('skallstugguFikenTestAccess');
   window.adminHeaders=async()=>{const {data,error}=await client.auth.getSession();if(error||!data.session)throw new Error('Logg inn på nytt.');return {'Content-Type':'application/json',apikey:key,Authorization:'Bearer '+data.session.access_token};};
   window.logoutAdmin=async()=>{try{await window.disableAdminPush?.({preserveSubscription:true});}catch{console.warn('Kunne ikke deaktivere varsler.');}await client.auth.signOut();goLogin();};
-  const loginPage=location.pathname.endsWith('/login.html');
+  const loginPage=/\/login(?:\.html)?\/?$/.test(location.pathname);
   window.adminReady=(async()=>{
     if(loginPage)return null;
     const {data,error}=await client.auth.getUser();
