@@ -18,14 +18,17 @@ async function loadFikenStatus(){
 const labels={vendor:'Leverandør',organization_number:'Organisasjonsnummer',purchase_date:'Kjøpsdato',currency:'Valuta',payment_method:'Betalingsmetode',category:'Kategori (forslag)',account:'Konto (forslag)',notes:'Notater',net:'Beløp ekskl. MVA',vat:'MVA',gross:'Totalbeløp inkl. MVA',rounding:'Avrunding'};
 const say=(message,error=false)=>{$('status').textContent=message;$('status').className=error?'error':'';};
 const scribeFrame=$('scribeFrame');
-let scribeReady=scribeFrame.contentDocument?.readyState==='complete',scribePending=null;
-scribeFrame.addEventListener('load',()=>{scribeReady=true;});
+let scribeReady=false,scribePending=null,scribeLoadPromise=null;
 function waitForScribe(){
  if(scribeReady)return Promise.resolve();
- return new Promise((resolve,reject)=>{
-  const timeout=setTimeout(()=>reject(Error('Scribe-skanneren kunne ikke lastes. Oppdater siden og prøv igjen.')),20000);
-  scribeFrame.addEventListener('load',()=>{clearTimeout(timeout);scribeReady=true;resolve();},{once:true});
- });
+ if(scribeLoadPromise)return scribeLoadPromise;
+ scribeLoadPromise=new Promise((resolve,reject)=>{
+  const onLoad=()=>{clearTimeout(timeout);scribeReady=true;resolve();};
+  const timeout=setTimeout(()=>{scribeFrame.removeEventListener('load',onLoad);reject(Error('Scribe-skanneren kunne ikke lastes. Oppdater siden og prøv igjen.'));},20000);
+  scribeFrame.addEventListener('load',onLoad,{once:true});
+  scribeFrame.src=scribeFrame.dataset.src;
+ }).finally(()=>{scribeLoadPromise=null;});
+ return scribeLoadPromise;
 }
 function recognizeWithScribe(file,name){
  return waitForScribe().then(()=>new Promise((resolve,reject)=>{
