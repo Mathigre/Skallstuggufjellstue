@@ -1,0 +1,9 @@
+:root { font: 16px/1.5 system-ui, sans-serif; color: #302319; background: #f6f2eb; }
+body { margin: 0; padding: 1.5rem; }
+main { max-width: 48rem; margin: 0 auto; padding: 1.5rem; border: 1px solid #dfcdb7; border-radius: 1rem; background: white; }
+h1 { font-size: 1.5rem; }
+label, input, button, textarea { display: block; width: 100%; box-sizing: border-box; margin: .75rem 0; }
+button { border: 0; border-radius: .5rem; padding: .8rem; color: white; background: #8c4b2d; font: inherit; font-weight: 650; cursor: pointer; }
+button:disabled { opacity: .55; cursor: wait; }
+textarea { min-height: 16rem; padding: .75rem; border: 1px solid #cabba9; border-radius: .5rem; font: 14px/1.4 ui-monospace, monospace; }
+
