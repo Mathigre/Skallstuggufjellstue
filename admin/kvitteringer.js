@@ -63,6 +63,7 @@ function syncButtons(){
  $('delete').hidden=deleted;$('restore').hidden=!deleted;
  $('analyze').disabled=busy||deleted||current.review_status==='approved';
  $('analyzeScribe').disabled=busy||deleted||current.review_status==='approved';
+ $('analyzeBoth').disabled=busy||deleted||current.review_status==='approved';
  $('analyze').textContent='Les tekst gratis';
  $('receiptForm').querySelectorAll('input,textarea,button').forEach(e=>e.disabled=e.hasAttribute('data-permanent-disabled')||busy||deleted);
  $('analysisHint').textContent='Tekstlesingen skjer på enheten. Forslag må kontrolleres og lagres manuelt.';
@@ -127,6 +128,24 @@ function showValidation(){
  }catch(e){$('validation').append(elem('p',e.message,'error'));}
 }
 function changed(){dirty=true;$('confirmed').checked=false;showValidation();syncButtons();}
+function mergeReceiptResults(preferred,fallback){
+ const merged={...preferred},conflicts=[];
+ for(const key of [...textFields,...moneyFields]){
+  const a=merged[key],b=fallback[key];
+  if((a==null||a==='')&&b!=null&&b!=='')merged[key]=b;
+  else if(a!=null&&b!=null&&a!==''&&b!==''&&(moneyFields.includes(key)?Math.round(Number(a)*100)!==Math.round(Number(b)*100):a!==b))conflicts.push(labels[key]||key);
+ }
+ if(!merged.vat_rates.length&&fallback.vat_rates.length)merged.vat_rates=fallback.vat_rates;
+ else if(merged.vat_rates.length&&fallback.vat_rates.length&&JSON.stringify(merged.vat_rates)!==JSON.stringify(fallback.vat_rates))conflicts.push('MVA-fordeling');
+ if(!merged.items.length&&fallback.items.length)merged.items=fallback.items;
+ const inferred=preferred.uncertainties.some(x=>x.includes('beregnet fra totalbeløpet'));
+ if(inferred&&fallback.net!=null&&fallback.vat!=null&&fallback.vat_rates.length){
+  merged.net=fallback.net;merged.vat=fallback.vat;merged.vat_rates=fallback.vat_rates;
+  merged.uncertainties=merged.uncertainties.filter(x=>!x.includes('beregnet fra totalbeløpet'));
+ }
+ merged.uncertainties=[...new Set([...merged.uncertainties,...fallback.uncertainties,...conflicts.map(x=>'Scribe og Tesseract foreslår ulike verdier for '+x+'. Kontroller mot originalen.')])];
+ return merged;
+}
 $('receiptForm').addEventListener('input',e=>{if(e.target.id!=='confirmed')changed();});
 function canLeave(){return !dirty||confirm('Du har ulagrede rettelser. Vil du forkaste dem?');}
 async function openReceipt(id,keepForm=false){
@@ -178,6 +197,36 @@ $('analyzeScribe').onclick=()=>{
   $('ocrText').value=text;$('ocrResult').hidden=false;
   const missing=[['purchase_date','dato'],['gross','totalbeløp'],['net','netto'],['vat','MVA']].filter(([key])=>parsed[key]===null).map(([,label])=>label);
   say(missing.length?'Scribe leste teksten delvis. Mangler '+missing.join(', ')+'. Kontroller originalen eller bruk reserveverktøyet.':'Scribe leste teksten lokalt. Kontroller alle forslag, MVA-fordelingen og leverandørnavnet mot originalbilaget.');
+ });
+};
+$('analyzeBoth').onclick=()=>{
+ if(!canLeave())return;
+ run(async()=>{
+  if(!['application/pdf','image/jpeg','image/png'].includes(current.mime_type))throw Error('Kombinert lesing støtter PDF, JPG og PNG. Bruk Tesseract alene for HEIC.');
+  say('Henter originalbilaget …');
+  const fresh=await api({action:'get',id:current.id}),response=await fetch(fresh.url);
+  if(!response.ok)throw Error('Kunne ikke hente originalen. Åpne kvitteringen på nytt.');
+  const blob=await response.blob(),name=/\.(pdf|png|jpe?g)$/i.test(current.original_name)?current.original_name:current.original_name+'.'+({'application/pdf':'pdf','image/png':'png','image/jpeg':'jpg'}[current.mime_type]);
+  let scribeText='',tesseractText='',scribeData=emptyData(),tesseractData=emptyData(),failures=[];
+  try{
+   say('Leser med Scribe lokalt …');
+   scribeText=await recognizeWithScribe(blob,name);
+   if(!scribeText.trim())throw Error('Scribe fant ingen lesbar tekst.');
+   scribeData=parseReceiptText(scribeText);
+  }catch(e){failures.push('Scribe: '+e.message);}
+  try{
+   say('Kontrollerer feltene med Tesseract …');
+   tesseractText=await recognizeReceipt(blob,current.mime_type,message=>say('Tesseract: '+message));
+   if(!tesseractText.trim())throw Error('Tesseract fant ingen lesbar tekst.');
+   tesseractData=parseReceiptText(tesseractText);
+  }catch(e){failures.push('Tesseract: '+e.message);}
+  if(!scribeText&&!tesseractText)throw Error(failures.join(' ')||'Ingen lesbar tekst funnet.');
+  const parsed=mergeReceiptResults(scribeData,tesseractData);
+  renderForm(parsed);dirty=true;
+  $('ocrText').value=[scribeText?'--- Scribe.js ---\n'+scribeText:'',tesseractText?'--- Tesseract ---\n'+tesseractText:''].filter(Boolean).join('\n\n');
+  $('ocrResult').hidden=false;
+  const missing=[['purchase_date','dato'],['gross','totalbeløp'],['net','netto'],['vat','MVA']].filter(([key])=>parsed[key]===null).map(([,label])=>label);
+  say(failures.length?'Lesingen ble delvis fullført. '+failures.join(' ')+' Kontroller alle forslag.':missing.length?'Begge lesingene er ferdige. Mangler '+missing.join(', ')+'. Kontroller råtekst og originalbilag.':'Begge lesingene er ferdige. Kontroller forslagene og eventuelle avvik mot originalbilaget.');
  });
 };
 $('analyze').onclick=()=>{
