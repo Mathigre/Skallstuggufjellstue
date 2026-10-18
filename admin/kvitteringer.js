@@ -61,7 +61,8 @@ function syncButtons(){
  if(!current)return;
  const deleted=!!current.deleted_at;
  $('delete').hidden=deleted;$('restore').hidden=!deleted;
- $('analyze').disabled=busy||deleted||current.review_status==='approved';\n $('analyzeScribe').disabled=busy||deleted||current.review_status==='approved';
+ $('analyze').disabled=busy||deleted||current.review_status==='approved';
+ $('analyzeScribe').disabled=busy||deleted||current.review_status==='approved';
  $('analyze').textContent='Les tekst gratis';
  $('receiptForm').querySelectorAll('input,textarea,button').forEach(e=>e.disabled=e.hasAttribute('data-permanent-disabled')||busy||deleted);
  $('analysisHint').textContent='Tekstlesingen skjer på enheten. Forslag må kontrolleres og lagres manuelt.';
