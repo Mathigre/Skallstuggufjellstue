@@ -1,5 +1,5 @@
 import {serveWithCloudflareOrigin} from '../shared/cloudflare-origin.ts';
-// Admin-only receipt upload, management and explicit Gemini analysis.
+// Admin-only receipt upload and management.
 import { requireAdmin } from '../shared/auth.ts';
 import { normalizeData, validateData } from '../../../admin/receipt-data.mjs';
 import { PDFDocument } from 'npm:pdf-lib@1.17.1';
@@ -85,9 +85,8 @@ export async function handle(req:Request){
  }
  const receipt=await getReceipt(body.id);
  if(body.action==='get'){
- const runs=await database('receipt_analysis_runs?receipt_id=eq.'+receipt.id+'&order=started_at.desc');
  const sign=await (await storage('object/sign/kvitteringer/'+receipt.original_path,'POST',JSON.stringify({expiresIn:300}),'application/json')).json();
- return reply({receipt,runs,url:env('SUPABASE_URL')+'/storage/v1'+sign.signedURL});
+ return reply({receipt,url:env('SUPABASE_URL')+'/storage/v1'+sign.signedURL});
  }
  if(['save','approve','delete','restore'].includes(body.action)){
  let data=null;
