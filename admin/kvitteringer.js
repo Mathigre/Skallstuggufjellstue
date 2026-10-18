@@ -20,7 +20,7 @@ const say=(message,error=false)=>{$('status').textContent=message;$('status').cl
 function setProgress(message,percent=null){say(message);const box=$('ocrProgress'),bar=$('ocrProgressBar');if(!box||!bar)return;box.hidden=false;$('ocrProgressLabel').textContent=message;if(Number.isFinite(percent)){bar.value=Math.max(0,Math.min(100,percent));bar.setAttribute('aria-valuetext',Math.round(bar.value)+' %');}else{bar.removeAttribute('value');bar.removeAttribute('aria-valuetext');}}
 function parseReceiptTextWithFallback(text){
  const d=parseReceiptText(text),lines=text.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
- const amounts=line=>[...new Set([...line.matchAll(/(?:\d{1,3}(?:[ .]\d{3})+|\d+)[,.]\s*\d{2}/g)].map(m=>Number(m[0].replace(/[ .]/g,'').replace(',','.'))))];
+ const amounts=line=>[...new Set([...line.matchAll(/(?:\d{1,3}(?:[ .]\d{3})+|\d+)[,.]\s*\d{2}/g)].map(m=>{const raw=m[0].replace(/\s/g,'');return Number(raw.includes(',')?raw.replace(/\./g,'').replace(',','.'):raw);}))];
  if(d.gross==null){
   const totals=lines.filter(line=>/^total\b.*\b(?:moms|mva)\b/i.test(line)).flatMap(amounts);
   const unique=[...new Set(totals)];if(unique.length===1)d.gross=unique[0];
