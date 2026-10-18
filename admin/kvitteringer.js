@@ -1,4 +1,4 @@
-import {parseReceiptText} from './receipt-ocr.mjs?v=20261015c';
+import {parseReceiptText} from './receipt-ocr.mjs?v=20261018-scribeparse1';
 import {loadOCR,recognizeReceipt} from './receipt-ocr-engine.mjs?v=20261015c';
 import {emptyData,normalizeData,validateData,textFields,moneyFields} from './receipt-data.mjs';
 const $=id=>document.getElementById(id),endpoint='https://rbphgvnwmzjeuvyrasvy.supabase.co/functions/v1/receipt-analyze';
