@@ -226,6 +226,7 @@ function mergeReceiptResults(preferred,fallback){
  return merged;
 }
 $('receiptForm').addEventListener('input',e=>{if(e.target.id!=='confirmed')changed();});
+$('receiptForm').addEventListener('change',e=>{if(e.target.id==='field-account')changed();});
 function canLeave(){return !dirty||confirm('Du har ulagrede rettelser. Vil du forkaste dem?');}
 async function openReceipt(id,keepForm=false){
  const result=await api({action:'get',id});current=result.receipt;fikenState=null;fikenLoaded=false;
