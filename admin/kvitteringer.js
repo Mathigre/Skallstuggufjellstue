@@ -17,6 +17,33 @@ async function loadFikenStatus(){
 }
 const labels={vendor:'Leverandør',organization_number:'Organisasjonsnummer',purchase_date:'Kjøpsdato',currency:'Valuta',payment_method:'Betalingsmetode',category:'Kategori (forslag)',account:'Konto (forslag)',notes:'Notater',net:'Beløp ekskl. MVA',vat:'MVA',gross:'Totalbeløp inkl. MVA',rounding:'Avrunding'};
 const say=(message,error=false)=>{$('status').textContent=message;$('status').className=error?'error':'';};
+const scribeFrame=$('scribeFrame');
+let scribeReady=scribeFrame.contentDocument?.readyState==='complete',scribePending=null;
+scribeFrame.addEventListener('load',()=>{scribeReady=true;});
+function waitForScribe(){
+ if(scribeReady)return Promise.resolve();
+ return new Promise((resolve,reject)=>{
+  const timeout=setTimeout(()=>reject(Error('Scribe-skanneren kunne ikke lastes. Oppdater siden og prøv igjen.')),20000);
+  scribeFrame.addEventListener('load',()=>{clearTimeout(timeout);scribeReady=true;resolve();},{once:true});
+ });
+}
+function recognizeWithScribe(file,name){
+ return waitForScribe().then(()=>new Promise((resolve,reject)=>{
+  if(scribePending)return reject(Error('En Scribe-skanning pågår allerede.'));
+  const timeout=setTimeout(()=>{scribePending=null;reject(Error('Scribe brukte for lang tid. Prøv et mindre eller skarpere bilag.'));},180000);
+  scribePending={resolve,reject,timeout};
+  scribeFrame.contentWindow.postMessage({type:'skallstuggu:scribe:scan',file,name},location.origin);
+ }));
+}
+window.addEventListener('message',event=>{
+ if(event.origin!==location.origin||event.source!==scribeFrame.contentWindow)return;
+ const message=event.data;if(!message||typeof message.type!=='string')return;
+ if(message.type==='skallstuggu:scribe:status'&&typeof message.text==='string'){say(message.text);return;}
+ if(!scribePending)return;
+ const pending=scribePending;scribePending=null;clearTimeout(pending.timeout);
+ if(message.type==='skallstuggu:scribe:result'&&typeof message.text==='string')pending.resolve(message.text);
+ else if(message.type==='skallstuggu:scribe:error')pending.reject(Error(typeof message.text==='string'?message.text:'Scribe klarte ikke å lese bilaget.'));
+});
 async function api(body){
  const headers=await window.adminHeaders();if(body instanceof FormData)delete headers['Content-Type'];
  const response=await fetch(endpoint,{method:'POST',headers,body:body instanceof FormData?body:JSON.stringify(body)});
@@ -31,7 +58,7 @@ function syncButtons(){
  if(!current)return;
  const deleted=!!current.deleted_at;
  $('delete').hidden=deleted;$('restore').hidden=!deleted;
- $('analyze').disabled=busy||deleted||current.review_status==='approved';
+ $('analyze').disabled=busy||deleted||current.review_status==='approved';\n $('analyzeScribe').disabled=busy||deleted||current.review_status==='approved';
  $('analyze').textContent='Les tekst gratis';
  $('receiptForm').querySelectorAll('input,textarea,button').forEach(e=>e.disabled=e.hasAttribute('data-permanent-disabled')||busy||deleted);
  $('analysisHint').textContent='Tekstlesingen skjer på enheten. Forslag må kontrolleres og lagres manuelt.';
@@ -131,6 +158,24 @@ $('refresh').onclick=()=>{if(canLeave())run(async()=>{await loadList();if(curren
 $('closeDetail').onclick=()=>{if(canLeave()){$('detail').hidden=true;current=null;dirty=false;}};
 $('renewPreview').onclick=()=>run(()=>openReceipt(current.id,true));
 $('addVat').onclick=()=>{addRow('vat');changed();};$('addItem').onclick=()=>{addRow('item');changed();};
+$('analyzeScribe').onclick=()=>{
+ if(!canLeave())return;
+ run(async()=>{
+  if(!['application/pdf','image/jpeg','image/png'].includes(current.mime_type))throw Error('Scribe støtter PDF, JPG og PNG her. Bruk Tesseract som reserve for HEIC.');
+  say('Starter lokal Scribe-lesing …');
+  const fresh=await api({action:'get',id:current.id});
+  const response=await fetch(fresh.url);
+  if(!response.ok)throw Error('Kunne ikke hente originalen. Åpne kvitteringen på nytt.');
+  const blob=await response.blob();
+  const name=/\\.(pdf|png|jpe?g)$/i.test(current.original_name)?current.original_name:current.original_name+'.'+({ 'application/pdf':'pdf','image/png':'png','image/jpeg':'jpg' }[current.mime_type]);
+  const text=await recognizeWithScribe(blob,name);
+  if(!text.trim())throw Error('Scribe fant ingen lesbar tekst. Prøv et skarpere bilde eller Tesseract.');
+  const parsed=parseReceiptText(text);renderForm(parsed);dirty=true;
+  $('ocrText').value=text;$('ocrResult').hidden=false;
+  const missing=[['purchase_date','dato'],['gross','totalbeløp'],['net','netto'],['vat','MVA']].filter(([key])=>parsed[key]===null).map(([,label])=>label);
+  say(missing.length?'Scribe leste teksten delvis. Mangler '+missing.join(', ')+'. Kontroller originalen eller bruk reserveverktøyet.':'Scribe leste teksten lokalt. Kontroller alle forslag, MVA-fordelingen og leverandørnavnet mot originalbilaget.');
+ });
+};
 $('analyze').onclick=()=>{
  if(!canLeave())return;
  run(async()=>{
