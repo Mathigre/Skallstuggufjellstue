@@ -35,9 +35,4 @@ export function validateData(input){
  if(d.uncertainties.length)warnings.push(...d.uncertainties);
  return {data:d,errors,warnings};
 }
-export function estimateCost(usage,inputRate,outputRate){
- const a=usage?.promptTokenCount,b=usage?.candidatesTokenCount,t=usage?.thoughtsTokenCount??0;
- if(![a,b,t].every(v=>Number.isInteger(v)&&v>=0))return {input:null,output:null,cost:null};
- return {input:a,output:b+t,cost:(a*inputRate+(b+t)*outputRate)/1e6};
-}
 

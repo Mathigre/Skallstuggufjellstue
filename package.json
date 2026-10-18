@@ -1,0 +1,9 @@
+{
+  "name": "skallstuggu-site-build",
+  "private": true,
+  "packageManager": "pnpm@11.25.0",
+  "scripts": {
+    "build": "node scripts/build-static-site.mjs && pnpm --filter @skallstuggu/receipt-scanner build"
+  }
+}
+
