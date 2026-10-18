@@ -18,7 +18,7 @@
     document.documentElement.classList.add('admin-authorized');
     const reveal=()=>{const content=document.getElementById('adminContent');if(content)content.style.display='block';};
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',reveal,{once:true});else reveal();
-    const installPush=()=>{const css=document.createElement('link');css.rel='stylesheet';css.href='push.css?v=1';document.head.append(css);const script=document.createElement('script');script.src='push.js?v=20261014-logout';document.head.append(script);};
+    const installPush=()=>{const css=document.createElement('link');css.rel='stylesheet';css.href='push.css?v=20261018-hide-active';document.head.append(css);const script=document.createElement('script');script.src='push.js?v=20261018-hide-active';document.head.append(script);};
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installPush,{once:true});else setTimeout(installPush,0);
     return data.user;
   })();
