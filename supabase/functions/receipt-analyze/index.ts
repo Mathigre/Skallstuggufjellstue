@@ -1,7 +1,7 @@
 import {serveWithCloudflareOrigin} from '../shared/cloudflare-origin.ts';
 // Admin-only receipt upload and management.
 import { requireAdmin } from '../shared/auth.ts';
-import { normalizeData, validateData } from '../../../admin/receipt-data.mjs';
+import { validateData } from '../../../admin/receipt-data.mjs';
 import { PDFDocument } from 'npm:pdf-lib@1.17.1';
 const env=(name:string)=>Deno.env.get(name)||'';
 const origin=env('RECEIPT_ALLOWED_ORIGIN')||'https://skallstuggu-test.no';
@@ -46,12 +46,11 @@ async function inspectFile(bytes:Uint8Array){
  if(!mime)throw new Fault(400,'TYPE','Bruk en gyldig JPG-, PNG-, HEIC- eller PDF-fil.');
  return mime;
 }
-const toBase64=(bytes:Uint8Array)=>{let s='';for(let i=0;i<bytes.length;i+=16384)s+=String.fromCharCode(...bytes.subarray(i,i+16384));return btoa(s);};
 export async function handle(req:Request){
  if(req.method==='OPTIONS')return new Response(null,{headers:cors,status:204});
  if(req.method!=='POST')return reply({error:'Bruk POST.'},405);
  try{
- const user=await requireAdmin(req,env);
+ await requireAdmin(req,env);
  const settings=(await database('receipt_settings?id=eq.true'))[0];
  if(req.headers.get('content-type')?.startsWith('multipart/form-data')){
  const buffer=await limitedBody(req,15728640+65536);
@@ -80,7 +79,6 @@ export async function handle(req:Request){
  if(body.action==='list'){
  const page=Number.isInteger(body.page)&&body.page>=0?body.page:0;
  const receipts=await database('receipts?order=created_at.desc&limit=100&offset='+page*100);
- const day=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Oslo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
  return reply({receipts,settings:{real_documents_enabled:settings.real_documents_enabled},page,more:receipts.length===100});
  }
  const receipt=await getReceipt(body.id);
