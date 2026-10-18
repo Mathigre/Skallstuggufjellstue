@@ -1,6 +1,6 @@
 // Bounded, local preprocessing. Keep the original file untouched.
 export function imageScale(width,height){
- return Math.min(6,Math.max(1,1500/width),2600/width,Math.sqrt(12000000/(width*height)));
+ return Math.min(3.5,Math.max(1,1800/width),Math.sqrt(6000000/(width*height)));
 }
 export function enhancePixels(data){
  const histogram=new Uint32Array(256);
