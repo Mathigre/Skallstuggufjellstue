@@ -108,20 +108,6 @@ async function openReceipt(id,keepForm=false){
  if(!keepForm){renderForm(current.reviewed_data||emptyData());$('ocrResult').hidden=true;$('ocrText').value='';}
  syncButtons();await loadFikenStatus();$('detail').focus({preventScroll:true});
 }
-async function analysisCopy(file){
- if(!/\.(jpe?g|png|heic|heif)$/i.test(file.name))return null;
- let bitmap;
- try{bitmap=await createImageBitmap(file);}catch{return null;}
- try{
- if(bitmap.width*bitmap.height>60000000)throw Error('Bildet har for mange piksler. Ta et nytt bilde med lavere oppløsning.');
- const scale=Math.min(1,2000/bitmap.width);
- if(scale===1&&file.size<2000000)return null;
- const canvas=document.createElement('canvas');canvas.width=Math.round(bitmap.width*scale);canvas.height=Math.round(bitmap.height*scale);
- const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);
- const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',0.9));
- return blob&&blob.size<file.size&&blob.size<=5242880?blob:null;
- }finally{bitmap.close();}
-}
 async function upload(fileList){
  if(!settings.real_documents_enabled&&!$('synthetic').checked)throw Error('Bekreft at filene er syntetiske testkvitteringer.');
  const files=Array.from(fileList);if(files.length>20)throw Error('Velg maks 20 filer om gangen.');
@@ -131,7 +117,6 @@ async function upload(fileList){
  try{
  if(file.size>10485760)throw Error('Filen er over 10 MB.');
  const form=new FormData();form.append('file',file);form.append('synthetic',String($('synthetic').checked));
- const copy=await analysisCopy(file);if(copy)form.append('analysis',copy,'analysis.jpg');
  last=(await api(form)).receipt.id;
  }catch(e){failed++;failures.push(file.name+': '+e.message);}
  }
