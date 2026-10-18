@@ -37,6 +37,8 @@ async function checkServices() {
 }
 
 async function checkPush() {
+  const manage = $('pushManage');
+  if (manage) manage.hidden = true;
   if (!('Notification' in window) || !('serviceWorker' in navigator)) {
     return { state: 'warning', label: 'Støttes ikke', message: 'Denne nettleseren støtter ikke webvarsler.' };
   }
@@ -47,7 +49,8 @@ async function checkPush() {
   if (!registration) return { state: 'warning', label: 'Mangler', message: 'Adminens varslingstjeneste er ikke installert i denne nettleseren.' };
   const subscription = await registration.pushManager.getSubscription();
   if (!subscription) return { state: 'warning', label: 'Ikke abonnert', message: 'Varsler er tillatt, men denne enheten er ikke abonnert.' };
-  return { state: 'warning', label: 'Delvis kontrollert', message: 'Nettleseren har et abonnement, men levering av varsler er ikke testet.' };
+  if (manage && typeof window.disableAdminPush === 'function') manage.hidden = false;
+  return { state: 'warning', label: 'Aktiv, ikke leveringstestet', message: 'Denne enheten er abonnert. Faktisk levering av varsler testes ikke her.' };
 }
 
 async function runChecks() {
@@ -89,4 +92,12 @@ async function runChecks() {
 }
 
 $('checkNow').addEventListener('click', runChecks);
+$('pushManage')?.addEventListener('click', async () => {
+  const button = $('pushManage');
+  button.disabled = true;
+  try { await window.disableAdminPush?.(); await runChecks(); }
+  catch (error) { setResult('pushCheck', 'error', 'Feil', error?.message || 'Kunne ikke deaktivere varsler.'); }
+  finally { button.disabled = false; }
+});
+window.addEventListener('adminpushchange', () => setTimeout(runChecks, 400));
 if (await window.adminReady) await runChecks();
