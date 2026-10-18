@@ -10,23 +10,31 @@ export function parseReceiptText(text){
  const unique=[...new Set(values)];if(unique.length===1)d[key]=unique[0];if(key==='gross'){totalCandidates=unique;if(unique.length>1)conflictingTotals=true;}
  }
  const agrees=(a,b)=>Math.abs(Math.round(a*100)-Math.round(b*100))<=2;
+ const taxRates=[0,10,12,15,25];
+ const parseVatRow=line=>{
+  const match=line.match(/(?:^|\s)(\d{1,2})(?:[,.]0{1,2})?\s*%/);if(!match)return null;
+  const explicitRate=Number(match[1]),tail=line.slice(match.index+match[0].length);
+  let values=numbers(tail),corrected=false;
+  if(values.length!==3){
+   const tokens=[...tail.matchAll(/\b[\dOQIl|Bb]{5,7}\b/g)].map(m=>Number(m[0].replace(/[OQ]/g,'0').replace(/[Il|]/g,'1').replace(/[Bb]/g,'8'))/100);
+   if(tokens.length!==3)return null;values=tokens;corrected=true;
+  }
+  const [net,vat,gross]=values;if(!agrees(net+vat,gross))return null;
+  const matching=taxRates.filter(rate=>agrees(net*rate/100,vat));
+  if(matching.length!==1)return null;
+  const rate=matching[0];
+  return {row:{rate,net,vat,gross},rateCorrected:corrected||explicitRate!==rate};
+ };
  // A validated purchase VAT table can corroborate one of conflicting OCR totals.
  // Stop at savings/loyalty sections: those contain a separate, unrelated VAT table.
  const purchaseTables=[];
  for(let h=0;h<lines.length;h++){
  if(/spart|medlemsfordel|utbytte|andre rabatter/i.test(lines[h]))break;
- if(!/[mh]va[- ]?[ag]runnlag/i.test(lines[h])||!/[mh]va\s*[-%]/i.test(lines[h])||!/sum/i.test(lines[h]))continue;
+ if(!/(?:mva|moms|muin[gs])/i.test(lines[h])||!/grunnlag/i.test(lines[h])||!/(?:sum|total|lotal|jotul)/i.test(lines[h]))continue;
  const rows=[];
  for(const line of lines.slice(h+1,h+7)){
  if(/spart|medlems|utbytte|rabatt|^sum\b/i.test(line))break;
- const rateMatch=line.match(/\b(\d{1,2})(?:[,.]0{1,2})?\s*%/);if(!rateMatch)continue;
- // Remove only stray quote marks next to a decimal separator; never guess digits.
- const cleaned=line.replace(/(?<=\d)["“”']+(?=[,.])/g,'');
- const before=numbers(cleaned.slice(0,cleaned.indexOf(rateMatch[0])));
- const after=numbers(cleaned.slice(cleaned.indexOf(rateMatch[0])+rateMatch[0].length));
- if(before.length!==1||after.length!==2)continue;
- const rate=Number(rateMatch[1]),net=before[0],[vat,gross]=after;
- if([0,10,12,15,25].includes(rate)&&agrees(net+vat,gross)&&agrees(net*rate/100,vat))rows.push({rate,net,vat,gross});
+ const parsed=parseVatRow(line);if(parsed&&!rows.some(r=>r.rate===parsed.row.rate&&agrees(r.gross,parsed.row.gross)))rows.push(parsed.row);if(parsed?.rateCorrected)derivedVat=true;
  }
  const gross=Math.round(rows.reduce((s,r)=>s+r.gross,0)*100)/100;
  if(rows.length&&totalCandidates.some(v=>agrees(v,gross)))purchaseTables.push({rows,gross});
@@ -38,13 +46,12 @@ export function parseReceiptText(text){
  const sums=lines.filter(l=>/^sum\s/i.test(l)).map(numbers).filter(v=>v.length===3&&agrees(v[0]+v[1],v[2]));
  if(sums.length===1&&!conflictingTotals){const [net,vat,gross]=sums[0];if(d.gross===null||agrees(d.gross,gross)){d.net=net;d.vat=vat;d.gross=gross;}}
  // Only parse rate rows beneath an explicit VAT table heading.
- const header=lines.findIndex(l=>/mva/i.test(l)&&/grunnlag/i.test(l)&&/totalt?/i.test(l));
+ const header=lines.findIndex(l=>/(?:mva|moms|muin[gs])/i.test(l)&&/grunnlag/i.test(l)&&/(?:total|lotal|jotul)/i.test(l));
  if(header>=0){
  const rows=[];
  for(const line of lines.slice(header+1,header+9)){
  if(/^sum\b/i.test(line))break;
- const v=numbers(line);if(v.length!==4||![0,10,12,15,25].includes(v[0]))continue;
- const [rate,net,vat,gross]=v;if(agrees(net+vat,gross)&&agrees(net*rate/100,vat))rows.push({rate,net,vat,gross});
+ const parsed=parseVatRow(line);if(parsed&&!rows.some(r=>r.rate===parsed.row.rate&&agrees(r.gross,parsed.row.gross)))rows.push(parsed.row);if(parsed?.rateCorrected)derivedVat=true;
  }
  if(rows.length&&d.gross!==null&&agrees(rows.reduce((s,r)=>s+r.gross,0),d.gross)){
  d.vat_rates=rows;d.net=Math.round(rows.reduce((s,r)=>s+r.net,0)*100)/100;d.vat=Math.round(rows.reduce((s,r)=>s+r.vat,0)*100)/100;
@@ -80,6 +87,8 @@ export function parseReceiptText(text){
  if(d.gross!==null&&agrees(d.gross,gross)&&agrees(net*rate/100,vat)){d.net=net;d.vat=vat;d.vat_rates=[{rate,net,vat,gross}];}
  }
  const dates=[...text.matchAll(/\b(20\d{2})-(\d{2})-(\d{2})\b|\b(\d{2})[./ °-](\d{2})[./ °-](20\d{2}|\d{2})\b/g)].map(m=>m[1]?m[1]+'-'+m[2]+'-'+m[3]:(m[6].length===2?'20'+m[6]:m[6])+'-'+m[5]+'-'+m[4]);
+ const monthNames={january:'01',february:'02',march:'03',april:'04',may:'05',june:'06',july:'07',august:'08',september:'09',october:'10',november:'11',december:'12',jan:'01',feb:'02',mar:'03',apr:'04',jun:'06',jul:'07',aug:'08',sep:'09',sept:'09',oct:'10',nov:'11',dec:'12'};
+ for(const m of text.matchAll(/\b(\d{1,2})(?:st|nd|rd|th)?\s+(January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\s+(20\d{2})\b/gi))dates.push(m[3]+'-'+monthNames[m[2].toLowerCase()]+'-'+m[1].padStart(2,'0'));
  const unique=[...new Set(dates.filter(date=>!isNaN(Date.parse(date))&&new Date(date).toISOString().slice(0,10)===date))];if(unique.length===1)d.purchase_date=unique[0];
  const org=text.match(/(?:org(?:anisasjons)?\.?\s*(?:nr|nummer|ni)\.?|moms\s*nr\.?)[^\d]{0,20}(?:NO)?\s*(\d{3})\s?(\d{3})\s?(\d{3})/i);if(org){
  const value=org.slice(1).join(''),weights=[3,2,7,6,5,4,3,2],remainder=value.slice(0,8).split('').reduce((s,n,i)=>s+Number(n)*weights[i],0)%11,control=remainder===0?0:11-remainder;
@@ -90,7 +99,7 @@ export function parseReceiptText(text){
  if(/\b(?:BANK|bankkort|Visa|Mastercard|BankAxept|Contactless|PIN OK|Card)\b/i.test(text))d.payment_method='Kort';
  // Raw OCR is shown separately in the UI, not stored as the user's bookkeeping note.
  d.notes=null;
- d.uncertainties=['Tekstlest lokalt. Kontroller alle foreslåtte verdier mot originalen.',...(derivedVat?['Netto og MVA er beregnet fra totalbeløpet og én gjenkjent sats. Kontroller beregningen mot originalen.']:[]),d.vendor?'Kontroller leverandørnavnet. Varelinjer og regnskapskonto må fylles ut manuelt.':'Leverandør, varelinjer og regnskapskonto må fylles ut manuelt.'];
+ d.uncertainties=['Tekstlest lokalt. Kontroller alle foreslåtte verdier mot originalen.',...(derivedVat?['MVA er utledet fra en lesbar sats eller en matematisk kontrollert MVA-rad. Kontroller mot originalen.']:[]),...(unique?.length>1?['Flere datoer ble funnet. Kjøpsdato er derfor ikke valgt automatisk.']:[]),d.vendor?'Kontroller leverandørnavnet. Varelinjer og regnskapskonto må fylles ut manuelt.':'Leverandør, varelinjer og regnskapskonto må fylles ut manuelt.'];
  if(!d.vat_rates.length)d.uncertainties.push('MVA-fordeling må fylles ut manuelt.');
  if(/midlertidig\s+kvittering/i.test(text))d.uncertainties.push('Dokumentet er merket midlertidig kvittering. Skaff og kontroller endelig kvittering før bokføring.');
  if([d.net,d.vat,d.gross].every(v=>v!==null)&&!agrees(d.net+d.vat,d.gross))d.uncertainties.push('Beløpene stemmer ikke: kontroller total og MVA mot originalen.');
