@@ -1,0 +1,31 @@
+:root{font-family:Arial,Helvetica,sans-serif;color:#302b27;background:#f6f3ee}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh}
+.status-page{max-width:1100px;margin:0 auto;padding:16px 20px 48px}
+.status-heading{display:flex;justify-content:space-between;align-items:center;gap:24px;margin:14px 0 8px}
+.status-heading h1{font-family:Georgia,serif;font-size:clamp(2rem,4vw,2.8rem);margin:4px 0 8px}
+.status-heading p{margin:0;color:#665e57}
+.eyebrow{color:#8b4a2b!important;font-size:.82rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.check-button{border:0;border-radius:10px;padding:14px 20px;background:#8b4a2b;color:#fff;font-size:1rem;font-weight:700;cursor:pointer;white-space:nowrap}
+.check-button:hover{background:#703a21}
+.check-button:focus-visible{outline:3px solid #d5a256;outline-offset:3px}
+.check-button:disabled{opacity:.65;cursor:wait}
+.checked-at{min-height:1.4em;margin:12px 0 22px;color:#70675f;font-size:.92rem}
+.status-card{background:#fff;border:1px solid #e9e2da;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.05);padding:22px;margin:18px 0}
+.status-card h2{font-family:Georgia,serif;margin:0 0 8px}
+.section-help{margin:0 0 14px;color:#6e665f;line-height:1.5}
+.status-row{display:grid;grid-template-columns:22px minmax(0,1fr) auto;align-items:center;gap:14px;padding:16px 4px;border-top:1px solid #eee9e3}
+.status-row h3{font-size:1rem;margin:0 0 4px}
+.status-row p{margin:0;color:#716961;line-height:1.45;font-size:.92rem}
+.status-icon{width:14px;height:14px;border-radius:50%;background:#aaa;justify-self:center}
+.status-row[data-state=ok] .status-icon{background:#348451;box-shadow:0 0 0 4px #e4f3e9}
+.status-row[data-state=warning] .status-icon{background:#c58a16;box-shadow:0 0 0 4px #fff3d8}
+.status-row[data-state=error] .status-icon{background:#c44646;box-shadow:0 0 0 4px #fbe8e8}
+.status-row[data-state=unknown] .status-icon{background:#92979b;box-shadow:0 0 0 4px #eff0f1}
+.status-label{font-size:.86rem;font-weight:700;color:#625a53;text-align:right}
+.status-row[data-state=ok] .status-label{color:#286a3e}
+.status-row[data-state=warning] .status-label{color:#865d0e}
+.status-row[data-state=error] .status-label{color:#a13434}
+.status-note{margin:20px 2px;color:#716961;font-size:.9rem}
+.account-link{color:#8b4a2b}
+@media(max-width:650px){.status-page{padding:10px 14px 36px}.status-heading{align-items:flex-start;flex-direction:column}.check-button{width:100%}.status-card{padding:18px 15px}.status-row{grid-template-columns:18px minmax(0,1fr);gap:12px}.status-label{grid-column:2;text-align:left}.status-icon{grid-row:1 / span 2}}
