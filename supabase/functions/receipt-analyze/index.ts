@@ -62,17 +62,10 @@ export async function handle(req:Request){
  const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),n=>n.toString(16).padStart(2,'0')).join('');
  const duplicate=await database('receipts?file_hash=eq.'+hash+'&select=id');
  if(duplicate.length)throw new Fault(409,'DUPLICATE','Denne filen er allerede lagret, eventuelt i papirkurven.');
- const derivative=form.get('analysis');let analysisBytes:Uint8Array|null=null,analysisMime:string|null=null;
- if(derivative instanceof File){
- if(derivative.size>5242880)throw new Fault(400,'SIZE','Analysekopien er for stor.');
- analysisBytes=new Uint8Array(await derivative.arrayBuffer());analysisMime=await inspectFile(analysisBytes);
- if(!['image/jpeg','image/png'].includes(analysisMime)||mime==='application/pdf')throw new Fault(400,'TYPE','Ugyldig analysekopi.');
- }
- const id=crypto.randomUUID(),path=id+'/original',analysisPath=analysisBytes?id+'/analysis':null;
+ const id=crypto.randomUUID(),path=id+'/original';
  await storage('object/kvitteringer/'+path,'POST',bytes,mime);
- if(analysisBytes)await storage('object/kvitteringer/'+analysisPath,'POST',analysisBytes,analysisMime!);
  // On DB failure leave the unique uploaded object for maintenance, not unsafe automatic removal.
- const [receipt]=await database('receipts','POST',{id,created_by:user.id,original_path:path,analysis_path:analysisPath,analysis_mime:analysisMime,original_name:file.name.slice(0,250),mime_type:mime,file_size:file.size,file_hash:hash,synthetic});
+ const [receipt]=await database('receipts','POST',{id,created_by:user.id,original_path:path,original_name:file.name.slice(0,250),mime_type:mime,file_size:file.size,file_hash:hash,synthetic});
  return reply({receipt});
  }
  const body=JSON.parse(new TextDecoder().decode(await limitedBody(req,200000)));
