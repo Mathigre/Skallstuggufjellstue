@@ -128,7 +128,7 @@ function syncButtons(){
  $('analyze').disabled=busy||deleted||current.review_status==='approved';
  $('analyzeScribe').disabled=busy||deleted||current.review_status==='approved';
  $('analyzeBoth').disabled=busy||deleted||current.review_status==='approved';
- $('analyze').textContent='Les tekst gratis';
+ $('analyze').textContent='Les med Tesseract';
  $('receiptForm').querySelectorAll('input,textarea,select,button').forEach(e=>e.disabled=e.hasAttribute('data-permanent-disabled')||busy||deleted);
  $('analysisHint').textContent='Tekstlesingen skjer på enheten. Forslag må kontrolleres og lagres manuelt.';
  const fikenReason=fikenBlockReason();
