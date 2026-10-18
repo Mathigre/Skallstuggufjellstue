@@ -5,11 +5,13 @@ const scanButton = document.querySelector('#scan');
 const status = document.querySelector('#status');
 const textOutput = document.querySelector('#text');
 let active = false;
+scribe.opt.workerN = 1;
+const warmPromise = scribe.init({ ocr: true, font: false }).catch(() => null);
 
-function setStatus(text) {
+function setStatus(text, progress = null) {
   status.textContent = text;
   if (window.parent !== window) {
-    window.parent.postMessage({ type: 'skallstuggu:scribe:status', text }, window.location.origin);
+    window.parent.postMessage({ type: 'skallstuggu:scribe:status', text, progress }, window.location.origin);
   }
 }
 
@@ -20,12 +22,16 @@ async function recognize(file) {
   textOutput.value = '';
   let doc;
   try {
-    setStatus('Klargjør Scribe…');
-    doc = await scribe.openDocument([file]);
+    setStatus('Klargjør Scribe på enheten …');
+    await warmPromise;
     scribe.opt.progressHandler = (message) => {
-      if (message?.type === 'recognize') setStatus('Leser kvitteringen lokalt…');
+      if (message?.type === 'recognize') {
+        const percent = Number.isFinite(message.progress) ? Math.round(message.progress * 100) : null;
+        setStatus(percent === null ? 'Leser kvitteringen lokalt …' : 'Scribe leser kvitteringen … ' + percent + ' %', percent);
+      }
     };
-    await doc.recognize({ langs: ['nor', 'eng'], mode: 'quality' });
+    doc = await scribe.openDocument([file]);
+    await doc.recognize({ langs: ['nor', 'eng'], mode: 'speed', modeAdv: 'lstm' });
     const text = await doc.exportData('text');
     textOutput.value = text;
     setStatus(text.trim() ? 'Ferdig. Kontroller teksten mot originalbilaget.' : 'Fant ingen lesbar tekst.');
