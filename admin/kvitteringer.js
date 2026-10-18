@@ -167,7 +167,7 @@ $('analyzeScribe').onclick=()=>{
   const response=await fetch(fresh.url);
   if(!response.ok)throw Error('Kunne ikke hente originalen. Åpne kvitteringen på nytt.');
   const blob=await response.blob();
-  const name=/\\.(pdf|png|jpe?g)$/i.test(current.original_name)?current.original_name:current.original_name+'.'+({ 'application/pdf':'pdf','image/png':'png','image/jpeg':'jpg' }[current.mime_type]);
+  const name=/\.(pdf|png|jpe?g)$/i.test(current.original_name)?current.original_name:current.original_name+'.'+({ 'application/pdf':'pdf','image/png':'png','image/jpeg':'jpg' }[current.mime_type]);
   const text=await recognizeWithScribe(blob,name);
   if(!text.trim())throw Error('Scribe fant ingen lesbar tekst. Prøv et skarpere bilde eller Tesseract.');
   const parsed=parseReceiptText(text);renderForm(parsed);dirty=true;
