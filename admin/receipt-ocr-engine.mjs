@@ -30,9 +30,9 @@ async function getWorker(){
  }
  return workerPromise;
 }
-export async function prepareOCR(onProgress=()=>{}){
- const previous=progressSink;progressSink=(message,percent)=>onProgress(message,percent);
- try{await getWorker();}finally{progressSink=previous;}
+export async function prepareOCR(onProgress=null){
+ const previous=progressSink;if(onProgress)progressSink=(message,percent)=>onProgress(message,percent);
+ try{await getWorker();}finally{if(onProgress)progressSink=previous;}
 }
 export async function recognizeReceipt(blob,mime,onProgress=()=>{}){
  if(active)throw Error('En tekstlesing pågår allerede.');
@@ -84,7 +84,7 @@ export async function recognizeReceipt(blob,mime,onProgress=()=>{}){
    let text='';
    for(let i=1;i<=pdf.numPages;i++){
     progressSink('Forbereder PDF-side '+i+' av '+pdf.numPages+' …',Math.round((i-1)/pdf.numPages*100));
-    const page=await pdf.getPage(i),natural=page.getViewport({scale:1),scale=Math.min(1.8,1800/natural.width,Math.sqrt(6000000/(natural.width*natural.height))),view=page.getViewport({scale});
+    const page=await pdf.getPage(i),natural=page.getViewport({scale:1}),scale=Math.min(1.8,1800/natural.width,Math.sqrt(6000000/(natural.width*natural.height))),view=page.getViewport({scale});
     const canvas=document.createElement('canvas');canvas.width=Math.ceil(view.width);canvas.height=Math.ceil(view.height);
     await page.render({canvasContext:canvas.getContext('2d'),viewport:view}).promise;
     try{text+=await readImage(canvas,i-1,pdf.numPages)+'\n';}finally{cleanupCanvas(canvas);page.cleanup();}
