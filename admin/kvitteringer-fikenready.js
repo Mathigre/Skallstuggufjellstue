@@ -16,6 +16,13 @@ async function loadFikenStatus(){
  syncButtons();
 }
 const labels={vendor:'Leverandør',organization_number:'Organisasjonsnummer',purchase_date:'Kjøpsdato',currency:'Valuta',payment_method:'Betalingsmetode',category:'Kategori (forslag)',account:'Konto (forslag)',notes:'Notater',net:'Beløp ekskl. MVA',vat:'MVA',gross:'Totalbeløp inkl. MVA',rounding:'Avrunding'};
+const accountGroups=[
+ ['Mat og varer for salg',[['4330','Matvarer for videresalg','Ferdige matvarer du selger videre uten å bearbeide dem. Kontroller MVA-satsen på bilaget.'],['4300','Andre varer for videresalg','Varer du kjøper inn og selger videre.'],['4000','Råvarer og materialer','Råvarer eller materialer som inngår i noe du tilbereder, produserer eller reparerer.']]],
+ ['Hytte og drift',[['6600','Vedlikehold av bygning','Reparasjon og vedlikehold som holder bygningen i samme standard. Materialer til slikt vedlikehold kan føres her.'],['6690','Vedlikehold av annet utstyr','Reparasjon og vedlikehold av utstyr som ikke er selve bygningen.'],['6360','Renhold av lokaler','Vask, renholdsmidler og renholdsutstyr til hytta.'],['6340','Lys og varme','Strøm og oppvarming av lokaler.'],['6320','Renovasjon, vann og avløp','Renovasjon, vann, avløp og lignende driftskostnader.'],['6540','Møbler og inventar','Vanlige møbler, interiør og løst inventar under aktiveringsgrensen.'],['6500','Verktøy og utstyr','Mindre verktøy og driftsutstyr.']]],
+ ['Datautstyr',[['6551','Data, telefon og kontormaskiner','PC, skjerm, telefon og annet fysisk datautstyr under aktiveringsgrensen.']]],
+ ['Større eiendeler',[['1250','Balanseført møbler og inventar','Større varig inventar: normalt minst 30 000 kr og minst tre års forventet levetid.'],['1280','Balanseført PC og kontormaskiner','Større varig datautstyr: normalt minst 30 000 kr og minst tre års forventet levetid.'],['1100','Bygning / påkostning','Kan være aktuelt for investering som øker bygningens standard/verdi. Avklar eierskap og føring før valg.']]],
+ ['Annet',[['__custom','Annen konto – skriv inn','Skriv inn et firesifret kontonummer hvis kontoen ikke finnes i listen.']]]
+];
 const say=(message,error=false)=>{$('status').textContent=message;$('status').className=error?'error':'';};
 function setProgress(message,percent=null){say(message);const box=$('ocrProgress'),bar=$('ocrProgressBar');if(!box||!bar)return;box.hidden=false;$('ocrProgressLabel').textContent=message;if(Number.isFinite(percent)){bar.value=Math.max(0,Math.min(100,percent));bar.setAttribute('aria-valuetext',Math.round(bar.value)+' %');}else{bar.removeAttribute('value');bar.removeAttribute('aria-valuetext');}}
 function parseReceiptTextWithFallback(text){
@@ -122,7 +129,7 @@ function syncButtons(){
  $('analyzeScribe').disabled=busy||deleted||current.review_status==='approved';
  $('analyzeBoth').disabled=busy||deleted||current.review_status==='approved';
  $('analyze').textContent='Les tekst gratis';
- $('receiptForm').querySelectorAll('input,textarea,button').forEach(e=>e.disabled=e.hasAttribute('data-permanent-disabled')||busy||deleted);
+ $('receiptForm').querySelectorAll('input,textarea,select,button').forEach(e=>e.disabled=e.hasAttribute('data-permanent-disabled')||busy||deleted);
  $('analysisHint').textContent='Tekstlesingen skjer på enheten. Forslag må kontrolleres og lagres manuelt.';
  const fikenReason=fikenBlockReason();
  $('fikenExport').disabled=!!fikenReason;
@@ -166,15 +173,28 @@ function addRow(kind,data={}){
 function renderForm(data){
  const d=normalizeData(data||emptyData());$('fields').replaceChildren();
  for(const key of [...textFields,...moneyFields]){
- const label=elem('label',labels[key]),input=elem(key==='notes'?'textarea':'input');input.id='field-'+key;
- if(key!=='notes')input.type=moneyFields.includes(key)?'number':key==='purchase_date'?'date':'text';
- if(moneyFields.includes(key))input.step='0.01';input.value=d[key]??'';label.append(input);$('fields').append(label);
+  const label=elem('label',labels[key]);
+  if(key==='account'){
+   const select=elem('select');select.id='field-account';select.setAttribute('aria-label','Velg regnskapskonto');
+   const placeholder=elem('option','Velg en konto …');placeholder.value='';select.append(placeholder);
+   const accountChoices=accountGroups.flatMap(([group,items])=>items.map(([value,title,description])=>({group,value,title,description})));
+   for(const [group,items] of accountGroups){const optgroup=document.createElement('optgroup');optgroup.label=group;for(const [value,title] of items){const option=elem('option',value==='__custom'?title:value+' – '+title);option.value=value;optgroup.append(option);}select.append(optgroup);}
+   const known=accountChoices.some(item=>item.value===d.account),custom=elem('input');custom.id='field-account-custom';custom.type='text';custom.inputMode='numeric';custom.maxLength=4;custom.placeholder='Skriv firesifret kontonummer';custom.setAttribute('aria-label','Egendefinert kontonummer');
+   select.value=known?d.account:(d.account?'__custom':'');custom.value=known?'':d.account||'';custom.hidden=select.value!=='__custom';
+   const hint=elem('small','Velg konto etter hva kjøpet gjelder. Ved eget vedlikeholdsarbeid fører du bare dokumenterte materialkjøp; egen arbeidstid føres ikke som leverandørkjøp.','account-hint');
+   const describe=()=>{const choice=accountChoices.find(item=>item.value===select.value);hint.textContent=choice?choice.description:'Velg kontoen som passer til kjøpet. Kontroller spesielt MVA og om arbeidet er vedlikehold eller en standardheving.';};
+   select.addEventListener('change',()=>{custom.hidden=select.value!=='__custom';describe();});
+   describe();label.append(select,custom,hint);$('fields').append(label);continue;
+  }
+  const input=elem(key==='notes'?'textarea':'input');input.id='field-'+key;
+  if(key!=='notes')input.type=moneyFields.includes(key)?'number':key==='purchase_date'?'date':'text';
+  if(moneyFields.includes(key))input.step='0.01';input.value=d[key]??'';label.append(input);$('fields').append(label);
  }
  $('vatRows').replaceChildren();$('itemRows').replaceChildren();d.vat_rates.forEach(r=>addRow('vat',r));d.items.forEach(r=>addRow('item',r));
  $('uncertainties').value=d.uncertainties.join('\n');$('confirmed').checked=false;dirty=false;showValidation();
 }
 function readForm(){
- const d=emptyData();for(const k of textFields)d[k]=$('field-'+k).value.trim()||null;for(const k of moneyFields)d[k]=$('field-'+k).value===''?null:Number($('field-'+k).value);
+ const d=emptyData();for(const k of textFields)d[k]=k==='account'?($('field-account').value==='__custom'?$('field-account-custom').value.trim()||null:$('field-account').value||null):$('field-'+k).value.trim()||null;for(const k of moneyFields)d[k]=$('field-'+k).value===''?null:Number($('field-'+k).value);
  for(const [kind,target] of [['vat','vat_rates'],['item','items']])d[target]=[...$(kind==='vat'?'vatRows':'itemRows').rows].map(row=>Object.fromEntries([...row.querySelectorAll('input')].map(i=>[i.dataset.key,i.value===''?null:i.type==='number'?Number(i.value):i.value])));
  d.uncertainties=$('uncertainties').value.split('\n').map(s=>s.trim()).filter(Boolean);return d;
 }
