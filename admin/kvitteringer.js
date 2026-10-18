@@ -19,20 +19,20 @@ const labels={vendor:'Leverandør',organization_number:'Organisasjonsnummer',pur
 const say=(message,error=false)=>{$('status').textContent=message;$('status').className=error?'error':'';};
 function setProgress(message,percent=null){say(message);const box=$('ocrProgress'),bar=$('ocrProgressBar');if(!box||!bar)return;box.hidden=false;$('ocrProgressLabel').textContent=message;if(Number.isFinite(percent)){bar.value=Math.max(0,Math.min(100,percent));bar.setAttribute('aria-valuetext',Math.round(bar.value)+' %');}else{bar.removeAttribute('value');bar.removeAttribute('aria-valuetext');}}
 function parseReceiptTextWithFallback(text){
- const d=parseReceiptText(text),lines=text.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
- const amounts=line=>[...new Set([...line.matchAll(/(?:\d{1,3}(?:[ .]\d{3})+|\d+)[,.]\s*\d{2}/g)].map(m=>{const raw=m[0].replace(/\s/g,'');return Number(raw.includes(',')?raw.replace(/\./g,'').replace(',','.'):raw);}))];
- if(d.gross==null){
-  const totals=lines.filter(line=>/^total\b.*\b(?:moms|mva)\b/i.test(line)).flatMap(amounts);
-  const unique=[...new Set(totals)];if(unique.length===1)d.gross=unique[0];
- }
- if(d.vendor==null&&/\bELKJ[ØO]P\b/i.test(lines.slice(0,15).join(' ')))d.vendor='Elkjøp Norge';
+ const d=parseReceiptText(text),lines=text.split(/\\r?\\n/).map(s=>s.trim()).filter(Boolean);
+ const amounts=line=>[...new Set([...line.matchAll(/(?:\\d{1,3}(?:[ .]\\d{3})+|\\d+)[,.]\\s*\\d{2}/g)].map(m=>{const raw=m[0].replace(/\\s/g,'');return Number(raw.includes(',')?raw.replace(/\\./g,'').replace(',','.'):raw);}))];
+ const totalLines=lines.filter(line=>/^total\\b.*\\b(?:moms|mva)\\b/i.test(line));
+ const totals=[...new Set(totalLines.flatMap(amounts))];
+ const explicitGross=totals.length===1?totals[0]:null;
+ if(explicitGross!=null&&(d.gross==null||Math.abs(d.gross-explicitGross)>.03))d.gross=explicitGross;
+ if(d.vendor==null&&/\\bELKJ[ØO]P\\b/i.test(lines.slice(0,15).join(' ')))d.vendor='Elkjøp Norge';
  const header=lines.findIndex(line=>/(?:mva|moms|muin[gs])/i.test(line)&&/grunnlag/i.test(line)&&/(?:total|lotal|jotul)/i.test(line));
- if(d.gross!=null&&(!d.vat_rates?.length||d.net==null||d.vat==null)&&header>=0){
+ if(d.gross!=null&&header>=0){
   for(const line of lines.slice(header+1,header+9)){
-   const match=line.match(/(?:^|\s)(\d{1,2})(?:[,.]0{1,2})?\s*%/);if(!match)continue;
+   const match=line.match(/(?:^|\\s)(\\d{1,2})(?:[,.]0{1,2})?\\s*%/);if(!match)continue;
    const tail=line.slice(match.index+match[0].length);let values=amounts(tail);
    if(values.length!==3){
-    const tokens=[...tail.matchAll(/\b[\dOQIl|Bb]{5,7}\b/g)].map(m=>Number(m[0].replace(/[OQ]/g,'0').replace(/[Il|]/g,'1').replace(/[Bb]/g,'8'))/100);
+    const tokens=[...tail.matchAll(/\\b[\\dOQIl|Bb]{5,7}\\b/g)].map(m=>Number(m[0].replace(/[OQ]/g,'0').replace(/[Il|]/g,'1').replace(/[Bb]/g,'8'))/100);
     if(tokens.length!==3)continue;values=tokens;
    }
    const [net,vat,gross]=values;if(Math.abs(Math.round((net+vat-gross)*100))>2||Math.abs(Math.round((gross-d.gross)*100))>2)continue;
@@ -42,11 +42,7 @@ function parseReceiptTextWithFallback(text){
    break;
   }
  }
- if(d.gross!=null&&d.net==null&&d.vat==null&&d.vat_rates?.length===0){
-  const headerRates=[...lines.slice(Math.max(0,header),header+8).join(' ').matchAll(/\b(0|10|12|15|25)\s*%/g)].map(m=>Number(m[1]));
-  const rates=[...new Set(headerRates)];if(rates.length===1){const rate=rates[0];d.net=Math.round(d.gross/(1+rate/100)*100)/100;d.vat=Math.round((d.gross-d.net)*100)/100;d.vat_rates=[{rate,net:d.net,vat:d.vat,gross:d.gross}];d.uncertainties=[...new Set([...d.uncertainties,'Netto og MVA er beregnet fra én sats i MVA-tabellen. Kontroller mot originalbilaget.'])];}
- }
- if(/\b\d{1,2}(?:st|nd|rd|th)?\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+20\d{2}\b/i.test(text)&&d.purchase_date){
+ if(/\\b\\d{1,2}(?:st|nd|rd|th)?\\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\\s+20\\d{2}\\b/i.test(text)&&d.purchase_date){
   d.purchase_date=null;d.uncertainties=[...new Set([...d.uncertainties,'Kvitteringen inneholder flere mulige datoer. Kontroller kjøpsdatoen manuelt.'])];
  }
  d.notes=null;return d;
