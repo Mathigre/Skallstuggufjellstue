@@ -104,12 +104,12 @@ function fikenBlockReason(){
  if(current.review_status!=='approved'){
   const validation=validateData(readForm());
   const missing=[...validation.errors];
-  if(!readForm().account||!/^\\d{4}$/.test(readForm().account))missing.push('Fyll inn en firesifret kostnadskonto.');
+  if(!readForm().account||!/^\d{4}$/.test(readForm().account))missing.push('Fyll inn en firesifret kostnadskonto.');
   return 'Kontroller bilaget, fyll inn manglende opplysninger ('+[...new Set(missing)].join(' ')+'), og velg «Lagre som kontrollert» først.';
  }
  const d=readForm(),validation=validateData(d);
  if(validation.errors.length)return 'Fiken-testen er sperret: '+validation.errors.join(' ');
- if(!d.account||!/^\\d{4}$/.test(d.account))return 'Fyll inn en firesifret kostnadskonto før Fiken-testen.';
+ if(!d.account||!/^\d{4}$/.test(d.account))return 'Fyll inn en firesifret kostnadskonto før Fiken-testen.';
  if(d.currency!=='NOK')return 'Denne testversjonen støtter bare NOK.';
  if(!d.vat_rates.length||d.vat_rates.some(row=>![0,12,15,25].includes(Number(row.rate))))return 'Fullstendig MVA-fordeling med sats 0, 12, 15 eller 25 % kreves.';
  return null;
