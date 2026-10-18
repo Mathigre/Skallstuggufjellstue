@@ -1,5 +1,5 @@
 import {parseReceiptText} from './receipt-ocr.mjs?v=20261018-scribeparse1';
-import {loadOCR,recognizeReceipt} from './receipt-ocr-engine.mjs?v=20261015c';
+import {loadOCR,prepareOCR,recognizeReceipt} from './receipt-ocr-engine.mjs?v=20261018-speed1';
 import {emptyData,normalizeData,validateData,textFields,moneyFields} from './receipt-data.mjs';
 const $=id=>document.getElementById(id),endpoint='https://rbphgvnwmzjeuvyrasvy.supabase.co/functions/v1/receipt-analyze';
 const fikenEndpoint='https://rbphgvnwmzjeuvyrasvy.supabase.co/functions/v1/fiken-receipt';
@@ -17,6 +17,7 @@ async function loadFikenStatus(){
 }
 const labels={vendor:'Leverandør',organization_number:'Organisasjonsnummer',purchase_date:'Kjøpsdato',currency:'Valuta',payment_method:'Betalingsmetode',category:'Kategori (forslag)',account:'Konto (forslag)',notes:'Notater',net:'Beløp ekskl. MVA',vat:'MVA',gross:'Totalbeløp inkl. MVA',rounding:'Avrunding'};
 const say=(message,error=false)=>{$('status').textContent=message;$('status').className=error?'error':'';};
+function setProgress(message,percent=null){say(message);const box=$('ocrProgress'),bar=$('ocrProgressBar');if(!box||!bar)return;box.hidden=false;$('ocrProgressLabel').textContent=message;if(Number.isFinite(percent)){bar.value=Math.max(0,Math.min(100,percent));bar.setAttribute('aria-valuetext',Math.round(bar.value)+' %');}else{bar.removeAttribute('value');bar.removeAttribute('aria-valuetext');}}
 const scribeFrame=$('scribeFrame');
 let scribeReady=false,scribePending=null,scribeLoadPromise=null;
 function waitForScribe(){
@@ -41,7 +42,7 @@ function recognizeWithScribe(file,name){
 window.addEventListener('message',event=>{
  if(event.origin!==location.origin||event.source!==scribeFrame.contentWindow)return;
  const message=event.data;if(!message||typeof message.type!=='string')return;
- if(message.type==='skallstuggu:scribe:status'&&typeof message.text==='string'){say(message.text);return;}
+ if(message.type==='skallstuggu:scribe:status'&&typeof message.text==='string'){setProgress(message.text,Number.isFinite(message.progress)?message.progress:null);return;}
  if(!scribePending)return;
  const pending=scribePending;scribePending=null;clearTimeout(pending.timeout);
  if(message.type==='skallstuggu:scribe:result'&&typeof message.text==='string')pending.resolve(message.text);
@@ -55,7 +56,7 @@ async function api(body){
 async function run(task){
  if(busy)return;busy=true;document.querySelectorAll('button:not(:disabled)').forEach(b=>{b.dataset.working='1';b.disabled=true;});
  syncButtons();
- try{await task();}catch(e){say(e.message,true);}finally{busy=false;document.querySelectorAll('[data-working]').forEach(b=>{b.disabled=false;delete b.dataset.working;});syncButtons();}
+ try{await task();}catch(e){say(e.message,true);}finally{busy=false;if($('ocrProgress'))$('ocrProgress').hidden=true;document.querySelectorAll('[data-working]').forEach(b=>{b.disabled=false;delete b.dataset.working;});syncButtons();}
 }
 function syncButtons(){
  if(!current)return;
@@ -150,6 +151,7 @@ $('receiptForm').addEventListener('input',e=>{if(e.target.id!=='confirmed')chang
 function canLeave(){return !dirty||confirm('Du har ulagrede rettelser. Vil du forkaste dem?');}
 async function openReceipt(id,keepForm=false){
  const result=await api({action:'get',id});current=result.receipt;fikenState=null;fikenLoaded=false;
+ if(!current.deleted_at&&['application/pdf','image/jpeg','image/png'].includes(current.mime_type))void prepareOCR().catch(()=>{});
  $('detail').hidden=false;$('fileTitle').textContent=current.original_name;
  $('original').href=result.url;$('preview').replaceChildren();
  if(['image/jpeg','image/png'].includes(current.mime_type)){const img=elem('img');img.src=result.url;img.alt='Original kvittering';$('preview').append(img);}
@@ -185,7 +187,7 @@ $('analyzeScribe').onclick=()=>{
  if(!canLeave())return;
  run(async()=>{
   if(!['application/pdf','image/jpeg','image/png'].includes(current.mime_type))throw Error('Scribe støtter PDF, JPG og PNG her. Bruk Tesseract som reserve for HEIC.');
-  say('Starter lokal Scribe-lesing …');
+  setProgress('Starter lokal Scribe-lesing …');
   const fresh=await api({action:'get',id:current.id});
   const response=await fetch(fresh.url);
   if(!response.ok)throw Error('Kunne ikke hente originalen. Åpne kvitteringen på nytt.');
@@ -203,20 +205,20 @@ $('analyzeBoth').onclick=()=>{
  if(!canLeave())return;
  run(async()=>{
   if(!['application/pdf','image/jpeg','image/png'].includes(current.mime_type))throw Error('Kombinert lesing støtter PDF, JPG og PNG. Bruk Tesseract alene for HEIC.');
-  say('Henter originalbilaget …');
+  setProgress('Henter originalbilaget …',0);
   const fresh=await api({action:'get',id:current.id}),response=await fetch(fresh.url);
   if(!response.ok)throw Error('Kunne ikke hente originalen. Åpne kvitteringen på nytt.');
   const blob=await response.blob(),name=/\.(pdf|png|jpe?g)$/i.test(current.original_name)?current.original_name:current.original_name+'.'+({'application/pdf':'pdf','image/png':'png','image/jpeg':'jpg'}[current.mime_type]);
   let scribeText='',tesseractText='',scribeData=emptyData(),tesseractData=emptyData(),failures=[];
   try{
-   say('Leser med Scribe lokalt …');
+   setProgress('Leser med Scribe lokalt …');
    scribeText=await recognizeWithScribe(blob,name);
    if(!scribeText.trim())throw Error('Scribe fant ingen lesbar tekst.');
    scribeData=parseReceiptText(scribeText);
   }catch(e){failures.push('Scribe: '+e.message);}
   try{
-   say('Kontrollerer feltene med Tesseract …');
-   tesseractText=await recognizeReceipt(blob,current.mime_type,message=>say('Tesseract: '+message));
+   setProgress('Kontrollerer feltene med Tesseract …',0);
+   tesseractText=await recognizeReceipt(blob,current.mime_type,(message,percent)=>setProgress('Tesseract: '+message,percent));
    if(!tesseractText.trim())throw Error('Tesseract fant ingen lesbar tekst.');
    tesseractData=parseReceiptText(tesseractText);
   }catch(e){failures.push('Tesseract: '+e.message);}
@@ -236,7 +238,7 @@ $('analyze').onclick=()=>{
  const fresh=await api({action:'get',id:current.id});
  const response=await fetch(fresh.url);
  if(!response.ok)throw Error('Kunne ikke hente originalen. Åpne kvitteringen på nytt.');
- const text=await recognizeReceipt(await response.blob(),current.mime_type,say);
+ const text=await recognizeReceipt(await response.blob(),current.mime_type,(message,percent)=>setProgress(message,percent));
  if(!text.trim())throw Error('Ingen lesbar tekst funnet. Ta et tydeligere bilde eller fyll inn manuelt.');
  const parsed=parseReceiptText(text);renderForm(parsed);dirty=true;
  $('ocrText').value=text;$('ocrResult').hidden=false;
