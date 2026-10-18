@@ -16,7 +16,6 @@ async function loadFikenStatus(){
  syncButtons();
 }
 const labels={vendor:'Leverandør',organization_number:'Organisasjonsnummer',purchase_date:'Kjøpsdato',currency:'Valuta',payment_method:'Betalingsmetode',category:'Kategori (forslag)',account:'Konto (forslag)',notes:'Notater',net:'Beløp ekskl. MVA',vat:'MVA',gross:'Totalbeløp inkl. MVA',rounding:'Avrunding'};
-const statusLabels={new:'Ikke lest lokalt'};
 const say=(message,error=false)=>{$('status').textContent=message;$('status').className=error?'error':'';};
 async function api(body){
  const headers=await window.adminHeaders();if(body instanceof FormData)delete headers['Content-Type'];
