@@ -10,7 +10,7 @@
  if(ios&&!standalone){status.textContent='På iPhone: Legg admin til på Hjem-skjermen via Del-menyen. Åpne ikonet og aktiver varsler der (iOS 16.4 eller nyere).';return;}
  if(!('serviceWorker' in navigator)||!('PushManager' in window)||!('Notification' in window)){status.textContent='Denne nettleseren støtter ikke pushvarsler. Prøv en oppdatert nettleser eller åpne admin fra hjemskjermen.';return;}
  let registration,publicKey;
- const active=value=>{enable.hidden=value;disable.hidden=!value;enable.disabled=false;};
+ const active=value=>{enable.hidden=value;disable.hidden=!value;enable.disabled=false;panel.hidden=value;window.dispatchEvent(new CustomEvent('adminpushchange',{detail:{active:value}}));};
  const busy=value=>{[enable,disable].forEach(button=>button.disabled=value);};
  const error=e=>{status.textContent=e.message||'Kunne ikke aktivere varsler.';};
  window.disableAdminPush=async({preserveSubscription=false}={})=>{
