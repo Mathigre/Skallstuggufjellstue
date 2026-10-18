@@ -273,7 +273,7 @@ $('analyze').onclick=()=>{
  if(!response.ok)throw Error('Kunne ikke hente originalen. Åpne kvitteringen på nytt.');
  const text=await recognizeReceipt(await response.blob(),current.mime_type,(message,percent)=>setProgress(message,percent));
  if(!text.trim())throw Error('Ingen lesbar tekst funnet. Ta et tydeligere bilde eller fyll inn manuelt.');
- const parsed=parseReceiptText(text);renderForm(parsed);dirty=true;
+ const parsed=parseReceiptTextWithFallback(text);renderForm(parsed);dirty=true;
  $('ocrText').value=text;$('ocrResult').hidden=false;
  const missing=[['purchase_date','dato'],['gross','totalbeløp'],['net','netto'],['vat','MVA']].filter(([key])=>parsed[key]===null).map(([,label])=>label);
  say(missing.length?'Teksten er delvis lest. Mangler '+missing.join(', ')+'. Prøv et skarpere bilde eller fyll inn manuelt.':'Teksten er lest lokalt. Kontroller forslagene, MVA-fordelingen og leverandørnavnet før du lagrer.');
