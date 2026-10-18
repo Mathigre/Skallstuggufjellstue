@@ -34,11 +34,10 @@ function syncButtons(){
  $('recover').hidden=!processing;
  $('delete').hidden=deleted;$('restore').hidden=!deleted;
  $('analyze').disabled=busy||deleted||processing||current.review_status==='approved';
- $('analyzeAI').disabled=busy||deleted||processing||current.review_status==='approved';
  $('analyze').textContent='Les tekst gratis';
  $('receiptForm').querySelectorAll('input,textarea,button').forEach(e=>e.disabled=e.hasAttribute('data-permanent-disabled')||busy||deleted||processing);
  $('applyAI').hidden=!current.ai_data||!current.reviewed_data;
- $('analysisHint').textContent='Gratis Tesseract kjører på enheten. Gemini er et separat AI-forslag som kan koste penger. Alle forslag må kontrolleres og lagres manuelt.';
+ $('analysisHint').textContent='Tekstlesingen skjer på enheten. Forslag må kontrolleres og lagres manuelt.';
  $('fikenExport').disabled=!fikenLoaded||busy||dirty||deleted||processing||current.review_status!=='approved'||(fikenState!==null&&!retryableFiken());
  $('fikenStatus').textContent=fikenState?'Fiken: '+({processing:'Sending pågår',draft_created:'Utkast opprettet – kontroller vedlegg',ready:'Kjøpsutkast med vedlegg opprettet',uncertain:'Usikker sending – kontroller Fiken',error:'Sending avbrutt – kontroller status'}[fikenState.state]||fikenState.state):'Testforetak: apiskallstuggu. Oppretter bare et utkast.';
 }
@@ -66,7 +65,7 @@ async function loadList(){
  while(more){const r=await api({action:'list',page});receipts.push(...r.receipts);settings=r.settings;usage=r.usage;more=r.more;page++;}
  $('mode').textContent=settings.real_documents_enabled?'Kvitteringsarkiv':'Testmodus – bruk kun syntetiske bilag';
  $('testConsent').hidden=settings.real_documents_enabled;
- $('quota').textContent='Tesseract er gratis og lokalt. Gemini brukes bare når du velger AI-lesing; grensen er 10 analyser per administrator og 20 totalt per dag. Brukt i dag: '+(usage?.admin??'?')+'/10 for deg · '+(usage?.total??'?')+'/20 totalt. Supabase-lagring kan ha egne kvoter.';
+ $('quota').textContent='Tesseract · ingen betaling per skanning. Privat lagring bruker fortsatt Supabase.';
  renderList();
 }
 const rowFields={vat:['rate','net','vat','gross'],item:['description','quantity','unit_price','gross','vat_rate']};
@@ -154,20 +153,6 @@ $('closeDetail').onclick=()=>{if(canLeave()){$('detail').hidden=true;current=nul
 $('renewPreview').onclick=()=>run(()=>openReceipt(current.id,true));
 $('addVat').onclick=()=>{addRow('vat');changed();};$('addItem').onclick=()=>{addRow('item');changed();};
 $('applyAI').onclick=()=>{if(confirm('Bytt skjemaet til det nyeste AI-forslaget? Lagrede rettelser erstattes først når du lagrer.')){renderForm(current.ai_data);dirty=true;}};
-$('analyzeAI').onclick=()=>{
- if(!canLeave())return;
- const reanalyze=!!current.ai_data;
- const message='Dette sender originalbilaget til Google Gemini for å foreslå leverandør, dato, beløp, MVA-fordeling og varelinjer. Det kan koste penger; en daglig grense er aktiv. Resultatet blir ikke godkjent, sendt til Fiken eller bokført. Vil du fortsette?';
- if(!confirm(message))return;
- run(async()=>{
-  say('Gemini leser bilaget og lager et kontrollforslag …');
-  const result=await api({action:'analyze',id:current.id,revision:current.revision,reanalyze});
-  await loadList();
-  await openReceipt(current.id);
-  const issues=[...(result.validation?.errors||[]),...(result.validation?.warnings||[])].slice(0,3);
-  say('Gemini-forslag klart. Kontroller originalen og alle varelinjer før du lagrer.'+(issues.length?' Kontroller spesielt: '+issues.join(' '):''));
- });
-};
 $('analyze').onclick=()=>{
  if(!canLeave())return;
  run(async()=>{
