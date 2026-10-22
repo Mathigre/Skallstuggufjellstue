@@ -44,3 +44,24 @@ async function addChatWidget(directory, relative = "") {
 }
 
 await addChatWidget(output);
+
+// Build a small public text index for the chatbot from published pages.
+async function collectPublicPages(directory, relative = '', pages = []) {
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const file = path.join(directory, entry.name);
+    const rel = path.posix.join(relative, entry.name);
+    if (entry.isDirectory()) { if (entry.name !== 'admin') await collectPublicPages(file, rel, pages); continue; }
+    if (!entry.isFile() || !entry.name.endsWith('.html') || entry.name === 'admin.html') continue;
+    const html = await readFile(file, 'utf8');
+    const title = (html.match(/<title[^>]*>([\\s\\S]*?)<\\/title>/i)?.[1] || rel).replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').trim();
+    let plain = html.replace(/<(script|style|noscript|svg|nav|footer)\\b[^>]*>[\\s\\S]*?<\\/\\1>/gi, ' ')
+      .replace(/<br\\s*\\/?\\s*>|<\\/(p|div|section|article|h[1-6]|li|tr)>/gi, '\\n').replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;|&#160;/gi, ' ').replace(/&amp;/gi, '&').replace(/&lt;/gi, '<').replace(/&gt;/gi, '>')
+      .replace(/&quot;/gi, '"').replace(/&#39;|&apos;/gi, "'");
+    plain = plain.split('\\n').map(line => line.replace(/\\s+/g, ' ').trim()).filter(Boolean).join('\\n').slice(0, 12000);
+    if (plain.length > 60) pages.push({ title, path: '/' + rel, text: plain });
+  }
+  return pages;
+}
+const publicPages = await collectPublicPages(output);
+await writeFile(path.join(output, 'chatbot-knowledge.json'), JSON.stringify(publicPages), 'utf8');
