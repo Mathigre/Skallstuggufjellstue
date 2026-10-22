@@ -18,6 +18,11 @@ Offentlige fagregistre omtaler Christian Green som malermester. Foretaksoppføri
 
 **Opplysning fra eier/bruker, ikke uavhengig bekreftet i kildene som er gjennomgått:** Christian Green bidrar i stisyklingmiljøet og har bygget flere stier for Innherred Stibyggerlag. Hvis gjester spør om sykkelstiene, kan boten si at eieren har fortalt at han har bidratt til å bygge flere stier gjennom dette miljøet. Ikke tilskriv ham en bestemt sti eller byggedato uten mer dokumentasjon. Gjeldende bruk og regler for stiene må sjekkes lokalt.
 
+## Arctic Race, sykkelfest og afterski
+Skallstuggu var målområde for tredje etappe av Arctic Race of Norway 2022. Etappen gikk fra Namsos til Skallstuggu Summit 13. august 2022, og arrangementet samlet publikum ved målgangen. Det er en fin del av stedets nyere historie og viser at fjellstua også har vært ramme for store sykkelarrangementer. Ikke si at Skallstuggu var målgang i andre år med mindre en kilde bekrefter det.
+
+**Opplysning fra eier/bruker, ikke uavhengig bekreftet:** Skallstuggu har arrangert afterski som hadde opptil omtrent 1 000 besøkende det ene året. Hvis dette nevnes, behold formuleringen «eieren opplyser» eller «Skallstuggu forteller»; ikke framstill tallet som en uavhengig opptelling eller si at så mange var til stede samtidig.
+
 ## Historie
 Skallstuggu ble reist av Frol Idrettslag omkring 1970. Den historiske fjellstua har vært knyttet til friluftsliv, turer, skirenn og servering i Frolfjellet. Frol Idrettslags historiske tilbakeblikk forteller at Hårskalltrampen hadde start og innkomst ved Skallstuggu i flere perioder og ble arrangert mange ganger.
 
@@ -116,6 +121,7 @@ Offisielle/primære og lokale kilder brukt til denne kunnskapen (lest 22. oktobe
 - Visit Innherred, vandreturer i Levanger: https://visitinnherred.com/vandreturer-i-levanger
 - Visit Innherred, skiområder: https://visitinnherred.com/skiloyper-verdal-levanger
 - Visit Innherred, Opplev Levanger: https://visitinnherred.com/levanger
+- Arctic Race of Norway, etappe 3 med mål på Skallstuggu i 2022: https://www.arctic-race-of-norway.com/en/news/2022/the-arctic-race-of-norway-heads-south/696
 - Frol Idrettslag, Hårskalltrampen: https://frolil.no/trim/harskalltrampen-et-60-arsminne
 - Frol Bygdealmenning, kulturhistorie: https://frolbygdealmenning.no/om-oss/kulturhistorie/
 - Levanger Historielag, Fjellvegen og lokalhistorie: https://levangerhistorielag.no/lokalhistorie/i-reinsjolia-hadde-stalin-staller/fjellvegen/
