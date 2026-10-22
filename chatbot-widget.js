@@ -66,6 +66,20 @@
   const messagesEl = root.querySelector(".messages");
   const status = root.querySelector(".status");
   const conversation = [];
+  let knowledgeCache;
+  async function retrieveWebsiteText(query) {
+    try {
+      knowledgeCache ||= fetch('/chatbot-knowledge.json', { cache: 'no-cache' }).then(response => { if (!response.ok) throw new Error('Knowledge unavailable'); return response.json(); });
+      const pages = await knowledgeCache;
+      const terms = new Set(String(query).toLowerCase().match(/[a-zæøå0-9]{3,}/g) || []);
+      return pages.map(page => {
+        const words = new Set((String(page.title) + ' ' + String(page.path) + ' ' + String(page.text)).toLowerCase().match(/[a-zæøå0-9]{3,}/g) || []);
+        let score = 0; for (const term of terms) if (words.has(term)) score++;
+        return { page, score };
+      }).filter(item => item.score > 0).sort((a, b) => b.score - a.score).slice(0, 3)
+        .map(({ page }) => ({ title: page.title, path: page.path, text: String(page.text).slice(0, 3500) }));
+    } catch { return []; }
+  }
 
   function toggle(open) {
     panel.hidden = !open;
@@ -91,12 +105,12 @@
     addMessage("user", text);
     input.value = "";
     submit.disabled = true;
-    status.textContent = "Skriver svar…";
+    status.textContent = "Søker på nettsiden og skriver svar…";
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: conversation.slice(-8) }),
+        body: JSON.stringify({ messages: conversation.slice(-8), knowledge: await retrieveWebsiteText(text) }),
       });
       const data = await response.json();
       if (!response.ok || typeof data.answer !== "string") throw new Error(data.error || "Kunne ikke hente svar.");
