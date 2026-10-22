@@ -45,12 +45,12 @@
         .panel { right:10px; bottom:76px; height:min(520px, calc(100dvh - 100px)); width:calc(100vw - 20px); }
       }
     </style>
-    <button class="launcher" type="button" aria-haspopup="dialog" aria-expanded="false">Spør Skallstuggu</button>
-    <section class="panel" role="dialog" aria-label="Spør Skallstuggu" hidden>
-      <header><strong>Spør Skallstuggu</strong><button class="close" type="button" aria-label="Lukk chat">×</button></header>
-      <p class="notice">Testchat med AI. Den kan ta feil og kan ikke se bestillinger eller bekrefte ledige datoer.</p>
+    <button class="launcher" type="button" aria-haspopup="dialog" aria-expanded="false">Spør Skallstuggus AI-bot</button>
+    <section class="panel" role="dialog" aria-label="Spør Skallstuggus AI-bot" hidden>
+      <header><strong>Spør Skallstuggus AI-bot</strong><button class="close" type="button" aria-label="Lukk chat">×</button></header>
+      <p class="notice">Svarene bygger på offentlig informasjon. Jeg kan sjekke ledighet, men ikke opprette eller bekrefte bestillinger.</p>
       <div class="messages" aria-live="polite">
-        <div class="bubble bot">Hei! Jeg kan svare på spørsmål om Skallstuggu. For priser og ledige datoer, bruk bookingsiden.</div>
+        <div class="bubble bot">Hei! Spør meg om Skallstuggu, priser eller ledige datoer.</div>
       </div>
       <div class="status" aria-live="polite"></div>
       <form><input name="message" maxlength="1000" autocomplete="off" placeholder="Skriv et spørsmål…" aria-label="Skriv et spørsmål" required><button type="submit">Send</button></form>
