@@ -109,6 +109,7 @@ export async function onRequestPost({ request, env }) {
     if(!start)return json({answer:'Jeg finner ikke et gyldig ukenummer. Oppgi datoene du vurderer.'});
     if(!weekMatch[2]){const today=new Date();today.setUTCHours(0,0,0,0);if(start<today){year++;start=weekMonday(year,week);}}
     if(!start)return json({answer:'Jeg finner ikke den uken i et framtidig år. Oppgi datoene du vurderer.'});
+    const todayForCheck=new Date();todayForCheck.setUTCHours(0,0,0,0);if(start<todayForCheck)return json({answer:'Uke '+week+' i '+year+' er passert. Oppgi en framtidig uke for pris eller ledighet.'});
     const nights=Array.from({length:7},(_,i)=>new Date(start.getTime()+i*86400000)); const end=new Date(start.getTime()+7*86400000);
     const parts=['Uke '+week+' i '+year+' er '+fullDate(start)+' til '+fullDate(new Date(end.getTime()-86400000))+'.'];
     if(asksAvailability){try{const calendar=await supabaseJson('/functions/v1/booking-public',{action:'calendar'});const bookings=Array.isArray(calendar.dates)?calendar.dates:[];const occupied=nights.filter(date=>bookings.some(item=>iso(date)>=item.start_date&&iso(date)<item.end_date));const available=nights.filter(date=>!occupied.includes(date));parts.push(available.length?'Ledige overnattingsnetter: '+available.map(fullDate).join(', ')+'.':'Uken er fullbooket ifølge kalenderen akkurat nå.');if(occupied.length)parts.push('Opptatte netter: '+occupied.map(fullDate).join(', ')+'.');parts.push('Dette er en kontroll av kalenderen nå, ikke en bekreftet reservasjon.');}catch{parts.push('Jeg får ikke kontrollert kalenderen akkurat nå. Sjekk bookingsiden for oppdatert ledighet.');}}
@@ -123,6 +124,7 @@ export async function onRequestPost({ request, env }) {
     const parsed=dateMatches.slice(0,2).map(parseDate);
     if(parsed.some(date=>!date))return json({answer:'Jeg forstår ikke datoformatet. Skriv datoene som dd.mm.åååå eller åååå-mm-dd.'});
     const start=parsed[0], end=parsed[1]||new Date(start.getTime()+86400000);
+    const todayForCheck=new Date();todayForCheck.setUTCHours(0,0,0,0);if(asksAvailability&&start<todayForCheck)return json({answer:'Den perioden er passert. Oppgi framtidige datoer for å sjekke ledighet.'});
     const count=Math.round((end-start)/86400000);
     if(count<1||count>31)return json({answer:'Skriv en gyldig periode på mellom én og 31 netter.'});
     const nights=Array.from({length:count},(_,i)=>new Date(start.getTime()+i*86400000));
