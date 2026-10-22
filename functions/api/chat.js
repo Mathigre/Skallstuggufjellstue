@@ -102,12 +102,3 @@ export async function onRequestPost({ request, env }) {
   }
 }
 
-export async function onRequest({ request }) {
-  if (request.method === "OPTIONS") {
-    return new Response(null, {
-      status: 204,
-      headers: { "Access-Control-Allow-Origin": request.headers.get("Origin") || "null", "Vary": "Origin" },
-    });
-  }
-  return json({ error: "Metoden støttes ikke." }, 405);
-}
