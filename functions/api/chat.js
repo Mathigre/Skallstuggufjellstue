@@ -99,10 +99,11 @@ export async function onRequestPost({ request, env }) {
 
   const userText = messages.filter(item => item.role === 'user').map(item => item.content).join(' ');
   const weekMatch = userText.match(/\b(?:uke|week)\s*(\d{1,2})(?:\s*(?:i|for)\s*(20\d{2}))?/i);
+  const dateMatches = Array.from(userText.matchAll(/\b(?:\d{4}-\d{2}-\d{2}|\d{1,2}\.\d{1,2}\.\d{4})\b/g), match => match[0]);
   const asksPrice = /pris|koster|kostnad|overnatt|natt|kr\b/i.test(userText);
   const asksAvailability = /ledig|ledighet|tilgjengelig|opptatt|dato|booke|reservere/i.test(userText);
-  if (!weekMatch && asksPrice) return json({ answer: 'Hvilken dato eller uke gjelder det? Si gjerne et ukesnummer, for eksempel uke 41. Prisen for én natt kan variere mellom ukedag og helg.' });
-  if (!weekMatch && asksAvailability) return json({ answer: 'Hvilke datoer eller hvilken uke vil du sjekke? Oppgi gjerne datoer eller et ukesnummer, for eksempel uke 41.' });
+  if (!weekMatch && !dateMatches.length && asksPrice) return json({ answer: 'Hvilken dato eller uke gjelder det? Si gjerne et ukesnummer, for eksempel uke 41. Prisen for én natt kan variere mellom ukedag og helg.' });
+  if (!weekMatch && !dateMatches.length && asksAvailability) return json({ answer: 'Hvilke datoer eller hvilken uke vil du sjekke? Oppgi gjerne datoer eller et ukesnummer, for eksempel uke 41.' });
   if (weekMatch && (asksPrice || asksAvailability)) {
     const week=Number(weekMatch[1]); let year=Number(weekMatch[2]||new Date().getUTCFullYear()); let start=weekMonday(year,week);
     if(!start)return json({answer:'Jeg finner ikke et gyldig ukenummer. Oppgi datoene du vurderer.'});
@@ -115,6 +116,19 @@ export async function onRequestPost({ request, env }) {
       if(/hele uka|hele uken|7 netter|en uke|ei uke|ukespris/i.test(userText)){const quote=calculateQuote({start:iso(start),end:iso(end),settings});parts.push('Pris for 7 netter: '+formatMoney(quote.total)+' inkludert 25 % mva.');}
       else{const prices=nights.map(date=>({day:weekdayName(date),total:calculateQuote({start:iso(date),end:iso(new Date(date.getTime()+86400000)),settings}).total}));const grouped=[];for(const entry of prices){const prior=grouped.at(-1);if(prior&&prior.total===entry.total)prior.days.push(entry.day);else grouped.push({total:entry.total,days:[entry.day]});}parts.push('Pris for én natt i denne uken: '+grouped.map(group=>group.days.join('/')+': '+formatMoney(group.total)).join('; ')+' per natt, inkludert 25 % mva. Sengeklær, håndklær og vask kommer eventuelt i tillegg.');}
     }catch{parts.push('Jeg får ikke hentet de gjeldende prisene fra admin nå. Se prisberegningen på bookingsiden.');}}
+    return json({answer:parts.join(' ')});
+  }
+  if (!weekMatch && dateMatches.length && (asksPrice || asksAvailability)) {
+    const parseDate = value => { let isoValue=value; const norwegian=value.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/); if(norwegian)isoValue=norwegian[3]+'-'+norwegian[2].padStart(2,'0')+'-'+norwegian[1].padStart(2,'0'); const date=new Date(isoValue+'T00:00:00Z'); return /^\d{4}-\d{2}-\d{2}$/.test(isoValue)&&Number.isFinite(date.getTime())&&iso(date)===isoValue?date:null; };
+    const parsed=dateMatches.slice(0,2).map(parseDate);
+    if(parsed.some(date=>!date))return json({answer:'Jeg forstår ikke datoformatet. Skriv datoene som dd.mm.åååå eller åååå-mm-dd.'});
+    const start=parsed[0], end=parsed[1]||new Date(start.getTime()+86400000);
+    const count=Math.round((end-start)/86400000);
+    if(count<1||count>31)return json({answer:'Skriv en gyldig periode på mellom én og 31 netter.'});
+    const nights=Array.from({length:count},(_,i)=>new Date(start.getTime()+i*86400000));
+    const parts=['Perioden er '+fullDate(start)+' til '+fullDate(end)+'.'];
+    if(asksAvailability){try{const calendar=await supabaseJson('/functions/v1/booking-public',{action:'calendar'});const bookings=Array.isArray(calendar.dates)?calendar.dates:[];const occupied=nights.filter(date=>bookings.some(item=>iso(date)>=item.start_date&&iso(date)<item.end_date));const available=nights.filter(date=>!occupied.includes(date));parts.push(available.length?'Ledige netter: '+available.map(fullDate).join(', ')+'.':'Perioden er fullbooket ifølge kalenderen akkurat nå.');if(occupied.length)parts.push('Opptatte netter: '+occupied.map(fullDate).join(', ')+'.');parts.push('Dette er en kontroll av kalenderen nå, ikke en bekreftet reservasjon.');}catch{parts.push('Jeg får ikke kontrollert kalenderen akkurat nå. Sjekk bookingsiden for oppdatert ledighet.');}}
+    if(asksPrice){try{const rows=await supabaseJson('/rest/v1/booking_price_settings?select=revision,settings&id=eq.1');if(!Array.isArray(rows)||!rows[0]||!rows[0].settings)throw new Error('No settings');const settings=validateSettings(rows[0].settings);const quote=calculateQuote({start:iso(start),end:iso(end),settings});parts.push('Pris for '+count+' natt'+(count===1?'':'er')+': '+formatMoney(quote.total)+' inkludert 25 % mva.');}catch{parts.push('Jeg får ikke hentet de gjeldende prisene fra admin nå. Se prisberegningen på bookingsiden.');}}
     return json({answer:parts.join(' ')});
   }
   const pages=Array.isArray(body?.knowledge)?body.knowledge.slice(0,8).filter(page=>page&&typeof page.title==='string'&&typeof page.path==='string'&&typeof page.text==='string'&&page.title.length<=200&&page.path.length<=300&&page.text.length<=12000):[];
