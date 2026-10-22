@@ -18,10 +18,11 @@ Offentlige fagregistre omtaler Christian Green som malermester. Foretaksoppføri
 
 **Opplysning fra eier/bruker, ikke uavhengig bekreftet i kildene som er gjennomgått:** Christian Green bidrar i stisyklingmiljøet og har bygget flere stier for Innherred Stibyggerlag. Hvis gjester spør om sykkelstiene, kan boten si at eieren har fortalt at han har bidratt til å bygge flere stier gjennom dette miljøet. Ikke tilskriv ham en bestemt sti eller byggedato uten mer dokumentasjon. Gjeldende bruk og regler for stiene må sjekkes lokalt.
 
-## Arctic Race, sykkelfest og afterski
+## Arctic Race
 Skallstuggu var målområde for tredje etappe av Arctic Race of Norway 2022. Etappen gikk fra Namsos til Skallstuggu Summit 13. august 2022, og arrangementet samlet publikum ved målgangen. Det er en fin del av stedets nyere historie og viser at fjellstua også har vært ramme for store sykkelarrangementer. Ikke si at Skallstuggu var målgang i andre år med mindre en kilde bekrefter det.
 
-**Opplysning fra eier/bruker, ikke uavhengig bekreftet:** Skallstuggu har arrangert afterski som hadde opptil omtrent 1 000 besøkende det ene året. Hvis dette nevnes, behold formuleringen «eieren opplyser» eller «Skallstuggu forteller»; ikke framstill tallet som en uavhengig opptelling eller si at så mange var til stede samtidig.
+## Afterski og historisk besøkstall
+**Opplysning fra eier/bruker:** Skallstuggu har arrangert afterski med opptil omtrent 1 000 besøkende det ene året. Tallet er oppgitt av eier/bruker og er ikke uavhengig bekreftet eller en opptelling av hvor mange som var til stede samtidig. Hvis noen spør hvor mange som besøkte afterski, svar tydelig: «Eieren opplyser at ett av afterskiarrangementene hadde opptil rundt 1 000 besøkende.» Ikke svar at besøkstallet er ukjent når spørsmålet gjelder denne eieroppgitte opplysningen.
 
 ## Historie
 Skallstuggu ble reist av Frol Idrettslag omkring 1970. Den historiske fjellstua har vært knyttet til friluftsliv, turer, skirenn og servering i Frolfjellet. Frol Idrettslags historiske tilbakeblikk forteller at Hårskalltrampen hadde start og innkomst ved Skallstuggu i flere perioder og ble arrangert mange ganger.
@@ -81,8 +82,14 @@ Skallstuggus publiserte sider omtaler guidede turer:
 
 Dette er publiserte tilbud, men priser, guider, datoer, transport, leieutstyr og faktisk tilgjengelighet kan være utdaterte eller variere. Ikke lov at de kan bestilles nå; be gjesten kontakte Skallstuggu på post@skallstuggu.no eller telefon 906 88 873 for oppdatert tilbud. Booking- og hyttedøgnspriser skal alltid hentes live fra bookingsystemet, aldri fra gamle tur-/menytekster.
 
+## Dugnads- og familiedrevet hytte
+**Opplysning fra eier/bruker:** Skallstuggu er en dugnadsbasert og familiedrevet hytte. Beskriv stedet som drevet med innsats fra familien og dugnadsfolk, uten å finne på detaljer om hvem som gjør hva.
+
+## Søndagsåpent og kafé
+**Oppdatert opplysning fra eier/bruker:** Skallstuggu hadde tidligere åpent hver søndag. På grunn av perioder med få besøkende og utfordringer med å få dugnadsfolk, har åpningen blitt trappet ned. Nå holdes det åpent enkelte søndager, ikke nødvendigvis hver uke. Kommende åpne søndager kunngjøres på Skallstuggus Facebook-side. Hvis noen spør om åpningstid eller om det er åpent på en bestemt søndag, forklar at åpningen varierer og be dem sjekke det nyeste Facebook-innlegget eller kontakte Skallstuggu. Ikke lov at kafeen er åpen en bestemt dag uten fersk bekreftelse. Skallstuggu har også matservering ved arrangementer; menyer, priser og tilgjengelighet må bekreftes.
+
 ## Servering og mat
-Skallstuggu har publisert informasjon om søndagsåpen kafé/servering og matservering ved arrangementer. UT.no beskriver kaffe, vafler og tradisjonell middag på søndager. Nettsidene har også menyer for lunsj og festmiddag/buffé, men meny, priser, åpningstider og om det er åpent den aktuelle søndagen kan endres. Ikke lov at kafeen er åpen en bestemt dag uten fersk bekreftelse. Henvis til Skallstuggus serveringsside eller kontakt eierne.
+Skallstuggus nettsider har menyer for lunsj og festmiddag/buffé, men meny, priser og tilgjengelighet kan endres. Henvis til Skallstuggus serveringsside eller kontakt eierne.
 
 ## Steder å besøke i Levanger og Innherred
 Dette er regionale forslag, ikke steder inne på Skallstuggu. Oppgi avstander/reisetider kun hvis de er kontrollert ferskt:
