@@ -101,6 +101,8 @@ export async function onRequestPost({ request, env }) {
   const weekMatch = userText.match(/\b(?:uke|week)\s*(\d{1,2})(?:\s*(?:i|for)\s*(20\d{2}))?/i);
   const asksPrice = /pris|koster|kostnad|overnatt|natt|kr\b/i.test(userText);
   const asksAvailability = /ledig|ledighet|tilgjengelig|opptatt|dato|booke|reservere/i.test(userText);
+  if (!weekMatch && asksPrice) return json({ answer: 'Hvilken dato eller uke gjelder det? Si gjerne et ukesnummer, for eksempel uke 41. Prisen for én natt kan variere mellom ukedag og helg.' });
+  if (!weekMatch && asksAvailability) return json({ answer: 'Hvilke datoer eller hvilken uke vil du sjekke? Oppgi gjerne datoer eller et ukesnummer, for eksempel uke 41.' });
   if (weekMatch && (asksPrice || asksAvailability)) {
     const week=Number(weekMatch[1]); let year=Number(weekMatch[2]||new Date().getUTCFullYear()); let start=weekMonday(year,week);
     if(!start)return json({answer:'Jeg finner ikke et gyldig ukenummer. Oppgi datoene du vurderer.'});
