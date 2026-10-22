@@ -1,4 +1,4 @@
-import { cp, mkdir, readdir, rm } from 'node:fs/promises';
+import { cp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -6,7 +6,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const output = path.join(root, 'dist');
 const excluded = new Set([
   '.git', '.github', '.vscode', 'node_modules', 'dist', 'database', 'docs',
-  'dokumenter', 'supabase', 'tests', 'test-fixtures', 'work', 'outputs', 'scribe-prototype',
+  'dokumenter', 'supabase', 'functions', 'tests', 'test-fixtures', 'work', 'outputs', 'scribe-prototype',
   'scripts', 'package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml',
   'old-engine.mjs', 'ocr-test.html', 'preview-server.mjs', 'make-fixtures.cjs',
 ]);
@@ -28,3 +28,19 @@ for (const entry of await readdir(root, { withFileTypes: true })) {
   await cp(path.join(root, entry.name), path.join(output, entry.name), { recursive: true });
 }
 
+async function addChatWidget(directory, relative = "") {
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const file = path.join(directory, entry.name);
+    const rel = path.posix.join(relative, entry.name);
+    if (entry.isDirectory()) {
+      if (entry.name !== 'admin') await addChatWidget(file, rel);
+      continue;
+    }
+    if (!entry.isFile() || !entry.name.endsWith('.html')) continue;
+    const html = await readFile(file, 'utf8');
+    if (html.includes('/chatbot-widget.js') || !html.includes('</body>')) continue;
+    await writeFile(file, html.replace('</body>', '  <script src="/chatbot-widget.js" defer></script>\n</body>'));
+  }
+}
+
+await addChatWidget(output);
