@@ -105,6 +105,7 @@ export async function onRequestPost({ request, env }) {
     const week=Number(weekMatch[1]); let year=Number(weekMatch[2]||new Date().getUTCFullYear()); let start=weekMonday(year,week);
     if(!start)return json({answer:'Jeg finner ikke et gyldig ukenummer. Oppgi datoene du vurderer.'});
     if(!weekMatch[2]){const today=new Date();today.setUTCHours(0,0,0,0);if(start<today){year++;start=weekMonday(year,week);}}
+    if(!start)return json({answer:'Jeg finner ikke den uken i et framtidig år. Oppgi datoene du vurderer.'});
     const nights=Array.from({length:7},(_,i)=>new Date(start.getTime()+i*86400000)); const end=new Date(start.getTime()+7*86400000);
     const parts=['Uke '+week+' i '+year+' er '+fullDate(start)+' til '+fullDate(new Date(end.getTime()-86400000))+'.'];
     if(asksAvailability){try{const calendar=await supabaseJson('/functions/v1/booking-public',{action:'calendar'});const bookings=Array.isArray(calendar.dates)?calendar.dates:[];const occupied=nights.filter(date=>bookings.some(item=>iso(date)>=item.start_date&&iso(date)<item.end_date));const available=nights.filter(date=>!occupied.includes(date));parts.push(available.length?'Ledige overnattingsnetter: '+available.map(fullDate).join(', ')+'.':'Uken er fullbooket ifølge kalenderen akkurat nå.');if(occupied.length)parts.push('Opptatte netter: '+occupied.map(fullDate).join(', ')+'.');parts.push('Dette er en kontroll av kalenderen nå, ikke en bekreftet reservasjon.');}catch{parts.push('Jeg får ikke kontrollert kalenderen akkurat nå. Sjekk bookingsiden for oppdatert ledighet.');}}
