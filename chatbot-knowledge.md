@@ -9,7 +9,14 @@ Botten skal svare på norsk bokmål, vennlig og konkret. Bruk kun kunnskap fra n
 ## Skallstuggu – kort fortalt
 Skallstuggu Fjellstue er en stor utleiehytte/fjellstue ved Vulusjøen på Frolfjellet i Levanger kommune, Trøndelag. Stedet ligger rundt 480 meter over havet. Levanger sentrum er omtrent 20 kilometer unna (eldre beskrivelse sier cirka to mil). Det er et utgangspunkt for turer, sykling og vinteraktiviteter, og kan leies til overnatting, kurs, seminar, selskap og andre arrangementer.
 
-Bruk «Skallstuggu» som navn på stedet. Det juridiske foretaket er Skallstuggu Fjellstue AS, organisasjonsnummer 919 472 669. Offentlige bedriftsopplysninger viser Christian Green som daglig leder og styreleder, og som eneaksjonær (100 %). Dette er rolle-/eierinformasjon om selskapet, ikke nødvendigvis en uttømmende beskrivelse av hvem som eier bygningen eller tomten. Ikke oppgi privat adresse eller andre private opplysninger. Roller og eierforhold kan endres; for juridiske spørsmål, vis til Brønnøysundregistrene eller Skallstuggu.
+Bruk «Skallstuggu» som navn på stedet. Det juridiske foretaket er Skallstuggu Fjellstue AS, organisasjonsnummer 919 472 669. Offentlige bedriftsopplysninger viser Christian Green som daglig leder og styreleder, og som eneaksjonær (100 %). Dette er rolle-/eierinformasjon om selskapet, ikke nødvendigvis en uttømmende beskrivelse av hvem som eier bygningen eller tomten. Ikke oppgi privat adresse eller andre private opplysninger. Roller og eierforhold kan endres; for juridiske spørsmål, vis til Brønnøysundregistrene eller Skallstuggu. Levanger kommunes flerbruksplan fra 2025 beskriver at Skallstuggu opprinnelig var eid av Frol Idrettslag, og har vært eid og drevet av private aktører siden 2015. Dette gjelder stedets historie; selskapsopplysningene over gjelder Skallstuggu Fjellstue AS.
+
+
+
+## Eierens fag- og friluftsarbeid
+Offentlige fagregistre omtaler Christian Green som malermester. Foretaksoppføringer viser også et enkeltpersonforetak innen malertjenester under navnet Malerservice1 Innherred Christian Green. Dette er profesjonelle virksomhetsopplysninger; ikke oppgi privat adresse eller personlige telefonnumre.
+
+**Opplysning fra eier/bruker, ikke uavhengig bekreftet i kildene som er gjennomgått:** Christian Green bidrar i stisyklingmiljøet og har bygget flere stier for Innherred Stibyggerlag. Hvis gjester spør om sykkelstiene, kan boten si at eieren har fortalt at han har bidratt til å bygge flere stier gjennom dette miljøet. Ikke tilskriv ham en bestemt sti eller byggedato uten mer dokumentasjon. Gjeldende bruk og regler for stiene må sjekkes lokalt.
 
 ## Historie
 Skallstuggu ble reist av Frol Idrettslag omkring 1970. Den historiske fjellstua har vært knyttet til friluftsliv, turer, skirenn og servering i Frolfjellet. Frol Idrettslags historiske tilbakeblikk forteller at Hårskalltrampen hadde start og innkomst ved Skallstuggu i flere perioder og ble arrangert mange ganger.
@@ -114,6 +121,8 @@ Offisielle/primære og lokale kilder brukt til denne kunnskapen (lest 22. oktobe
 - Levanger Historielag, Fjellvegen og lokalhistorie: https://levangerhistorielag.no/lokalhistorie/i-reinsjolia-hadde-stalin-staller/fjellvegen/
 - Pilegrimsleden, Stiklestad–Trondheim (ytre led): https://www.pilegrimsleden.no/turforslag/tur-2-stiklestad-trondheim-ytre-led
 - Proff, Skallstuggu Fjellstue AS (roller/eierdata fra offentlige registre): https://www.proff.no/roller/skallstuggu-fjellstue-as/verdal/hoteller-og-andre-overnattingssteder/IF7FHNH00LQ
+- Mesterbrevnemnda, registeroppføring for Christian Green som malermester: https://mesterregister.mesterbrev.no/mestere/4991
+- Malerservice1 Innherred Christian Green, virksomhetsoppføring: https://firmalisten.no/979115008
 - Brønnøysundregistrene, søk foretak på org.nr. 919472669: https://virksomhet.brreg.no/nb/oppslag/enheter/919472669
 
 Oppdater denne kunnskapsbasen når Skallstuggu eller relevante offentlige kilder endres. Dette er ikke et automatisk sanntidsoppslag av turforhold eller virksomhetsroller.
