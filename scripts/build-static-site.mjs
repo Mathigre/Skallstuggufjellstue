@@ -36,7 +36,7 @@ async function addChatWidget(directory, relative = "") {
       if (entry.name !== 'admin') await addChatWidget(file, rel);
       continue;
     }
-    if (!entry.isFile() || !entry.name.endsWith('.html')) continue;
+    if (!entry.isFile() || !entry.name.endsWith('.html') || entry.name === 'admin.html') continue;
     const html = await readFile(file, 'utf8');
     if (html.includes('/chatbot-widget.js') || !html.includes('</body>')) continue;
     await writeFile(file, html.replace('</body>', '  <script src="/chatbot-widget.js" defer></script>\n</body>'));
