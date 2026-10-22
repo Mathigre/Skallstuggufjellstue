@@ -9,6 +9,7 @@ const excluded = new Set([
   'dokumenter', 'supabase', 'functions', 'tests', 'test-fixtures', 'work', 'outputs', 'scribe-prototype',
   'scripts', 'package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml',
   'old-engine.mjs', 'ocr-test.html', 'preview-server.mjs', 'make-fixtures.cjs',
+  'chatbot-knowledge.md',
 ]);
 
 await rm(output, { recursive: true, force: true });
@@ -45,7 +46,9 @@ async function addChatWidget(directory, relative = "") {
 
 await addChatWidget(output);
 
-// Build a small public text index for the chatbot from published pages.
+// Build a text index from public pages plus the separately maintained chatbot knowledge source.
+// The markdown file is not copied as a standalone website page. Each heading becomes its own
+// retrieval document so the Worker can select the most relevant material for a visitor question.
 async function collectPublicPages(directory, relative = '', pages = []) {
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     const file = path.join(directory, entry.name);
@@ -64,4 +67,17 @@ async function collectPublicPages(directory, relative = '', pages = []) {
   return pages;
 }
 const publicPages = await collectPublicPages(output);
+const knowledgeSource = await readFile(path.join(root, 'chatbot-knowledge.md'), 'utf8');
+for (const section of knowledgeSource.split(/^##\s+/m).slice(1)) {
+  const [headingLine, ...bodyLines] = section.split('\n');
+  const heading = (headingLine || '').trim();
+  const text = bodyLines.join('\n').trim();
+  if (!heading || text.length < 40 || heading === 'Kilder og vedlikehold' || heading === 'Praktisk sikkerhet for boten') continue;
+  const slug = heading.toLowerCase().replace(/[^a-z0-9æøå]+/g, '-').replace(/^-|-$/g, '');
+  publicPages.push({
+    title: 'Skallstuggu kunnskapsbase: ' + heading,
+    path: '/kunnskapskilde/' + slug,
+    text: text.slice(0, 12000),
+  });
+}
 await writeFile(path.join(output, 'chatbot-knowledge.json'), JSON.stringify(publicPages), 'utf8');
