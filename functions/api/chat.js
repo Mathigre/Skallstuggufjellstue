@@ -98,8 +98,8 @@ export async function onRequestPost({ request, env }) {
   if (messages.at(-1)?.role !== "user") return json({ error: "Siste melding må være et spørsmål." }, 400);
 
   const userText = messages.filter(item => item.role === 'user').map(item => item.content).join(' ');
-  const weekMatch = userText.match(/\\b(?:uke|week)\\s*(\\d{1,2})(?:\\s*(?:i|for)\\s*(20\\d{2}))?/i);
-  const asksPrice = /pris|koster|kostnad|overnatt|natt|kr\\b/i.test(userText);
+  const weekMatch = userText.match(/\b(?:uke|week)\s*(\d{1,2})(?:\s*(?:i|for)\s*(20\d{2}))?/i);
+  const asksPrice = /pris|koster|kostnad|overnatt|natt|kr\b/i.test(userText);
   const asksAvailability = /ledig|ledighet|tilgjengelig|opptatt|dato|booke|reservere/i.test(userText);
   if (weekMatch && (asksPrice || asksAvailability)) {
     const week=Number(weekMatch[1]); let year=Number(weekMatch[2]||new Date().getUTCFullYear()); let start=weekMonday(year,week);
@@ -121,7 +121,7 @@ export async function onRequestPost({ request, env }) {
 
   try {
     const result = await env.AI.run("@cf/meta/llama-3.2-3b-instruct", {
-      messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
+      messages: [{ role: "system", content: SYSTEM_PROMPT }, ...(websiteContext ? [websiteContext] : []), ...messages],
       max_tokens: 220,
       temperature: 0.2,
     });
