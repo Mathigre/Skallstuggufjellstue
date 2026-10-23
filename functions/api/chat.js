@@ -1,3 +1,4 @@
+import { faqReply } from '../../chatbot-faq.mjs';
 import { calculateQuote, formatMoney, validateSettings } from '../../pricing.mjs';
 
 const SUPABASE_URL = 'https://rbphgvnwmzjeuvyrasvy.supabase.co';
@@ -15,6 +16,14 @@ export function claimsHumanIdentity(text) {
     || /\b(?:jeg|vi)\s+(?:er|jobber|arbeider)\b[^.!?\n]{0,70}\b(?:ansatt\w*|eier\w*|resepsjonist\w*|medarbeider\w*|personalet|hos oss|ved Skallstuggu|på Skallstuggu)\b/iu.test(plain)
     || /\b(?:i am|i'm|we are)\b[^.!?\n]{0,70}\b(?:employee|staff|owner|receptionist|human)\b/iu.test(plain)
     || /\b(?:[Jj]eg er|[Ii] am|I'm)\s+(?!(?:AI|Skallstuggus?)\b)\p{Lu}\p{Ll}+/u.test(plain);
+}
+
+export function humanContactReply(message) {
+  if (/\b(?:snakke|prate|snakk|prat|kontakt|kontakte|ringe|ring|f(?:å|år)(?: jeg| vi)? tak i)\b[^.!?\n]{0,60}\b(?:person|menneske|ansatt(?:e)?|eier(?:en)?|vertskap(?:et)?|noen|menneskelig)\b/iu.test(message)
+    || /\b(?:vil|ønsker|trenger|kan jeg få)\b[^.!?\n]{0,40}\b(?:ekte person|ekte menneske|menneskelig hjelp)\b/iu.test(message)) {
+    return 'For å snakke med en ekte person hos Skallstuggu, ring 906 88 873 eller send e-post til post@skallstuggu.no.';
+  }
+  return null;
 }
 
 export function identityReply(message) {
@@ -115,10 +124,21 @@ export async function onRequestPost({ request, env }) {
   }
   if (messages.at(-1)?.role !== "user") return json({ error: "Siste melding må være et spørsmål." }, 400);
 
+  const humanContact = humanContactReply(messages.at(-1).content);
+  if (humanContact) return json({ answer: humanContact });
+
   const identity = identityReply(messages.at(-1).content);
   if (identity) return json({ answer: identity });
 
-  const userText = messages.filter(item => item.role === 'user').map(item => item.content).join(' ');
+  const latestQuestion = messages.at(-1).content;
+  const fixedAnswer = faqReply(latestQuestion);
+  if (fixedAnswer) return json({ answer: fixedAnswer });
+
+  // Keep earlier price questions from hijacking a new topic. A short date-only
+  // follow-up may still inherit the preceding question's price/availability intent.
+  const previousQuestion = messages.slice(0, -1).reverse().find(item => item.role === 'user')?.content || '';
+  const dateOnly = /^(?:(?:uke|week|i|for|fra|til|den|og|år)\s*|[0-9.\-\s,?!])+$/i.test(latestQuestion);
+  const userText = dateOnly ? previousQuestion + ' ' + latestQuestion : latestQuestion;
   const weekMatch = userText.match(/\b(?:uke|week)\s*(\d{1,2})(?:\s*(?:i|for)\s*(20\d{2}))?/i);
   const dateMatches = Array.from(userText.matchAll(/\b(?:\d{4}-\d{2}-\d{2}|\d{1,2}\.\d{1,2}\.\d{4})\b/g), match => match[0]);
   const asksPrice = /pris|koster|kostnad|overnatt|natt|kr\b/i.test(userText);
@@ -172,4 +192,5 @@ export async function onRequestPost({ request, env }) {
     return json({ error: "Chatten er midlertidig utilgjengelig. Prøv igjen senere." }, 502);
   }
 }
+
 
