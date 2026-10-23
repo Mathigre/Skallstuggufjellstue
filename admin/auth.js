@@ -4,7 +4,7 @@
   const client=window.supabase.createClient(url,key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
   window.adminClient=client;
   let redirecting=false;
-  const goLogin=()=>{if(!redirecting){redirecting=true;location.replace('login.html'+(/^([0-9a-f-]{36})$/i.test(new URLSearchParams(location.search).get('booking')||'')?'?booking='+encodeURIComponent(new URLSearchParams(location.search).get('booking')):''));}};
+  const goLogin=()=>{if(!redirecting){redirecting=true;location.replace('login.html'+(/^\/admin\/mail(?:\.html)?\/?$/.test(location.pathname)?'?mail=1'+(/^[0-9a-f-]{36}$/i.test(new URLSearchParams(location.search).get('thread')||'')?'&thread='+encodeURIComponent(new URLSearchParams(location.search).get('thread')):''):(/^([0-9a-f-]{36})$/i.test(new URLSearchParams(location.search).get('booking')||'')?'?booking='+encodeURIComponent(new URLSearchParams(location.search).get('booking')):'')));}};
   localStorage.removeItem('adminLoggedIn');localStorage.removeItem('skallstugguFikenTestAccess');
   window.adminHeaders=async()=>{const {data,error}=await client.auth.getSession();if(error||!data.session)throw new Error('Logg inn på nytt.');return {'Content-Type':'application/json',apikey:key,Authorization:'Bearer '+data.session.access_token};};
   window.logoutAdmin=async()=>{try{await window.disableAdminPush?.({preserveSubscription:true});}catch{console.warn('Kunne ikke deaktivere varsler.');}await client.auth.signOut();goLogin();};
@@ -18,7 +18,7 @@
     document.documentElement.classList.add('admin-authorized');
     const reveal=()=>{const content=document.getElementById('adminContent');if(content)content.style.display='block';};
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',reveal,{once:true});else reveal();
-    const installPush=()=>{const css=document.createElement('link');css.rel='stylesheet';css.href='push.css?v=20261018-hide-active';document.head.append(css);const script=document.createElement('script');script.src='push.js?v=20261018-hide-active';document.head.append(script);};
+    const installPush=()=>{const css=document.createElement('link');css.rel='stylesheet';css.href='push.css?v=20261018-hide-active';document.head.append(css);const script=document.createElement('script');script.src='push.js?v=mail1';document.head.append(script);};
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installPush,{once:true});else setTimeout(installPush,0);
     return data.user;
   })();

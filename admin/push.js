@@ -28,8 +28,8 @@
   publicKey=(await api({action:'config'})).publicKey;
   const sub=await registration.pushManager.getSubscription();
   if(sub&&Notification.permission==='granted'){
-   await api({action:'subscribe',subscription:sub.toJSON()});active(true);status.textContent='Aktivert for nye bookingforespørsler og meldinger fra gjester.';
-  }else{active(false);status.textContent=Notification.permission==='denied'?'Varsler er blokkert. Tillat varsler for Skallstuggu i telefonens eller nettleserens innstillinger, og åpne siden på nytt.':'Få beskjed om nye forespørsler og kundemeldinger, også når admin er lukket.';}
+   await api({action:'subscribe',subscription:sub.toJSON()});active(true);status.textContent='Aktivert for nye bookingforespørsler, mail og meldinger fra gjester.';
+  }else{active(false);status.textContent=Notification.permission==='denied'?'Varsler er blokkert. Tillat varsler for Skallstuggu i telefonens eller nettleserens innstillinger, og åpne siden på nytt.':'Få beskjed om nye forespørsler, mail og kundemeldinger, også når admin er lukket.';}
  }catch(e){error(e);enable.disabled=true;return;}
  enable.addEventListener('click',async()=>{
   busy(true);
@@ -39,7 +39,7 @@
    const key=Uint8Array.from(atob(publicKey.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
    const sub=await registration.pushManager.getSubscription()||await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:key});
    try{await api({action:'subscribe',subscription:sub.toJSON()});}catch(e){await sub.unsubscribe();throw e;}
-   active(true);status.textContent='Varsler er aktivert for nye bookingforespørsler og meldinger fra gjester.';
+   active(true);status.textContent='Varsler er aktivert for nye bookingforespørsler, mail og meldinger fra gjester.';
   }catch(e){error(e);}finally{busy(false);}
  });
  disable.addEventListener('click',async()=>{busy(true);try{await window.disableAdminPush();}catch(e){error(e);}finally{busy(false);}});
