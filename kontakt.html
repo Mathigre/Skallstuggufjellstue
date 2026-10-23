@@ -147,14 +147,14 @@
   <section id="kontaktskjema" class="contact-form-card" aria-labelledby="contactFormTitle">
     <h2 id="contactFormTitle">Send oss et spørsmål</h2>
     <p>Bruk gjerne kontaktskjemaet, så får vi samlet opplysningene og fulgt opp henvendelsen din. Du kan også ringe <a href="tel:90688873">906 88 873</a>.</p>
-    <form id="contactForm">
+    <form id="contactForm" method="post">
       <div class="contact-grid"><label for="contactName">Fullt navn<input id="contactName" name="name" autocomplete="name" maxlength="160" required placeholder="Fornavn og etternavn"></label>
       <label for="contactEmail">E-postadresse<input id="contactEmail" name="email" type="email" autocomplete="email" maxlength="254" required></label>
       <label for="contactPhone">Telefonnummer<input id="contactPhone" name="phone" type="tel" autocomplete="tel" maxlength="50" required></label></div>
       <label for="contactQuestion">Spørsmålet ditt<textarea id="contactQuestion" name="question" rows="6" minlength="5" maxlength="10000" required></textarea></label>
       <label class="contact-honey" aria-hidden="true">La feltet stå tomt<input name="website" tabindex="-1" autocomplete="off"></label>
       <p class="contact-privacy">Vi bruker opplysningene til å svare på henvendelsen. Unngå sensitive personopplysninger. <a href="/dokumenter/Personvern_Skallstuggu.pdf" target="_blank" rel="noopener">Personvern</a>.</p>
-      <button type="submit">Send spørsmål</button><p id="contactStatus" role="status" aria-live="polite"></p>
+      <button type="submit" disabled>Send spørsmål</button><p id="contactStatus" role="status" aria-live="polite"></p>
     </form><noscript>Du må ha JavaScript aktivert for å bruke skjemaet. Ring 906 88 873 eller send e-post til minsten.mg@gmail.com i testperioden.</noscript>
   </section>
   <!-- ADRESSE -->
