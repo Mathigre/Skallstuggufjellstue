@@ -6,6 +6,32 @@ Dette dokumentet er en redaksjonell kunnskapskilde for chatboten. Innholdet dele
 
 Botten skal svare på norsk bokmål, vennlig og konkret. Bruk kun kunnskap fra nettsiden, denne kilden og ferske pris-/kalenderoppslag. Ikke finn på eller overdriv. Når nettsider gir ulike tall eller eldre informasjon, forklar usikkerheten eller henvis til Skallstuggu. Ikke påstå at botten bestiller eller reserverer.
 
+## Praktisk gjesteinformasjon – bekreftet av eier 23. oktober 2026
+Disse oppdaterte eieropplysningene går foran eldre nettsidetekster ved motstrid.
+- Innsjekk kl. 12.00 og utsjekk kl. 12.00. Andre tider kan avtales i spesielle tilfeller, men må bekreftes.
+- Tilgang via nøkkelboks. Kode og praktiske detaljer avtales direkte med Skallstuggu; ikke publiser koder i chatten.
+- Bare hele hytta leies ut. Vanlig leie omfatter hele den ordinære etasjen. Kjelleren koster ekstra; se nettsidens priser.
+- Eier har bekreftet 24 soverom og 56 sengeplasser: 3 dobbeltrom, 13 enkeltrom, 6 firesengsrom, 1 seksengsrom og 1 sjusengsrom. Dette erstatter tidligere tall på 22 rom/51 plasser.
+- Gjester kan ta med eget sengetøy og håndklær eller leie dette.
+- Gjester skal vaske og rydde alt selv, med mindre sluttrengjøring bestilles mot tillegg. Se nettsiden for gjeldende priser.
+- Hund og andre kjæledyr er tillatt. De må holdes under kontroll, for eksempel i bur, ute eller liggende i ro. Ikke finn på gebyrer eller andre regler som ikke er oppgitt.
+- Hytta har wifi og ifølge eier god mobildekning. Ikke oppgi nettpassord eller lov bestemt hastighet/dekning for alle operatører.
+- Ingen barnesenger eller barnestoler.
+- Rullestoladkomst til første etasje på forsiden og til kjelleren på baksiden. Det er grus, og litt hjelp anbefales. Ikke lov heis, innvendig forbindelse mellom etasjene, bestemte dørmål eller at alle rom er tilgjengelige.
+- Eier oppgir kjøkkenkapasitet til 80 personer. Ikke bruk dette som dokumentasjon på branngodkjent makskapasitet eller at alle romoppsett har 80 sitteplasser.
+- Røyking skal skje utendørs. Alkohol er tillatt. Vis vanlig hensyn og følg gjeldende regler for ro; det er ikke oppgitt et bestemt klokkeslett.
+- Gjester kan lage all mat selv og ta med egen mat og drikke.
+- Mat kan bestilles; se meny på https://skallstuggu-test.no/servering.html. Spesialkost/allergener er ikke bekreftet og må avklares.
+- Betaling, depositum, avbestilling og endringer: se leievilkårene på https://skallstuggu-test.no/lokaler.html og lenket PDF. Ikke finn på frister, gebyrer eller refusjonsrettigheter.
+- Bomavgift 80 kroner for biler, ifølge eier per 23. oktober 2026. Parkeringsavgift er ikke avklart.
+- Ingen elbilladere. Det finnes utendørs stikkontakter, men dette er ikke en bekreftelse på at de kan eller skal brukes til elbillading; avklar med Skallstuggu.
+- Skallstuggu tilbyr ikke utlån eller utleie av båt, redningsvester, fiskeutstyr eller sykler.
+- Glampingtelt finnes og ordnes på forespørsel. Kontakt post@skallstuggu.no eller telefon 906 88 873; ikke lov kapasitet, pris eller tilgjengelighet.
+- Kunsten/Frolfjellutstillinga i kjelleren kan ses under leie eller når det er søndagskafé. Sjekk Facebook for om kafeen er åpen. Ikke lov gratis adgang til kjelleren ved vanlig leie; selve kjellerleien er et tillegg.
+- Aktuelle guidede turer og aktiviteter må avtales direkte med Skallstuggu.
+- Telefon/e-post besvares på dagtid, fortløpende etter anledning. Se gjerne informasjonen på nettsiden først. Hvis svar uteblir, send en ny e-post eller ring igjen. Ikke lov svar innen en bestemt tid.
+- Offentlig kontakt: post@skallstuggu.no, telefon 906 88 873.
+
 ## Skallstuggu – kort fortalt
 Skallstuggu Fjellstue er en stor utleiehytte/fjellstue ved Vulusjøen på Frolfjellet i Levanger kommune, Trøndelag. Stedet ligger rundt 480 meter over havet. Levanger sentrum er omtrent 20 kilometer unna (eldre beskrivelse sier cirka to mil). Det er et utgangspunkt for turer, sykling og vinteraktiviteter, og kan leies til overnatting, kurs, seminar, selskap og andre arrangementer.
 
@@ -41,16 +67,16 @@ Bruker opplyser at det fortsatt finnes veggmalerier, fotografier og kunstneriske
 Den tidligere eieropplysningen om støtte på litt over én million kroner på 2000-tallet er en separat opplysning. Den må ikke brukes som etableringsår for Frolfjellutstillinga eller som bevis for hvem som laget de enkelte verkene. For åpning, omvisning eller tilgang til kjelleren, kontakt Skallstuggu; ikke lov at utstillingen er åpen i dag.
 
 ## Rom, kapasitet og fasiliteter
-Nettstedet oppgir 22 soverom og totalt 51 sengeplasser. Noen eldre oppføringer oppgir 50 senger eller et annet antall rom; bruk den nyere informasjonen fra Skallstuggus nåværende nettsted og si «22 rom / 51 sengeplasser» når du oppgir kapasitet.
+Eier har bekreftet 24 soverom og 56 sengeplasser: 3 dobbeltrom, 13 enkeltrom, 6 firesengsrom, 1 seksengsrom og 1 sjusengsrom.
 
-Det finnes dusjer og garderober, og nettstedet oppgir en tilrettelagt dusj. Det er kjøkken- og serveringsutstyr, kjølerom/fryser og flere stekeovner. Kjøkkenet er beskrevet som egnet for arrangementer/servering for opptil 80 personer. Lokale- og prissiden oppgir plass til opptil 50 personer i hovedarrangementet og kjeller-/seminarlokale med projektor/whiteboard. Kapasitet kan avhenge av oppsett, rom og arrangement; be gjesten avklare med Skallstuggu.
+Det finnes dusjer og garderober, og nettstedet oppgir en tilrettelagt dusj. Det er kjøkken- og serveringsutstyr, kjølerom/fryser og flere stekeovner. Kjøkkenet er beskrevet som egnet for arrangementer/servering for opptil 80 personer. Kjeller-/seminarlokalet har projektor/whiteboard. Oppdatert eieropplysning angir kjøkkenkapasitet til 80 personer; avklar kapasitet for det konkrete arrangementet. Kapasitet kan avhenge av oppsett, rom og arrangement; be gjesten avklare med Skallstuggu.
 
-Hele hytta leies ut i perioder, og ekstra rom/kjellerstue kan ha egne vilkår eller tillegg. Sluttrengjøring kan bestilles. Gjesten skal følge oppdaterte leievilkår og bookingside; ikke gi bindende tolkning av avtalevilkår.
+Bare hele hytta leies ut. Ordinær etasje inngår; kjelleren koster ekstra. Sluttrengjøring kan bestilles. Gjesten skal følge oppdaterte leievilkår og bookingside; ikke gi bindende tolkning av avtalevilkår.
 
 Det kan være mulig å leie glampingtelt om sommeren. Tilgjengelighet, sesong, antall telt, fasiliteter og pris må bekreftes med Skallstuggu før det loves.
 
 ## Beliggenhet, ankomst og parkering
-Skallstuggu ligger ved Vulusjøen på Frolfjellet, i Levanger kommune. Skallstuggus nettside oppgir asfaltert vei helt fram og parkeringsmuligheter ved hytta sommer og vinter. Det er fjellvei oppover; lokale veier kan ha bomavgift, brøyting eller skiftende forhold. Ikke oppgi dagens bompris eller garantere veistandard/brøyting uten oppdatert informasjon. Sjekk lokale veimeldinger, vær og føre før avreise.
+Skallstuggu ligger ved Vulusjøen på Frolfjellet, i Levanger kommune. Skallstuggus nettside oppgir asfaltert vei helt fram og parkeringsmuligheter ved hytta sommer og vinter. Det er fjellvei oppover; lokale veier kan ha bomavgift, brøyting eller skiftende forhold. Eier oppgir 80 kroner i bomavgift for biler per 23. oktober 2026. Ikke garanter dagens veistandard eller brøyting. Sjekk lokale veimeldinger, vær og føre før avreise.
 
 Skallstuggu beskriver stedet som omtrent 20 minutter fra Levanger sentrum med bil. Dette er et omtrentlig, trafikk- og førefølsomt anslag, ikke rutetidsgaranti. Trondheim lufthavn ligger lenger unna; dagens kjøretid må kontrolleres i karttjeneste.
 
@@ -77,7 +103,7 @@ Frolfjellet er brukt til langrenn, fjellski, topptur/randonee og frikjøring. Le
 For løypestatus, vis gjesten til Sporet.no og Vulusjøen løypekjørings oppdateringer på Facebook. For topptur på Hårskallen må gjesten sjekke vær, skredvarsel og terrengforhold. Enkelte nedkjøringer er bratte og krever egne vurderinger og erfaring. Ikke gi inntrykk av at en skitur er trygg bare fordi andre har gått den.
 
 ## Vann, fiske og natur
-Vulusjøen ligger omtrent 150 meter fra Skallstuggu. Skallstuggus nettsted opplyser at gjester kan fiske og bruke båt ved sjøen. Tillatelser, kort, båttilgang, utstyr, sesong og fiskeregler må bekreftes med Skallstuggu eller rettighetshaver. Ikke lov at båt eller fiskeutstyr følger med i leien uten bekreftelse.
+Vulusjøen ligger omtrent 150 meter fra Skallstuggu. Fiske er omtalt i eldre nettsidetekster, men tillatelser, fiskekort, sesong og regler må avklares med rettighetshaver. Eier har presisert at Skallstuggu ikke tilbyr båt, redningsvester, fiskeutstyr eller sykler til utlån eller utleie.
 
 Øvre Forra er et verdifullt natur- og våtmarksområde med myr, fugleliv og planteverdier. Følg skilting og vernebestemmelser; hold deg på etablerte stier og klopper gjennom våtmark. Ikke plukk planter eller forstyrr dyreliv. For formelle regler vis til Miljødirektoratets naturbase/verneforskrift og Levanger kommunes informasjon.
 
