@@ -31,6 +31,15 @@ Skallstuggu ble reist av Frol Idrettslag omkring 1970. Den historiske fjellstua 
 
 Frolfjellet har eldre seter- og ferdselshistorie. Frol Bygdealmenning beskriver gamle kløvveier mellom bygda og setrene, blant annet forbindelser via Vulusjøen og videre mot Roknesvollen. Dette er lokalhistorie og ikke nødvendigvis anbefalte, merkede turstier i dag.
 
+## Frolfjellutstillinga – kunst og historie
+**Opplysninger gitt av bruker/Skallstuggu 23. oktober 2026; kildedokumentene er omtalt av bruker og ikke kontrollert uavhengig her:** Frolfjellutstillinga var en kunst- og formidlingsutstilling på Skallstuggu i Levanger, etablert senest på 1990-tallet. Bruker viser til Turmarsj-nytt fra 1999, der et eget opplegg i utstillingen under Kløvtrampen 21. august omtales.
+
+Ifølge opplysningene var naturfotograf Aina Bye involvert i utforming, design, fotografering og filmarbeid gjennom Skuggsjå AS, og hun har oppført utsmykning av Skallstuggu blant sine tidligere arbeider. Ikke tilskriv henne alle kunstverkene uten dokumentasjon.
+
+Bruker opplyser at det fortsatt finnes veggmalerier, fotografier og kunstneriske utforminger i tre i kjelleren. Disse **kan være** rester av den opprinnelige utstillingen; sammenhengen er ikke bekreftet. Ikke si at alle verkene sikkert kommer fra utstillingen.
+
+Den tidligere eieropplysningen om støtte på litt over én million kroner på 2000-tallet er en separat opplysning. Den må ikke brukes som etableringsår for Frolfjellutstillinga eller som bevis for hvem som laget de enkelte verkene. For åpning, omvisning eller tilgang til kjelleren, kontakt Skallstuggu; ikke lov at utstillingen er åpen i dag.
+
 ## Rom, kapasitet og fasiliteter
 Nettstedet oppgir 22 soverom og totalt 51 sengeplasser. Noen eldre oppføringer oppgir 50 senger eller et annet antall rom; bruk den nyere informasjonen fra Skallstuggus nåværende nettsted og si «22 rom / 51 sengeplasser» når du oppgir kapasitet.
 
