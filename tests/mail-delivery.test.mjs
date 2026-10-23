@@ -17,8 +17,8 @@ async function withFixture(run,{resendStatus=200,kind='reply'}={}){
  };
  try{await run(calls);}finally{globalThis.fetch=oldFetch;if(oldDeno===undefined)delete globalThis.Deno;else globalThis.Deno=oldDeno;}
 }
-test('outbound email is forced to test inbox with stable provider idempotency key',async()=>{
- await withFixture(async calls=>{await processJobs();const sent=calls.find(c=>c.url==='https://api.resend.com/emails');assert.deepEqual(sent.body.to,['minsten.mg@gmail.com']);assert.match(sent.body.text,/real-customer@example.test/);assert.equal(sent.options.headers['Idempotency-Key'],'skall-mail-'+jobId);assert.ok(sent.body.headers['X-Skallstuggu-Signature']);assert.ok(calls.some(c=>c.url.endsWith('/rpc/mail_complete_job')));});
+test('reply uses saved customer address with stable provider idempotency key',async()=>{
+ await withFixture(async calls=>{await processJobs();const sent=calls.find(c=>c.url==='https://api.resend.com/emails');assert.deepEqual(sent.body.to,['real-customer@example.test']);assert.doesNotMatch(sent.body.text,/TEST/);assert.equal(sent.options.headers['Idempotency-Key'],'skall-mail-'+jobId);assert.ok(sent.body.headers['X-Skallstuggu-Signature']);assert.ok(calls.some(c=>c.url.endsWith('/rpc/mail_complete_job')));});
 });
 test('failed provider call does not mark reply complete and is queued for retry',async()=>{
  await withFixture(async calls=>{await processJobs();assert.ok(!calls.some(c=>c.url.endsWith('/rpc/mail_complete_job')));assert.ok(calls.some(c=>c.body?.state==='pending'));assert.ok(calls.some(c=>c.body?.delivery_state==='queued'));},{resendStatus:503});
@@ -30,6 +30,8 @@ test('contact validation fails before any persistent write',async()=>{
  await withFixture(async calls=>{const r=await handler(new Request('https://project.supabase.co/functions/v1/mail-center',{method:'POST',headers:{Origin:'https://skallstuggu-test.no','Content-Type':'application/json'},body:JSON.stringify({action:'contact',request_id:jobId,name:'Only'})}));assert.equal(r.status,400);assert.equal(calls.length,0);});
 });
 
-test('contact acknowledgement stays in test inbox and does not complete an owner reply',async()=>{
- await withFixture(async calls=>{await processJobs();const sent=calls.find(c=>c.url==='https://api.resend.com/emails');assert.deepEqual(sent.body.to,['minsten.mg@gmail.com']);assert.match(sent.body.subject,/Takk for henvendelsen/);assert.match(sent.body.text,/Vi har mottatt meldingen din og svarer så snart vi kan/);assert.ok(!calls.some(c=>c.body?.delivery_state));assert.ok(sent.body.headers['X-Skallstuggu-Outbox']);},{kind:'acknowledgement'});
+test('contact acknowledgement uses customer address and does not complete an owner reply',async()=>{
+ await withFixture(async calls=>{await processJobs();const sent=calls.find(c=>c.url==='https://api.resend.com/emails');assert.deepEqual(sent.body.to,['real-customer@example.test']);assert.match(sent.body.subject,/Takk for henvendelsen/);assert.match(sent.body.text,/Vi har mottatt meldingen din og svarer så snart vi kan/);assert.ok(!calls.some(c=>c.body?.delivery_state));assert.ok(sent.body.headers['X-Skallstuggu-Outbox']);},{kind:'acknowledgement'});
 });
+
+test('owner notification still goes to test owner inbox',async()=>{await withFixture(async calls=>{await processJobs();assert.deepEqual(calls.find(c=>c.url==='https://api.resend.com/emails').body.to,['minsten.mg@gmail.com']);},{kind:'owner_email'});});

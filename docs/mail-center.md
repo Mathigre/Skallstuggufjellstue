@@ -59,3 +59,6 @@ Løsningen følger delte innbokser: egne køer, samlet samtalehistorikk og gjen�
 
 ## Automatisk mottaksbekreftelse
 Nye kontaktskjemaer køer både eiervarsel og en separat mottaksbekreftelse via Resend. Bekreftelsen takker for henvendelsen uten å love svartid og markerer ikke samtalen som besvart. I testmodus går også bekreftelsen bare til minsten.mg@gmail.com; den tiltenkte mottakeren står i teksten. Eksisterende henvendelser får ikke etterutsendt bekreftelse. Etter grunnskjemaet kjøres database/mail-contact-acknowledgement.sql.
+
+## Oppdatert mottakerruting
+Svar og mottaksbekreftelser sendes nå til lagret kundeadresse. Eiervarsler går fortsatt til minsten.mg@gmail.com. Dette erstatter beskrivelsene av tvungen testlevering ovenfor. Google OAuth er fortsatt i testmodus.

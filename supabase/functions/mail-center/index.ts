@@ -37,11 +37,11 @@ export async function processJobs(){
     if(!env('RESEND_API_KEY'))throw new MailError('resend_not_configured',503);
     if(Date.now()-Date.parse(job.created_at)>23*3600000)throw new MailError('retry_window_expired',409);
     const subject=(job.kind==='acknowledgement'?'Takk for henvendelsen – ':job.kind==='reply'?'Re: ':'')+thread.subject.replace(/\[Skallstuggu [0-9a-f-]+\]/ig,'').trim()+' [Skallstuggu '+thread.id+']';
-    // Test mode is deliberately fixed server-side: no customer deliveries yet.
-    const recipient=MAILBOX;
+    // Owner notifications go to the test owner; customer mail uses the saved contact address.
+    const recipient=job.kind==='owner_email'?MAILBOX:thread.contact_email;
     const emailHeaders=job.kind==='owner_email'?{'X-Skallstuggu-Contact':thread.id}:{'X-Skallstuggu-Outbox':job.id};
     emailHeaders['X-Skallstuggu-Signature']=await hashToken(env('SUPABASE_SERVICE_ROLE_KEY')+'|'+(job.kind==='owner_email'?thread.id:job.id));
-    const text=job.kind==='acknowledgement'?`[TEST – tiltenkt mottaker: ${thread.contact_email}]\n\nHei ${thread.contact_name}!\n\nTakk for henvendelsen! Vi har mottatt meldingen din og svarer så snart vi kan.\n\nDette er en automatisk bekreftelse. Hvis det haster, kan du ringe oss på 906 88 873.\n\nDin melding:\n${message.body}\n\nVennlig hilsen\nSkallstuggu`:job.kind==='owner_email'?`Ny henvendelse via kontaktskjemaet.\n\nNavn: ${thread.contact_name}\nE-post: ${thread.contact_email}\nTelefon: ${thread.contact_phone}\n\n${message.body}\n\nSvar fra admin: ${SITE}/admin/mail.html?thread=${thread.id}`:`[TEST – tiltenkt mottaker: ${thread.contact_email}]\n\n${message.body}\n\nSkallstuggu\nTelefon 906 88 873`;
+    const text=job.kind==='acknowledgement'?`Hei ${thread.contact_name}!\n\nTakk for henvendelsen! Vi har mottatt meldingen din og svarer så snart vi kan.\n\nDette er en automatisk bekreftelse. Hvis det haster, kan du ringe oss på 906 88 873.\n\nDin melding:\n${message.body}\n\nVennlig hilsen\nSkallstuggu`:job.kind==='owner_email'?`Ny henvendelse via kontaktskjemaet.\n\nNavn: ${thread.contact_name}\nE-post: ${thread.contact_email}\nTelefon: ${thread.contact_phone}\n\n${message.body}\n\nSvar fra admin: ${SITE}/admin/mail.html?thread=${thread.id}`:`${message.body}\n\nSkallstuggu\nTelefon 906 88 873`;
     const r=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:'Bearer '+env('RESEND_API_KEY'),'Content-Type':'application/json','Idempotency-Key':'skall-mail-'+job.id},body:JSON.stringify({from:'Skallstuggu <booking@skallstuggu-test.no>',to:[recipient],reply_to:job.kind==='owner_email'?thread.contact_email:MAILBOX,subject,text,headers:emailHeaders}),signal:AbortSignal.timeout(15000)});
     const data=await r.json();if(!r.ok||!data.id)throw new MailError('resend_http_'+r.status,r.status);
     await db('rpc/mail_complete_job','POST',{p_id:job.id,p_provider:data.id});
@@ -110,7 +110,7 @@ export async function handler(req){
    const [connection]=await db('mail_connection?id=eq.true&select=mailbox,enabled,backfill_complete,last_sync_at,last_error');
    const failed=await db('mail_jobs?state=eq.failed&select=id&limit=100');
    const pending=await db('mail_jobs?state=in.(pending,processing)&select=created_at,error_code&order=created_at.asc&limit=100');
-   return reply({connection,failed_jobs:failed.length,pending_jobs:pending.length,oldest_pending_at:pending[0]?.created_at||null,test_mode:true,test_recipient:MAILBOX,oauth_configured:!!env('GOOGLE_MAIL_CLIENT_ID')&&!!env('GOOGLE_MAIL_CLIENT_SECRET'),redirect_uri:callback()});
+   return reply({connection,failed_jobs:failed.length,pending_jobs:pending.length,oldest_pending_at:pending[0]?.created_at||null,test_mode:false,owner_recipient:MAILBOX,oauth_configured:!!env('GOOGLE_MAIL_CLIENT_ID')&&!!env('GOOGLE_MAIL_CLIENT_SECRET'),redirect_uri:callback()});
   }
   if(body.action==='connect'){
    if(!env('GOOGLE_MAIL_CLIENT_ID')||!env('GOOGLE_MAIL_CLIENT_SECRET'))throw new MailError('Førstegangsoppsett av Google mangler. Se veiledningen i Mail.',503);
@@ -147,7 +147,7 @@ export async function handler(req){
    const text=typeof body.message==='string'?body.message.trim():'';
    if(!UUID.test(body.request_id||'')||text.length<2||text.length>20000)throw new MailError('Skriv et svar på mellom 2 og 20 000 tegn.');
    const result=await db('rpc/mail_ingest','POST',{p:{thread_id:thread.id,provider_key:'reply:'+body.request_id,source:thread.source,direction:'outgoing',sender_name:'Skallstuggu',sender_email:MAILBOX,contact_email:thread.contact_email,subject:thread.subject,body:text,received_at:new Date().toISOString(),delivery_state:'queued',reply_through_at:thread.last_incoming_at}});
-   background(processJobs());return reply({queued:true,message_id:result.message_id,test_recipient:MAILBOX},202);
+   background(processJobs());return reply({queued:true,message_id:result.message_id,recipient:thread.contact_email},202);
   }
   throw new MailError('Ukjent handling.');
  }catch(e){const status=e.status===403?403:e instanceof MailError?e.status:500;return reply({error:status===500?'Tjenesten svarte ikke. Meldingen er ikke bekreftet lagret; prøv igjen eller ring 906 88 873.':e.message},status);}
