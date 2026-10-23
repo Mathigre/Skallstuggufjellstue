@@ -3,6 +3,7 @@
   if(!header)return;
   const menu=header.querySelector('.admin-site-links');
   if(menu&&!menu.querySelector('[href="kvitteringer.html"]')){const link=document.createElement('a');link.href='kvitteringer.html';link.textContent='Kvitteringer';menu.append(link);}
+  if(menu&&!menu.querySelector('[href="mail.html"]')){const link=document.createElement('a');link.href='mail.html';link.textContent='Mail';if(/\/mail(?:\.html)?$/.test(location.pathname))link.setAttribute('aria-current','page');menu.insertBefore(link,menu.children[1]||null);}
   const toggle=header.querySelector('.admin-site-toggle'),links=header.querySelector('.admin-site-links');
   const setOpen=open=>{links.classList.toggle('is-open',open);toggle.setAttribute('aria-expanded',String(open));toggle.setAttribute('aria-label',open?'Lukk meny':'Åpne meny');};
   toggle.addEventListener('click',()=>setOpen(toggle.getAttribute('aria-expanded')!=='true'));

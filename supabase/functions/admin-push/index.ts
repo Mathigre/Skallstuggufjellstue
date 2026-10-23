@@ -45,11 +45,12 @@ export async function handler(req){
   if(body.action==='dispatch'){
    const expected='Bearer '+env('SUPABASE_SERVICE_ROLE_KEY');
    if(!env('SUPABASE_SERVICE_ROLE_KEY')||req.headers.get('authorization')!==expected)return json({error:'Ingen tilgang.'},403);
-   if(!['booking','message'].includes(body.kind)||!uuid.test(body.bookingId||''))return json({error:'Ugyldig hendelse.'},400);
-   const bookings=await rest('bookings?id=eq.'+body.bookingId+'&select=id&limit=1');if(!bookings.length)return json({error:'Bestillingen finnes ikke.'},404);
+   const isMail=body.kind==='mail',eventId=isMail?body.threadId:body.bookingId;
+   if(!['booking','message','mail'].includes(body.kind)||!uuid.test(eventId||''))return json({error:'Ugyldig hendelse.'},400);
+   const records=await rest((isMail?'mail_threads':'bookings')+'?id=eq.'+eventId+'&select=id&limit=1');if(!records.length)return json({error:'Hendelsen finnes ikke.'},404);
    const members=await rest('admin_users?select=user_id');const ids=new Set(members.map(m=>m.user_id));
    const rows=(await rest('admin_push_subscriptions?expires_at=gt.'+encodeURIComponent(new Date().toISOString())+'&select=*')).filter(r=>ids.has(r.user_id));
-   const result=await send(rows,{title:body.kind==='booking'?'Ny bookingforespørsel':'Ny melding fra en gjest',body:'Åpne Skallstuggu Admin for å se bestillingen.',bookingId:body.bookingId,tag:body.kind+'-'+body.bookingId});
+   const result=await send(rows,{title:isMail?'Ny mail til Skallstuggu':body.kind==='booking'?'Ny bookingforespørsel':'Ny melding fra en gjest',body:isMail?'Åpne Mail i Skallstuggu Admin for å lese henvendelsen.':'Åpne Skallstuggu Admin for å se bestillingen.',...(isMail?{threadId:eventId}:{bookingId:eventId}),tag:body.kind+'-'+eventId});
    if(result.failed)console.warn('Push delivery failures: '+result.failed);
    return json(result);
   }
