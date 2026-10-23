@@ -36,12 +36,12 @@ export async function processJobs(){
    }else{
     if(!env('RESEND_API_KEY'))throw new MailError('resend_not_configured',503);
     if(Date.now()-Date.parse(job.created_at)>23*3600000)throw new MailError('retry_window_expired',409);
-    const subject=(job.kind==='reply'?'Re: ':'')+thread.subject.replace(/\[Skallstuggu [0-9a-f-]+\]/ig,'').trim()+' [Skallstuggu '+thread.id+']';
+    const subject=(job.kind==='acknowledgement'?'Takk for henvendelsen – ':job.kind==='reply'?'Re: ':'')+thread.subject.replace(/\[Skallstuggu [0-9a-f-]+\]/ig,'').trim()+' [Skallstuggu '+thread.id+']';
     // Test mode is deliberately fixed server-side: no customer deliveries yet.
     const recipient=MAILBOX;
     const emailHeaders=job.kind==='owner_email'?{'X-Skallstuggu-Contact':thread.id}:{'X-Skallstuggu-Outbox':job.id};
     emailHeaders['X-Skallstuggu-Signature']=await hashToken(env('SUPABASE_SERVICE_ROLE_KEY')+'|'+(job.kind==='owner_email'?thread.id:job.id));
-    const text=job.kind==='owner_email'?`Ny henvendelse via kontaktskjemaet.\n\nNavn: ${thread.contact_name}\nE-post: ${thread.contact_email}\nTelefon: ${thread.contact_phone}\n\n${message.body}\n\nSvar fra admin: ${SITE}/admin/mail.html?thread=${thread.id}`:`[TEST – tiltenkt mottaker: ${thread.contact_email}]\n\n${message.body}\n\nSkallstuggu\nTelefon 906 88 873`;
+    const text=job.kind==='acknowledgement'?`[TEST – tiltenkt mottaker: ${thread.contact_email}]\n\nHei ${thread.contact_name}!\n\nTakk for henvendelsen! Vi har mottatt meldingen din og svarer så snart vi kan.\n\nDette er en automatisk bekreftelse. Hvis det haster, kan du ringe oss på 906 88 873.\n\nDin melding:\n${message.body}\n\nVennlig hilsen\nSkallstuggu`:job.kind==='owner_email'?`Ny henvendelse via kontaktskjemaet.\n\nNavn: ${thread.contact_name}\nE-post: ${thread.contact_email}\nTelefon: ${thread.contact_phone}\n\n${message.body}\n\nSvar fra admin: ${SITE}/admin/mail.html?thread=${thread.id}`:`[TEST – tiltenkt mottaker: ${thread.contact_email}]\n\n${message.body}\n\nSkallstuggu\nTelefon 906 88 873`;
     const r=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:'Bearer '+env('RESEND_API_KEY'),'Content-Type':'application/json','Idempotency-Key':'skall-mail-'+job.id},body:JSON.stringify({from:'Skallstuggu <booking@skallstuggu-test.no>',to:[recipient],reply_to:job.kind==='owner_email'?thread.contact_email:MAILBOX,subject,text,headers:emailHeaders}),signal:AbortSignal.timeout(15000)});
     const data=await r.json();if(!r.ok||!data.id)throw new MailError('resend_http_'+r.status,r.status);
     await db('rpc/mail_complete_job','POST',{p_id:job.id,p_provider:data.id});
@@ -69,12 +69,12 @@ async function oauthCallback(req){
   const member=await db('admin_users?user_id=eq.'+saved.admin_id+'&select=user_id');if(!member.length)throw new MailError('not_admin');
   const code=url.searchParams.get('code');if(!code)throw new MailError('authorization_denied');
   const r=await fetch('https://oauth2.googleapis.com/token',{method:'POST',body:new URLSearchParams({code,client_id:env('GOOGLE_MAIL_CLIENT_ID')||'',client_secret:env('GOOGLE_MAIL_CLIENT_SECRET')||'',redirect_uri:callback(),grant_type:'authorization_code',code_verifier:saved.verifier}),signal:AbortSignal.timeout(15000)});
-  const token=await r.json();if(!r.ok||!token.refresh_token)throw new MailError('no_refresh_token');
+  const token=await r.json();if(!r.ok)throw new MailError(['invalid_client','invalid_grant','redirect_uri_mismatch'].includes(token.error)?token.error:'token_exchange_failed');if(!token.refresh_token)throw new MailError('no_refresh_token');
   const profile=await fetch('https://gmail.googleapis.com/gmail/v1/users/me/profile',{headers:{Authorization:'Bearer '+token.access_token},signal:AbortSignal.timeout(15000)});
-  const data=await profile.json();if(!profile.ok||data.emailAddress?.toLowerCase()!==MAILBOX)throw new MailError('wrong_mailbox');
+  const data=await profile.json();if(!profile.ok){const reasons=(data.error?.details||[]).map(d=>d.reason);throw new MailError(reasons.includes('SERVICE_DISABLED')?'gmail_api_disabled':reasons.includes('ACCESS_TOKEN_SCOPE_INSUFFICIENT')?'gmail_scope_missing':'gmail_profile_failed');}if(data.emailAddress?.toLowerCase()!==MAILBOX)throw new MailError('wrong_mailbox');
   await db('rpc/mail_store_refresh','POST',{p_token:token.refresh_token});success=true;
   background(doSync().then(()=>processJobs()));
- }catch{console.warn('gmail_connection_not_completed');}
+ }catch(e){const allowed=['invalid_state','expired_state','not_admin','authorization_denied','invalid_client','invalid_grant','redirect_uri_mismatch','token_exchange_failed','no_refresh_token','gmail_api_disabled','gmail_scope_missing','gmail_profile_failed','wrong_mailbox'];const reason=allowed.includes(e?.message)?e.message:'internal_error';console.warn('gmail_connection_not_completed:'+reason);}
  return new Response(null,{status:303,headers:{Location:SITE+'/admin/mail.html?gmail='+(success?'connected':'failed'),'Cache-Control':'no-store','Referrer-Policy':'no-referrer'}});
 }
 

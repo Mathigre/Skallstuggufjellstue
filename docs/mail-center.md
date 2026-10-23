@@ -56,3 +56,6 @@ Løsningen følger delte innbokser: egne køer, samlet samtalehistorikk og gjen�
 - Google OAuth for serverapper: https://developers.google.com/identity/protocols/oauth2/web-server
 - Supabase, Vault og planlagte Edge Functions: https://supabase.com/docs/guides/functions/schedule-functions
 - Resend API: https://resend.com/docs/api-reference/emails/send-email
+
+## Automatisk mottaksbekreftelse
+Nye kontaktskjemaer køer både eiervarsel og en separat mottaksbekreftelse via Resend. Bekreftelsen takker for henvendelsen uten å love svartid og markerer ikke samtalen som besvart. I testmodus går også bekreftelsen bare til minsten.mg@gmail.com; den tiltenkte mottakeren står i teksten. Eksisterende henvendelser får ikke etterutsendt bekreftelse. Etter grunnskjemaet kjøres database/mail-contact-acknowledgement.sql.

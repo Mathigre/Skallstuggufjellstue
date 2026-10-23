@@ -2,12 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {processJobs,handler} from '../supabase/functions/mail-center/index.ts';
 const jobId='d7097c57-3be8-4c36-b478-a7caf2baf41d',threadId='a71e91b0-b91b-4bbc-b0cd-aad8bd2e4a4b',messageId='a030230b-5951-4ff6-a541-55ea03e1c99c';
-async function withFixture(run,{resendStatus=200}={}){
+async function withFixture(run,{resendStatus=200,kind='reply'}={}){
  const oldFetch=globalThis.fetch,oldDeno=globalThis.Deno,calls=[];
  globalThis.Deno={env:{get:name=>({SUPABASE_URL:'https://project.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'service-test-key',RESEND_API_KEY:'resend-test-key'}[name]||'')}};
  globalThis.fetch=async(url,options={})=>{
   const body=options.body?JSON.parse(options.body):null;calls.push({url:String(url),options,body});
-  if(String(url).endsWith('/rpc/mail_claim_jobs'))return Response.json([{id:jobId,message_id:messageId,kind:'reply',attempts:1,created_at:new Date().toISOString()}]);
+  if(String(url).endsWith('/rpc/mail_claim_jobs'))return Response.json([{id:jobId,message_id:messageId,kind,attempts:1,created_at:new Date().toISOString()}]);
   if(String(url).includes('/mail_messages?'))return Response.json([{id:messageId,thread_id:threadId,body:'Et svar',reply_through_at:'2026-10-23T10:00:00Z'}]);
   if(String(url).includes('/mail_threads?'))return Response.json([{id:threadId,contact_email:'real-customer@example.test',subject:'Spørsmål'}]);
   if(String(url)==='https://api.resend.com/emails')return Response.json(resendStatus===200?{id:'provider-123'}:{error:'temporary'}, {status:resendStatus});
@@ -28,4 +28,8 @@ test('private mail APIs reject an unauthenticated request',async()=>{
 });
 test('contact validation fails before any persistent write',async()=>{
  await withFixture(async calls=>{const r=await handler(new Request('https://project.supabase.co/functions/v1/mail-center',{method:'POST',headers:{Origin:'https://skallstuggu-test.no','Content-Type':'application/json'},body:JSON.stringify({action:'contact',request_id:jobId,name:'Only'})}));assert.equal(r.status,400);assert.equal(calls.length,0);});
+});
+
+test('contact acknowledgement stays in test inbox and does not complete an owner reply',async()=>{
+ await withFixture(async calls=>{await processJobs();const sent=calls.find(c=>c.url==='https://api.resend.com/emails');assert.deepEqual(sent.body.to,['minsten.mg@gmail.com']);assert.match(sent.body.subject,/Takk for henvendelsen/);assert.match(sent.body.text,/Vi har mottatt meldingen din og svarer så snart vi kan/);assert.ok(!calls.some(c=>c.body?.delivery_state));assert.ok(sent.body.headers['X-Skallstuggu-Outbox']);},{kind:'acknowledgement'});
 });
