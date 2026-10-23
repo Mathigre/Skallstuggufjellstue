@@ -2,6 +2,7 @@
  const form=document.getElementById('contactForm');if(!form)return;
  const status=document.getElementById('contactStatus'),button=form.querySelector('button[type="submit"]');
  let requestId=crypto.randomUUID(),sending=false;
+ button.disabled=false;
  form.addEventListener('submit',async event=>{
   event.preventDefault();if(sending||!form.reportValidity())return;
   const data=new FormData(form);sending=true;button.disabled=true;status.textContent='Sender spørsmålet …';
