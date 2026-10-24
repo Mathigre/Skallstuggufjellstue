@@ -29,6 +29,15 @@ for (const entry of await readdir(root, { withFileTypes: true })) {
   await cp(path.join(root, entry.name), path.join(output, entry.name), { recursive: true });
 }
 
+// Publish the two visitor documents without including their editable source files.
+await mkdir(path.join(output, 'dokumenter'), { recursive: true });
+for (const name of ['Leiebetingelser_Skallstuggu.pdf', 'Personvern_Skallstuggu.pdf']) {
+  const source = path.join(root, 'dokumenter', name);
+  const bytes = await readFile(source);
+  if (bytes.subarray(0, 5).toString() !== '%PDF-') throw new Error(`Invalid public PDF: ${name}`);
+  await cp(source, path.join(output, 'dokumenter', name));
+}
+
 async function addChatWidget(directory, relative = "") {
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     const file = path.join(directory, entry.name);
