@@ -77,3 +77,19 @@ export function acknowledgementHtml({name,message,replyEmail}) {
  <p style="font-size:13px;color:#777">Dette er en automatisk bekreftelse på at meldingen din er mottatt.</p>
  ${getEmailSignature('post@skallstuggu.no')}</body></html>`;
 }
+
+let inlineLogo;
+export async function acknowledgementContent(details) {
+ const html=acknowledgementHtml(details);
+ try {
+  inlineLogo ||= fetch('https://skallstuggu-test.no/images/Logo.png',{signal:AbortSignal.timeout(5000)}).then(async response=>{
+   if(!response.ok||!response.headers.get('content-type')?.startsWith('image/png'))throw Error('logo_unavailable');
+   const bytes=new Uint8Array(await response.arrayBuffer());
+   if(bytes.length>1000000||bytes[0]!==137||bytes[1]!==80||bytes[2]!==78||bytes[3]!==71)throw Error('invalid_logo');
+   let binary='';for(let i=0;i<bytes.length;i+=8192)binary+=String.fromCharCode(...bytes.subarray(i,i+8192));
+   return btoa(binary);
+  });
+  const content=await inlineLogo;
+  return {html:html.replace(LOGO_URL,'cid:skallstuggu-logo'),attachments:[{filename:'skallstuggu-logo.png',content,content_type:'image/png',content_id:'skallstuggu-logo'}]};
+ }catch{inlineLogo=null;return {html:html.replace(LOGO_URL,'https://skallstuggu-test.no/images/Logo.png')};}
+}

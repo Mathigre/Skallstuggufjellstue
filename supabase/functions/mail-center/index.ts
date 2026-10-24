@@ -1,4 +1,4 @@
-import {acknowledgementHtml} from './email-template.ts';
+import {acknowledgementContent} from './email-template.ts';
 import {requireAdmin,db as rest,hashToken,newToken} from '../shared/auth.ts';
 import {MAILBOX,SITE,UUID,MailError,validateContact,base64url,syncGmail} from './core.ts';
 const env=name=>Deno.env.get(name);
@@ -43,7 +43,7 @@ export async function processJobs(){
     const emailHeaders=job.kind==='owner_email'?{'X-Skallstuggu-Contact':thread.id}:{'X-Skallstuggu-Outbox':job.id};
     emailHeaders['X-Skallstuggu-Signature']=await hashToken(env('SUPABASE_SERVICE_ROLE_KEY')+'|'+(job.kind==='owner_email'?thread.id:job.id));
     const text=job.kind==='acknowledgement'?`Hei ${thread.contact_name}!\n\nTakk for henvendelsen! Vi har mottatt meldingen din og svarer så snart vi kan.\n\nDette er en automatisk bekreftelse. Hvis det haster, kan du ringe oss på 906 88 873.\n\nDin melding:\n${message.body}\n\nVennlig hilsen\nSkallstuggu`:job.kind==='owner_email'?`Ny henvendelse via kontaktskjemaet.\n\nNavn: ${thread.contact_name}\nE-post: ${thread.contact_email}\nTelefon: ${thread.contact_phone}\n\n${message.body}\n\nSvar fra admin: ${SITE}/admin/mail.html?thread=${thread.id}`:`${message.body}\n\nSkallstuggu\nTelefon 906 88 873`;
-    const r=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:'Bearer '+env('RESEND_API_KEY'),'Content-Type':'application/json','Idempotency-Key':'skall-mail-'+job.id},body:JSON.stringify({from:'Skallstuggu <booking@skallstuggu-test.no>',to:[recipient],reply_to:job.kind==='owner_email'?thread.contact_email:MAILBOX,subject,text,...(job.kind==='acknowledgement'?{html:acknowledgementHtml({name:thread.contact_name,message:message.body,replyEmail:MAILBOX})}:{}),headers:emailHeaders}),signal:AbortSignal.timeout(15000)});
+    const r=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:'Bearer '+env('RESEND_API_KEY'),'Content-Type':'application/json','Idempotency-Key':'skall-mail-'+job.id},body:JSON.stringify({from:'Skallstuggu <booking@skallstuggu-test.no>',to:[recipient],reply_to:job.kind==='owner_email'?thread.contact_email:MAILBOX,subject,text,...(job.kind==='acknowledgement'?await acknowledgementContent({name:thread.contact_name,message:message.body,replyEmail:MAILBOX}):{}),headers:emailHeaders}),signal:AbortSignal.timeout(15000)});
     const data=await r.json();if(!r.ok||!data.id)throw new MailError('resend_http_'+r.status,r.status);
     await db('rpc/mail_complete_job','POST',{p_id:job.id,p_provider:data.id});
     return;

@@ -10,6 +10,7 @@ async function withFixture(run,{resendStatus=200,kind='reply'}={}){
   if(String(url).endsWith('/rpc/mail_claim_jobs'))return Response.json([{id:jobId,message_id:messageId,kind,attempts:1,created_at:new Date().toISOString()}]);
   if(String(url).includes('/mail_messages?'))return Response.json([{id:messageId,thread_id:threadId,body:'Et svar',reply_through_at:'2026-10-23T10:00:00Z'}]);
   if(String(url).includes('/mail_threads?'))return Response.json([{id:threadId,contact_email:'real-customer@example.test',subject:'Spørsmål'}]);
+  if(String(url)==='https://skallstuggu-test.no/images/Logo.png')return new Response(new Uint8Array([137,80,78,71,13,10,26,10]),{headers:{'Content-Type':'image/png'}});
   if(String(url)==='https://api.resend.com/emails')return Response.json(resendStatus===200?{id:'provider-123'}:{error:'temporary'}, {status:resendStatus});
   if(String(url).includes('/auth/v1/user'))return Response.json({error:'unauthorized'},{status:401});
   if(String(url).includes('/rest/v1/'))return Response.json([]);
@@ -40,5 +41,5 @@ test('acknowledgement includes booking branding and escaped customer content',as
  const {acknowledgementHtml}=await import('../supabase/functions/mail-center/email-template.ts');
  const html=acknowledgementHtml({name:'<img src=x onerror=alert(1)>',message:'<script>alert(1)</script>\nHei & takk',replyEmail:'owner@example.test'});
  assert.ok(html.includes('/leiebetingelser/logo.png'));assert.ok(html.includes('#8B4A2B'));assert.ok(html.includes('Din melding til oss:'));assert.ok(html.includes('mailto:post@skallstuggu.no'));assert.ok(!html.includes('Se din booking'));assert.ok(html.includes('&lt;script&gt;'));assert.ok(!html.includes('<script>'));assert.ok(!html.includes('<img src=x'));
- await withFixture(async calls=>{await processJobs();const sent=calls.find(c=>c.url==='https://api.resend.com/emails');assert.ok(sent.body.html.includes('Takk for din henvendelse'));assert.ok(sent.body.text);},{kind:'acknowledgement'});
+ await withFixture(async calls=>{await processJobs();const sent=calls.find(c=>c.url==='https://api.resend.com/emails');assert.ok(sent.body.html.includes('Takk for din henvendelse'));assert.ok(sent.body.text);assert.ok(sent.body.html.includes('cid:skallstuggu-logo'));assert.equal(sent.body.attachments[0].content_id,'skallstuggu-logo');},{kind:'acknowledgement'});
 });
