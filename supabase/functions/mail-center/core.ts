@@ -70,7 +70,7 @@ export async function syncGmail({db,gmail,verifyEcho=async()=>false}){
  }
  try{
   let history=connection.history_id;
-  if(!history){const profile=await gmail('/profile');history=profile.historyId;await save({history_id:history});}
+  if(!history||!connection.backfill_complete){const profile=await gmail('/profile');history=profile.historyId;await save({history_id:history,history_page:null,backfill_page:null,backfill_complete:true});}
   else {
    // Advance the durable history cursor only after every page and message succeeds.
    let page=connection.history_page,latest=history;let pages=0;
@@ -86,14 +86,9 @@ export async function syncGmail({db,gmail,verifyEcho=async()=>false}){
    }catch(e){
     if(e.status!==404)throw e;
     const profile=await gmail('/profile');
-    await save({history_id:profile.historyId,history_page:null,backfill_page:null,backfill_complete:false});
-    connection.backfill_page=null;connection.backfill_complete=false;
+    await save({history_id:profile.historyId,history_page:null,backfill_page:null,backfill_complete:true});
+    connection.backfill_page=null;connection.backfill_complete=true;
    }
-  }
-  if(!connection.backfill_complete){
-   const result=await gmail('/messages?includeSpamTrash=true&maxResults=25'+(connection.backfill_page?'&pageToken='+encodeURIComponent(connection.backfill_page):''));
-   for(const item of result.messages||[])await ingest(item.id,false);
-   await save({backfill_page:result.nextPageToken||null,backfill_complete:!result.nextPageToken});
   }
   await save({last_sync_at:new Date().toISOString(),last_error:null,lock_until:null});
   return {imported};

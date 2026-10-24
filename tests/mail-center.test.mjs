@@ -40,11 +40,11 @@ test('history cursor advances only after every imported message succeeded',async
 test('normal incremental sync imports incoming messages and advances cursor',async()=>{
  const h=harness();const r=await syncGmail(h);assert.equal(r.imported,2);assert.ok(h.saved.some(x=>x.history_id==='200'));assert.ok(h.ingested.every(x=>x.notify));
 });
-test('expired Gmail history causes complete rescan rather than silently skipping mail',async()=>{
- const h=harness({history404:true});await syncGmail(h);assert.ok(h.saved.some(x=>x.history_id==='500'&&x.backfill_complete===false));assert.equal(h.ingested[0].notify,false);
+test('expired Gmail history resets boundary without importing old mail',async()=>{
+ const h=harness({history404:true});await syncGmail(h);assert.ok(h.saved.some(x=>x.history_id==='500'&&x.backfill_complete===true));assert.equal(h.ingested.length,0);
 });
-test('initial backfill captures history boundary and retains pagination',async()=>{
- const h=harness({connection:{history_id:null,backfill_complete:false},hasNext:true});await syncGmail(h);assert.ok(h.saved.some(x=>x.history_id==='500'));assert.ok(h.saved.some(x=>x.backfill_page==='older'&&!x.backfill_complete));
+test('old backfill is stopped and only a new history boundary is captured',async()=>{
+ const h=harness({connection:{history_id:null,backfill_complete:false},hasNext:true});await syncGmail(h);assert.ok(h.saved.some(x=>x.history_id==='500'));assert.ok(h.saved.some(x=>x.backfill_page===null&&x.backfill_complete));assert.equal(h.ingested.length,0);
 });
 test('history backlog records a resumable page instead of repeating the first page forever',async()=>{
  const h=harness({hasNext:true});const r=await syncGmail(h);assert.equal(r.backlog,true);assert.ok(h.saved.some(x=>x.history_page==='next'));assert.ok(!h.saved.some(x=>x.history_id==='200'));

@@ -62,3 +62,6 @@ Nye kontaktskjemaer køer både eiervarsel og en separat mottaksbekreftelse via 
 
 ## Oppdatert mottakerruting
 Svar og mottaksbekreftelser sendes nå til lagret kundeadresse. Eiervarsler går fortsatt til minsten.mg@gmail.com. Dette erstatter beskrivelsene av tvungen testlevering ovenfor. Google OAuth er fortsatt i testmodus.
+
+## Bare nye Gmail-meldinger
+Historisk import er deaktivert. Ved oppstart settes et nytt Gmail historyId uten å hente eldre meldinger. Utløpt Gmail-historikk gir en ny grense uten full skanning.
