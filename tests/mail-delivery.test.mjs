@@ -39,6 +39,6 @@ test('owner notification still goes to test owner inbox',async()=>{await withFix
 test('acknowledgement includes booking branding and escaped customer content',async()=>{
  const {acknowledgementHtml}=await import('../supabase/functions/mail-center/email-template.ts');
  const html=acknowledgementHtml({name:'<img src=x onerror=alert(1)>',message:'<script>alert(1)</script>\nHei & takk',replyEmail:'owner@example.test'});
- assert.ok(html.includes('/leiebetingelser/logo.png'));assert.ok(html.includes('#8B4A2B'));assert.ok(html.includes('#f8f1e3'));assert.ok(html.includes('&lt;script&gt;'));assert.ok(!html.includes('<script>'));assert.ok(!html.includes('<img src=x'));
- await withFixture(async calls=>{await processJobs();const sent=calls.find(c=>c.url==='https://api.resend.com/emails');assert.ok(sent.body.html.includes('Takk for henvendelsen'));assert.ok(sent.body.text);},{kind:'acknowledgement'});
+ assert.ok(html.includes('/leiebetingelser/logo.png'));assert.ok(html.includes('#8B4A2B'));assert.ok(html.includes('Din melding til oss:'));assert.ok(html.includes('mailto:post@skallstuggu.no'));assert.ok(!html.includes('Se din booking'));assert.ok(html.includes('&lt;script&gt;'));assert.ok(!html.includes('<script>'));assert.ok(!html.includes('<img src=x'));
+ await withFixture(async calls=>{await processJobs();const sent=calls.find(c=>c.url==='https://api.resend.com/emails');assert.ok(sent.body.html.includes('Takk for din henvendelse'));assert.ok(sent.body.text);},{kind:'acknowledgement'});
 });
