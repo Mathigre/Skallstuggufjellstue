@@ -90,3 +90,28 @@ for (const section of knowledgeSource.split(/^##\s+/m).slice(1)) {
   });
 }
 await writeFile(path.join(output, 'chatbot-knowledge.json'), JSON.stringify(publicPages), 'utf8');
+
+// Home-screen icons use PNG for iOS and Android compatibility.
+const homeIcons = JSON.parse(await readFile(path.join(root, 'scripts', 'home-screen-icons.json'), 'utf8'));
+await mkdir(path.join(output, 'images', 'app-icons'), { recursive: true });
+for (const size of [180, 192, 512]) {
+  const bytes = Buffer.from(homeIcons[String(size)], 'base64');
+  if (bytes.subarray(0, 8).toString('hex') !== '89504e470d0a1a0a' ||
+      bytes.readUInt32BE(16) !== size || bytes.readUInt32BE(20) !== size) {
+    throw new Error('Invalid home-screen icon: ' + size);
+  }
+  await writeFile(path.join(output, 'images', 'app-icons', 'skallstuggu-' + size + '.png'), bytes);
+}
+const adminDirectory = path.join(output, 'admin');
+for (const entry of await readdir(adminDirectory, { withFileTypes: true })) {
+  if (!entry.isFile() || !entry.name.endsWith('.html')) continue;
+  const file = path.join(adminDirectory, entry.name);
+  let html = await readFile(file, 'utf8');
+  html = html.replace(/<link\b[^>]*rel=["'](?:apple-touch-icon|manifest)["'][^>]*>/gi, '')
+    .replace(/<meta\b[^>]*name=["']apple-mobile-web-app-(?:capable|title)["'][^>]*>/gi, '');
+  const tags = '<link rel="manifest" href="/admin/manifest.json?v=logo2">' +
+    '<link rel="apple-touch-icon" sizes="180x180" href="/images/app-icons/skallstuggu-180.png?v=logo2">' +
+    '<meta name="apple-mobile-web-app-capable" content="yes">' +
+    '<meta name="apple-mobile-web-app-title" content="Skallstuggu">';
+  await writeFile(file, html.replace(/<\/head>/i, tags + '</head>'));
+}
