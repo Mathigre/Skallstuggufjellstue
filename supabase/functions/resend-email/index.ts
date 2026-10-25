@@ -112,11 +112,11 @@ serveWithCloudflareOrigin(async (req) => {
     if(!['request_customer','request_owner','admin_reply','approved'].includes(body.type))throw new Error('Ukjent e-posttype.');
     if(!service && ['request_customer','request_owner'].includes(body.type))throw new Error('Kun bookingtjenesten kan sende forespørselsmail.');
     if(!/^[a-f0-9-]{36}$/i.test(body.bookingId||''))throw new Error('Bookingreferanse mangler.');
-    const [booking]=await db('bookings?id=eq.'+body.bookingId+'&select=id,created_at,name,email,phone,start_date,end_date,message,status,booking_total_ore,invoice_url',env);
+    const [booking]=await db('bookings?id=eq.'+body.bookingId+'&select=id,created_at,name,email,phone,start_date,end_date,message,status,booking_total_ore,basement_rooms,garage_rooms,invoice_url',env);
     if(!booking || !booking.email)throw new Error('Bookingen finnes ikke eller mangler e-post.');
     const PDF_URL = termsUrlForBooking(booking);
     if(body.type==='approved'&&booking.status!=='approved')throw new Error('Bookingen er ikke godkjent.');
-    Object.assign(body,{name:esc(booking.name),email:booking.email,phone:esc(booking.phone),start:booking.start_date,end:booking.end_date,customerMessage:esc((booking.message||'')+(booking.booking_total_ore!=null?'\nTotalpris inkl. mva: '+booking.booking_total_ore/100+' kr.':'')),message:esc(body.message||''),adminReply:esc(body.adminReply||'')});
+    Object.assign(body,{name:esc(booking.name),email:booking.email,phone:esc(booking.phone),start:booking.start_date,end:booking.end_date,customerMessage:esc((booking.message||'')+(booking.basement_rooms?'\nSoverom i kjelleren: bestilt.':'')+(booking.garage_rooms?'\nSoverom i garasjebygget: bestilt.':'')+(booking.booking_total_ore!=null?'\nTotalpris inkl. mva: '+booking.booking_total_ore/100+' kr.':'')),message:esc(body.message||''),adminReply:esc(body.adminReply||'')});
     body.invoiceUrl=booking.invoice_url&&booking.invoice_url.startsWith(env('SUPABASE_URL')+'/storage/v1/object/sign/fakturaer/')?esc(booking.invoice_url):null;
     if(body.type!=='request_owner'){
       const token=newToken();

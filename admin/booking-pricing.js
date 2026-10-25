@@ -1,4 +1,4 @@
-import { calculateQuote, formatMoney } from '../pricing.mjs?v=season1';
+import { calculateQuote, formatMoney } from '../pricing.mjs?v=rooms1';
 import {ensureFikenAccess,getAccessCode,clearAccessCode} from './test-access.mjs?v=security1';
 window.ensureFikenAccess=ensureFikenAccess;
 const busy=new Set();
@@ -22,7 +22,7 @@ window.appendBookingPricing = function(card, booking) {
   const details=card.querySelector('.booking-details');
   const section=document.createElement('div'); section.className='payment-box';
   try {
-    const quote=calculateQuote({start:booking.start_date,end:booking.end_date,linen:booking.linen_count,towels:booking.towel_count,cleaning:booking.full_cleaning,settings:booking.pricing_snapshot||null});
+    const quote=calculateQuote({start:booking.start_date,end:booking.end_date,linen:booking.linen_count,towels:booking.towel_count,cleaning:booking.full_cleaning,basementRooms:booking.basement_rooms??false,garageRooms:booking.garage_rooms??false,settings:booking.pricing_snapshot||null});
     const title=document.createElement('strong'); title.textContent=`Avtalt totalpris: ${formatMoney(quote.total)} inkl. 25 % mva`; section.appendChild(title);
     for(const line of quote.lines){const p=document.createElement('p');p.textContent=`${line.label}: ${line.quantity} × ${formatMoney(line.unitPrice)}`;section.appendChild(p);}
     const note=document.createElement('p');note.textContent=`Faktura-e-post: ${booking.email||'Mangler'}. Utkast i ApiSkallstuggu sendes ikke automatisk.`;section.appendChild(note);
@@ -56,7 +56,7 @@ window.approve=async function(id){
 
 const originalSave=window.saveBookingChanges;
 window.saveBookingChanges=async function(booking,values){
-  if(booking.price_version){calculateQuote({start:values.start_date,end:values.end_date,linen:values.linen_count??booking.linen_count,towels:values.towel_count??booking.towel_count,cleaning:values.full_cleaning??booking.full_cleaning,settings:booking.pricing_snapshot||null});}
+  if(booking.price_version){calculateQuote({start:values.start_date,end:values.end_date,linen:values.linen_count??booking.linen_count,towels:values.towel_count??booking.towel_count,cleaning:values.full_cleaning??booking.full_cleaning,basementRooms:values.basement_rooms??booking.basement_rooms??false,garageRooms:values.garage_rooms??booking.garage_rooms??false,settings:booking.pricing_snapshot||null});}
   if(booking.price_version&&booking.status==='approved'&&!await window.ensureFikenAccess())throw new Error('Lagring avbrutt. Fiken-tilgang kreves for å oppdatere fakturautkastet samtidig.');
   const result=await originalSave(booking,values);
   if(booking.price_version&&booking.status==='approved'){

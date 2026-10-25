@@ -1,6 +1,19 @@
-// Amounts are stored/calculated in ore to avoid floating-point currency errors.
+// Booking prices are stored in øre as gross prices (including VAT).
 export const PRICE_VERSION = '2026-09-17';
 export const RATES = Object.freeze({ night: 1400000, linen: 30000, towel: 15000, cleaning: 300000 });
+
+// Overnight stays in commercially rented cabins use the reduced 12% rate.
+// Separately priced linen, towels and cleaning use the standard 25% rate.
+export const VAT_PERCENT_BY_KEY = Object.freeze({ night: 12, basement: 12, garage: 12, linen: 25, towel: 25, cleaning: 25 });
+export const VAT_TYPE_BY_KEY = Object.freeze({ night: 'LOW', basement: 'LOW', garage: 'LOW', linen: 'HIGH', towel: 'HIGH', cleaning: 'HIGH' });
+
+export function netUnitPriceFromGross(grossOre, key) {
+  const vatPercent = VAT_PERCENT_BY_KEY[key];
+  if (!Number.isSafeInteger(grossOre) || grossOre < 0 || !Number.isInteger(vatPercent)) {
+    throw new Error('Ukjent bookinglinje eller ugyldig beløp for MVA-beregning.');
+  }
+  return Math.round(grossOre * 100 / (100 + vatPercent));
+}
 
 function day(value) {
   if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) throw new Error('Velg gyldige datoer.');
@@ -18,7 +31,7 @@ function count(value, label) {
 export function validateSettings(settings) {
   const price = value => { if (!Number.isSafeInteger(value) || value < 100 || value > 100000000 || value % 100) throw new Error('Priser må være hele kroner mellom 1 og 1 000 000.'); return value; };
   if (!settings || !Array.isArray(settings.seasons) || settings.seasons.length > 100) throw new Error('Ugyldig sesongoppsett.');
-  const result = { weekday:price(settings.weekday), weekend:price(settings.weekend), seasons:settings.seasons.map(s => {
+  const result = { extraRooms:{basement:price(settings.extraRooms?.basement ?? 400000),garage:price(settings.extraRooms?.garage ?? 300000)}, weekday:price(settings.weekday), weekend:price(settings.weekend), seasons:settings.seasons.map(s => {
     if (typeof s.name !== 'string' || !s.name.trim() || s.name.length > 80 || day(s.end) < day(s.start)) throw new Error('Fyll inn sesongnavn og gyldige datoer.');
     return {name:s.name.trim(), start:s.start, end:s.end, weekday:price(s.weekday), weekend:price(s.weekend)};
   }).sort((a,b)=>a.start.localeCompare(b.start)) };
@@ -26,12 +39,13 @@ export function validateSettings(settings) {
   return result;
 }
 
-export function calculateQuote({ start, end, linen = 0, towels = 0, cleaning = false, settings = null }) {
+export function calculateQuote({ start, end, linen = 0, towels = 0, cleaning = false, basementRooms = false, garageRooms = false, settings = null }) {
   const nights = day(end) - day(start);
   if (nights < 1 || nights > 366) throw new Error('Velg et opphold på mellom 1 og 366 netter.');
   const linenCount = count(linen, 'sett sengeklær');
   const towelCount = count(towels, 'håndklær');
   if (typeof cleaning !== 'boolean') throw new Error('Ugyldig valg for full vask.');
+  if(typeof basementRooms!=='boolean'||typeof garageRooms!=='boolean')throw new Error('Ugyldig valg av tilleggsrom.');
   const lines = [];
   if (settings) {
     settings = validateSettings(settings);
@@ -47,10 +61,15 @@ export function calculateQuote({ start, end, linen = 0, towels = 0, cleaning = f
   if (linenCount) lines.push({ key: 'linen', label: 'Sengeklær', quantity: linenCount, unitPrice: RATES.linen });
   if (towelCount) lines.push({ key: 'towel', label: 'Håndklær', quantity: towelCount, unitPrice: RATES.towel });
   if (cleaning) lines.push({ key: 'cleaning', label: 'Full vask', quantity: 1, unitPrice: RATES.cleaning });
+  if(basementRooms||garageRooms){if(!settings?.extraRooms)throw new Error('Pris for tilleggsrom mangler i prisavtalen.');}
+  if(basementRooms)lines.push({key:'basement',label:'Soverom i kjelleren',quantity:1,unitPrice:settings.extraRooms.basement});
+  if(garageRooms)lines.push({key:'garage',label:'Soverom i garasjebygget',quantity:1,unitPrice:settings.extraRooms.garage});
   const total = lines.reduce((sum, line) => sum + line.quantity * line.unitPrice, 0);
-  return { priceVersion: PRICE_VERSION, nights, linenCount, towelCount, cleaning, lines, total, net: total * 4 / 5, vat: total / 5 };
+  const net = lines.reduce((sum, line) => sum + line.quantity * netUnitPriceFromGross(line.unitPrice, line.key), 0);
+  return { priceVersion: PRICE_VERSION, nights, linenCount, towelCount, cleaning, basementRooms, garageRooms, lines, total, net, vat: total - net };
 }
 
 export function formatMoney(ore) {
   return new Intl.NumberFormat('nb-NO', { style: 'currency', currency: 'NOK', maximumFractionDigits: 0 }).format(ore / 100);
 }
+

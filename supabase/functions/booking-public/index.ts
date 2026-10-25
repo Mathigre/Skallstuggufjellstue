@@ -6,7 +6,7 @@ function notifyAdmins(kind,bookingId){
  const task=(async()=>{try{const key=env('SUPABASE_SERVICE_ROLE_KEY');const response=await fetch(env('SUPABASE_URL')+'/functions/v1/admin-push',{method:'POST',headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({action:'dispatch',kind,bookingId}),signal:AbortSignal.timeout(25000)});if(!response.ok)console.warn('Admin push dispatch failed: '+response.status);}catch{console.warn('Admin push dispatch unavailable');}})();
  EdgeRuntime.waitUntil(task);
 }
-const fields='id,name,start_date,end_date,status,message,cancelled_at,created_at,booking_total_ore,linen_count,towel_count,full_cleaning';
+const fields='id,name,start_date,end_date,status,message,cancelled_at,created_at,booking_total_ore,linen_count,towel_count,full_cleaning,basement_rooms,garage_rooms';
 export async function handler(req) {
  const json=(body,status=200)=>Response.json(body,{status,headers:cors});
  if(req.method==='OPTIONS')return new Response('ok',{headers:cors});
@@ -23,6 +23,8 @@ export async function handler(req) {
   }
   if(body.action==='create'){
    const p=body.booking||{};
+   const basementRooms=p.basement_rooms??false,garageRooms=p.garage_rooms??false;
+   if(typeof basementRooms!=='boolean'||typeof garageRooms!=='boolean')return json({error:'Kontroller valget av tilleggsrom.'},400);
    const text=(v,max)=>typeof v==='string'&&v.trim().length<=max?v.trim():'';
    const name=text(p.name,160),email=text(p.email,254).toLowerCase(),phone=text(p.phone,50),message=text(p.message,2000);
    if(!name||!phone||!/^\S+@\S+\.\S+$/.test(email)||!/^\d{4}-\d{2}-\d{2}$/.test(p.start_date||'')||!/^\d{4}-\d{2}-\d{2}$/.test(p.end_date||''))return json({error:'Fyll inn gyldig navn, e-post, telefon og datoer.'},400);
@@ -34,7 +36,7 @@ export async function handler(req) {
    const overlaps=await db('bookings?select=start_date&status=eq.approved&cancelled_at=is.null&start_date=lt.'+p.end_date+'&end_date=gt.'+p.start_date+'&limit=1',env);
    if(overlaps.length)return json({error:'Perioden er allerede booket.'},409);
    const token=newToken();
-   const booking=await db('rpc/create_secure_booking',env,'POST',{access_hash:await hashToken(token),payload:{name,email,phone,message,start_date:p.start_date,end_date:p.end_date,linen_count:p.linen_count,towel_count:p.towel_count,full_cleaning:p.full_cleaning,pricing_revision:p.pricing_revision}});
+   const booking=await db('rpc/create_secure_booking',env,'POST',{access_hash:await hashToken(token),payload:{name,email,phone,message,start_date:p.start_date,end_date:p.end_date,linen_count:p.linen_count,towel_count:p.towel_count,full_cleaning:p.full_cleaning,basement_rooms:basementRooms,garage_rooms:garageRooms,pricing_revision:p.pricing_revision}});
    notifyAdmins('booking',booking.id);
    const replyUrl='https://skallstuggu-test.no/reply.html#token='+token;
    let emailsSent=true;

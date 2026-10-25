@@ -56,7 +56,7 @@ function openBookingEditor(booking) {
       <label>Fra dato<input name="start_date" type="date" required></label>
       <label>Til dato<input name="end_date" type="date" required></label>
     </div>
-    <fieldset ${booking.price_version ? "" : "hidden"}><legend>Tillegg (inkl. 25 % mva)</legend><label>Sengeklær – 300 kr/sett<input name="linen_count" type="number" min="0" max="1000" step="1"></label><label>Håndklær – 150 kr/stk<input name="towel_count" type="number" min="0" max="1000" step="1"></label><label><input name="full_cleaning" type="checkbox"> Full vask – 3 000 kr/opphold</label></fieldset>
+    <fieldset ${booking.price_version ? "" : "hidden"}><legend>Tillegg (inkl. 25 % mva)</legend><label>Sengeklær – 300 kr/sett<input name="linen_count" type="number" min="0" max="1000" step="1"></label><label>Håndklær – 150 kr/stk<input name="towel_count" type="number" min="0" max="1000" step="1"></label><label><input name="full_cleaning" type="checkbox"> Full vask – 3 000 kr/opphold</label><label><input name="basement_rooms" type="checkbox" ${booking.pricing_snapshot?.extraRooms?'':'disabled'}> Kjellerrom (pris fra lagret prisavtale)</label><label><input name="garage_rooms" type="checkbox" ${booking.pricing_snapshot?.extraRooms?'':'disabled'}> Garasjerom (pris fra lagret prisavtale)</label></fieldset>
     <p>Endringene oppdaterer bookingen og kalenderen. Bruk «Send svar til kunde» hvis du også vil varsle kunden om endringen.</p>
     <p class="booking-editor-error" role="alert"></p>
     <div class="booking-actions"><button type="submit" class="btn-success">Lagre endringer</button><button type="button" class="btn-neutral" data-close>Lukk</button></div>
@@ -66,6 +66,8 @@ function openBookingEditor(booking) {
   form.elements.namedItem("linen_count").value = booking.linen_count || 0;
   form.elements.namedItem("towel_count").value = booking.towel_count || 0;
   form.elements.namedItem("full_cleaning").checked = Boolean(booking.full_cleaning);
+  form.elements.namedItem("basement_rooms").checked=Boolean(booking.basement_rooms);
+  form.elements.namedItem("garage_rooms").checked=Boolean(booking.garage_rooms);
   let saving = false;
   dialog.querySelector("[data-close]").onclick = () => dialog.close();
   dialog.addEventListener("cancel", event => { if (saving) event.preventDefault(); });
@@ -75,8 +77,8 @@ function openBookingEditor(booking) {
     if (saving || !form.reportValidity()) return;
     const values = Object.fromEntries(new FormData(form));
     for (const key of Object.keys(values)) values[key] = values[key].trim();
-    if (booking.price_version) { values.linen_count = Number(values.linen_count); values.towel_count = Number(values.towel_count); values.full_cleaning = form.elements.namedItem("full_cleaning").checked; }
-    else { delete values.linen_count; delete values.towel_count; delete values.full_cleaning; }
+    if (booking.price_version) { values.linen_count = Number(values.linen_count); values.towel_count = Number(values.towel_count); values.full_cleaning = form.elements.namedItem("full_cleaning").checked; values.basement_rooms=form.elements.namedItem("basement_rooms").checked;values.garage_rooms=form.elements.namedItem("garage_rooms").checked; }
+    else { delete values.linen_count; delete values.towel_count; delete values.full_cleaning;delete values.basement_rooms;delete values.garage_rooms; }
     const errorBox = dialog.querySelector(".booking-editor-error");
     if (!values.name || (!isCalendarImport(booking) && !values.email)) { errorBox.textContent = "Fyll inn navn og e-post."; return; }
     if (!validBookingDates(booking, values)) { errorBox.textContent = isCalendarImport(booking) ? "Til-dato kan ikke være før fra-dato." : "Til-dato må være etter fra-dato."; return; }
@@ -100,7 +102,7 @@ function openBookingEditor(booking) {
 
 function matchBookingSnapshot(query, booking) {
   // Do not overwrite a booking changed in another admin tab since it was opened.
-  for (const key of ["status", "name", "email", "phone", "start_date", "end_date", "cancelled_at", "linen_count", "towel_count", "full_cleaning"]) {
+  for (const key of ["status", "name", "email", "phone", "start_date", "end_date", "cancelled_at", "linen_count", "towel_count", "full_cleaning", "basement_rooms", "garage_rooms"]) {
     query = booking[key] == null ? query.is(key, null) : query.eq(key, booking[key]);
   }
   return query;
@@ -121,7 +123,7 @@ async function saveBookingChanges(booking, values) {
     }
     const update = {};
     for (const key of ["name", "email", "phone", "start_date", "end_date"]) update[key] = values[key] || null;
-    for (const key of ["linen_count", "towel_count", "full_cleaning"]) if (key in values) update[key] = values[key];
+    for (const key of ["linen_count", "towel_count", "full_cleaning", "basement_rooms", "garage_rooms"]) if (key in values) update[key] = values[key];
     const { data, error } = await matchBookingSnapshot(supabaseClient.from("bookings").update(update).eq("id", booking.id), booking).select("*").maybeSingle();
     if (error) throw new Error("Kunne ikke lagre: " + error.message);
     if (!data) throw new Error("Bookingen er endret eller du mangler tilgang. Last siden på nytt før du prøver igjen.");

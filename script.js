@@ -22,7 +22,7 @@ document.getElementById('bookingForm').addEventListener('submit',async event=>{
  try{
   const q=window.getBookingQuote();
   const value=id=>document.getElementById(id).value.trim();
-  const result=await publicApi({action:'create',booking:{name:value('name'),email:value('email'),phone:value('phone'),start_date:value('start'),end_date:value('end'),message:value('customerMessage'),linen_count:q.linenCount,towel_count:q.towelCount,full_cleaning:q.cleaning,pricing_revision:q.pricingRevision}});
+  const result=await publicApi({action:'create',booking:{name:value('name'),email:value('email'),phone:value('phone'),start_date:value('start'),end_date:value('end'),message:value('customerMessage'),linen_count:q.linenCount,towel_count:q.towelCount,full_cleaning:q.cleaning,basement_rooms:q.basementRooms,garage_rooms:q.garageRooms,pricing_revision:q.pricingRevision}});
   messageBox.className='message-success';messageBox.style.display='block';messageBox.replaceChildren();
   const text=document.createElement('p');text.textContent=result.emailsSent?'Takk! Forespørselen er registrert. Du får en privat bookinglenke på e-post.':'Forespørselen er registrert, men e-post kunne ikke sendes. Ta vare på den private lenken under, eller kontakt oss på 906 88 873.';
   const link=document.createElement('a');link.href=result.replyUrl;link.textContent='Åpne din booking og samtale';messageBox.append(text,link);event.target.reset();

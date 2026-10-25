@@ -10,8 +10,14 @@ export function makeHandler({env,request=fetch}) {return async req=>{
  try {
   const body=await req.json();
   if(!Number.isSafeInteger(body.revision)||body.revision<1) return reply({error:'Ugyldig prisversjon. Last siden på nytt.'},400);
-  const settings=validateSettings(body.settings),key=env('SUPABASE_SERVICE_ROLE_KEY'),url=env('SUPABASE_URL');
+  const key=env('SUPABASE_SERVICE_ROLE_KEY'),url=env('SUPABASE_URL');
   if(!key||!url)return reply({error:'Serveroppsettet mangler.'},503);
+  if(!body.settings?.extraRooms){
+    const current=await request(url+'/rest/v1/booking_price_settings?id=eq.1&select=settings',{headers:{apikey:key,Authorization:'Bearer '+key}});
+    if(!current.ok)return reply({error:'Prisene kunne ikke hentes.'},502);
+    const rows=await current.json();body.settings={...body.settings,extraRooms:rows[0]?.settings?.extraRooms};
+  }
+  const settings=validateSettings(body.settings);
   const res=await request(`${url}/rest/v1/booking_price_settings?id=eq.1&revision=eq.${body.revision}`,{method:'PATCH',signal:AbortSignal.timeout(20000),headers:{apikey:key,Authorization:`Bearer ${key}`,'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify({settings,revision:body.revision+1,updated_at:new Date().toISOString()})});
   if(!res.ok)return reply({error:'Prisene kunne ikke lagres.'},502);
   const rows=await res.json();if(!rows.length)return reply({error:'Prisene er endret i en annen fane. Last siden på nytt før du redigerer videre.'},409);

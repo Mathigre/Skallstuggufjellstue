@@ -15,7 +15,7 @@ function render({booking:b,messages}){
  el('bookingInfo').replaceChildren();
  for(const [label,value] of [['Ankomst',date(b.start_date)],['Avreise',date(b.end_date)],['Bestilt',date(b.created_at)],['Totalpris inkl. mva',b.booking_total_ore==null?'Ikke fastsatt':new Intl.NumberFormat('nb-NO',{style:'currency',currency:'NOK',maximumFractionDigits:0}).format(b.booking_total_ore/100)]]){
  const box=document.createElement('div');box.className='detail';const l=document.createElement('span');l.textContent=label;const v=document.createElement('strong');v.textContent=value;box.append(l,v);el('bookingInfo').append(box);}
- el('extras').textContent=[Number(b.linen_count||0)+' sett sengetøy',Number(b.towel_count||0)+' håndklær',b.full_cleaning?'Sluttrengjøring bestilt':'Sluttrengjøring ikke bestilt'].join(' · ');
+ el('extras').textContent=[Number(b.linen_count||0)+' sett sengetøy',Number(b.towel_count||0)+' håndklær',b.full_cleaning?'Sluttrengjøring bestilt':'Sluttrengjøring ikke bestilt',b.basement_rooms?'Kjellerrom bestilt':null,b.garage_rooms?'Garasjerom bestilt':null].filter(Boolean).join(' · ');
  el('bookingMessage').textContent=b.message?'Din forespørsel: '+b.message:'';
  el('messages').replaceChildren();
  for(const m of messages||[]){const box=document.createElement('div');box.className='message '+(m.sender==='admin'?'admin':'customer');const meta=document.createElement('div');meta.className='meta';meta.textContent=(m.sender==='admin'?'Skallstuggu':'Deg')+' · '+new Date(m.created_at).toLocaleString('nb-NO',{timeZone:'Europe/Oslo'});const text=document.createElement('div');text.textContent=m.message;box.append(meta,text);el('messages').append(box);}
