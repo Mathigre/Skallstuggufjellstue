@@ -71,7 +71,7 @@ Eier har bekreftet 24 soverom og 56 sengeplasser: 3 dobbeltrom, 13 enkeltrom, 6 
 
 Det finnes dusjer og garderober, og nettstedet oppgir en tilrettelagt dusj. Det er kjøkken- og serveringsutstyr, kjølerom/fryser og flere stekeovner. Kjøkkenet er beskrevet som egnet for arrangementer/servering for opptil 80 personer. Kjeller-/seminarlokalet har projektor/whiteboard. Oppdatert eieropplysning angir kjøkkenkapasitet til 80 personer; avklar kapasitet for det konkrete arrangementet. Kapasitet kan avhenge av oppsett, rom og arrangement; be gjesten avklare med Skallstuggu.
 
-Bare hele hytta leies ut. Ordinær etasje inngår; kjelleren koster ekstra. Sluttrengjøring kan bestilles. Gjesten skal følge oppdaterte leievilkår og bookingside; ikke gi bindende tolkning av avtalevilkår.
+Bare hele hytta leies ut. Ordinær leie gjelder hovedetasjen. Soverom i kjelleren og garasjebygget brukes kun etter avtale og koster ekstra; pris og tilgjengelighet må avklares med Skallstuggu. Kjellerstue er også et tillegg. Sluttrengjøring kan bestilles. Gjesten skal følge oppdaterte leievilkår og bookingside; ikke gi bindende tolkning av avtalevilkår.
 
 Det kan være mulig å leie glampingtelt om sommeren. Tilgjengelighet, sesong, antall telt, fasiliteter og pris må bekreftes med Skallstuggu før det loves.
 
@@ -174,3 +174,6 @@ Offisielle/primære og lokale kilder brukt til denne kunnskapen (lest 22. oktobe
 - Brønnøysundregistrene, søk foretak på org.nr. 919472669: https://virksomhet.brreg.no/nb/oppslag/enheter/919472669
 
 Oppdater denne kunnskapsbasen når Skallstuggu eller relevante offentlige kilder endres. Dette er ikke et automatisk sanntidsoppslag av turforhold eller virksomhetsroller.
+
+## Soveromsoversikter og rom som koster ekstra
+Oppdatert av eier 25. oktober 2026: Hovedetasjen har 9 soverom og 39 sengeplasser. Kjelleren har 5 enkeltrom og 2 dobbeltrom, til sammen 9 sengeplasser. Garasjebygget har 8 enkeltrom og 8 sengeplasser. Soverom i kjelleren og garasjebygget brukes kun etter avtale og koster ekstra. De inngår ikke i ordinær leie eller automatisk i prisberegningen for hovedetasjen. Ikke oppgi pris eller lov tilgjengelighet for disse tilleggsrommene; be gjesten kontakte Skallstuggu. Se tegninger og bygningenes plassering på https://skallstuggu-test.no/lokaler.html#soveromsoversikt .
