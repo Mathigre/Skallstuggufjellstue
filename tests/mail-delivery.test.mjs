@@ -2,17 +2,19 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {processJobs,handler} from '../supabase/functions/mail-center/index.ts';
 const jobId='d7097c57-3be8-4c36-b478-a7caf2baf41d',threadId='a71e91b0-b91b-4bbc-b0cd-aad8bd2e4a4b',messageId='a030230b-5951-4ff6-a541-55ea03e1c99c';
-async function withFixture(run,{resendStatus=200,kind='reply'}={}){
+async function withFixture(run,{resendStatus=200,kind='reply',authenticated=false}={}){
  const oldFetch=globalThis.fetch,oldDeno=globalThis.Deno,calls=[];
  globalThis.Deno={env:{get:name=>({SUPABASE_URL:'https://project.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'service-test-key',RESEND_API_KEY:'resend-test-key'}[name]||'')}};
  globalThis.fetch=async(url,options={})=>{
   const body=options.body?JSON.parse(options.body):null;calls.push({url:String(url),options,body});
-  if(String(url).endsWith('/rpc/mail_claim_jobs'))return Response.json([{id:jobId,message_id:messageId,kind,attempts:1,created_at:new Date().toISOString()}]);
-  if(String(url).includes('/mail_messages?'))return Response.json([{id:messageId,thread_id:threadId,body:'Et svar',reply_through_at:'2026-10-23T10:00:00Z'}]);
+  if((String(url).endsWith('/rpc/mail_claim_jobs')||String(url).endsWith('/rpc/mail_claim_reply')))return Response.json([{id:jobId,message_id:messageId,kind,attempts:1,created_at:new Date().toISOString()}]);
+  if(String(url).includes('/mail_messages?'))return Response.json([{id:messageId,thread_id:threadId,body:'Et svar',delivery_state:'sent',reply_through_at:'2026-10-23T10:00:00Z'}]);
   if(String(url).includes('/mail_threads?'))return Response.json([{id:threadId,contact_email:'real-customer@example.test',subject:'Spørsmål'}]);
   if(String(url)==='https://skallstuggu-test.no/images/Logo.png')return new Response(new Uint8Array([137,80,78,71,13,10,26,10]),{headers:{'Content-Type':'image/png'}});
   if(String(url)==='https://api.resend.com/emails')return Response.json(resendStatus===200?{id:'provider-123'}:{error:'temporary'}, {status:resendStatus});
-  if(String(url).includes('/auth/v1/user'))return Response.json({error:'unauthorized'},{status:401});
+  if(String(url).includes('/rpc/mail_ingest'))return Response.json({message_id:messageId});
+  if(String(url).includes('/admin_users?'))return Response.json(authenticated?[{user_id:threadId}]:[]);
+  if(String(url).includes('/auth/v1/user'))return Response.json(authenticated?{id:threadId}:{error:'unauthorized'},{status:authenticated?200:401});
   if(String(url).includes('/rest/v1/'))return Response.json([]);
   throw Error('Unexpected network request');
  };
@@ -49,4 +51,8 @@ test('owner reply uses branded HTML, inline logo and working document URLs',asyn
  const html=replyHtml({name:'Anne <Test>',message:'Det koster 30 000 kr.\n<script>unsafe</script>'});
  assert.ok(html.includes('Anne &lt;Test&gt;'));assert.ok(html.includes('&lt;script&gt;'));assert.ok(!html.includes('<script>'));assert.ok(!html.includes('automatisk bekreftelse'));assert.ok(html.includes('/dokumenter/Personvern_Skallstuggu.pdf'));assert.ok(html.includes('/dokumenter/Leiebetingelser_Skallstuggu.pdf'));
  await withFixture(async calls=>{await processJobs();const sent=calls.find(c=>c.url==='https://api.resend.com/emails');assert.ok(sent.body.html.includes('cid:skallstuggu-logo'));assert.equal(sent.body.attachments[0].content_id,'skallstuggu-logo');assert.deepEqual(sent.body.to,['real-customer@example.test']);assert.ok(sent.body.text.includes('Et svar'));});
+});
+
+test('Send svar waits for its own job and returns confirmed send status without refresh',async()=>{
+ await withFixture(async calls=>{const response=await handler(new Request('https://project.supabase.co/functions/v1/mail-center',{method:'POST',headers:{Origin:'https://skallstuggu-test.no',Authorization:'Bearer fixture','Content-Type':'application/json'},body:JSON.stringify({action:'reply',thread_id:threadId,request_id:jobId,message:'Et nytt svar'})}));const result=await response.json();assert.equal(response.status,200);assert.equal(result.delivery_state,'sent');assert.ok(calls.some(c=>c.url.endsWith('/rpc/mail_claim_reply')&&c.body.p_message_id===messageId));assert.ok(calls.some(c=>c.url.endsWith('/rpc/mail_complete_job')));},{authenticated:true});
 });

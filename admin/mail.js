@@ -36,8 +36,29 @@
    $('replyForm').onsubmit=async event=>{
     event.preventDefault();const textarea=$('replyText'),text=textarea.value.trim();if(!text)return;
     const button=event.target.querySelector('button[type=submit]');button.disabled=true;
-    try{await api({action:'reply',thread_id:id,request_id:textarea.dataset.requestId,message:text});drafts.delete(id);textarea.value='';textarea.dataset.requestId=crypto.randomUUID();$('replyStatus').textContent='Svaret er lagret og lagt i sendekø. Samtalen blir besvart når sendingen er bekreftet. Trykk «Oppdater samtalen» for sendestatus.';}
-    catch(e){$('replyStatus').textContent=e.message;}finally{button.disabled=false;}
+    try{
+     const result=await api({action:'reply',thread_id:id,request_id:textarea.dataset.requestId,message:text});
+     drafts.delete(id);textarea.value='';textarea.dataset.requestId=crypto.randomUUID();
+     const status=$('replyStatus');
+     const show=state=>{status.textContent=state==='sent'?'Sendt – e-posttjenesten har tatt imot svaret.':state==='failed'?'Sendingen mislyktes. Oppdater samtalen for å prøve på nytt.':state==='uncertain'?'Sendestatus må kontrolleres før du sender på nytt.':'Svaret er lagret. Venter på bekreftelse fra e-posttjenesten …';};
+     show(result.delivery_state);
+     if(result.delivery_state==='sent'){await openThread(id);if(selected===id)$('replyStatus').textContent='Sendt – e-posttjenesten har tatt imot svaret.';}
+     else if(result.message_id){
+      const watch=async()=>{
+       for(let attempt=0;attempt<20;attempt++){
+        await new Promise(resolve=>setTimeout(resolve,3000));
+        if(selected!==id||!status.isConnected)return;
+        try{const delivery=await api({action:'delivery',thread_id:id,message_id:result.message_id});show(delivery.delivery_state);
+         if(['sent','failed','uncertain'].includes(delivery.delivery_state)){
+          if(!$('replyText').value){await openThread(id);if(selected===id)$('replyStatus').textContent=status.textContent;}return;
+         }
+        }catch{status.textContent='Svaret er lagret, men sendestatus kunne ikke hentes. Ikke send samme svar på nytt.';return;}
+       }
+       if(status.isConnected)status.textContent='Svaret venter fortsatt i sendekø. Sending prøves automatisk igjen; ikke send samme svar på nytt.';
+      };watch();
+     }
+    }catch(e){$('replyStatus').textContent=e.message;}finally{button.disabled=false;}
+
    };
    await loadList();
   }catch(e){feedback(e.message);}

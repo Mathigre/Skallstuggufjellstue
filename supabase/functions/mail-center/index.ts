@@ -24,8 +24,8 @@ async function doSync(){
  };
  return syncGmail({db,gmail,verifyEcho});
 }
-export async function processJobs(){
- const jobs=await db('rpc/mail_claim_jobs','POST',{});
+export async function processJobs(messageId=null){
+ const jobs=await db(messageId?'rpc/mail_claim_reply':'rpc/mail_claim_jobs','POST',messageId?{p_message_id:messageId}:{});
  async function one(job){
   const [message]=await db('mail_messages?id=eq.'+job.message_id+'&select=*');
   const [thread]=await db('mail_threads?id=eq.'+message.thread_id+'&select=*');
@@ -139,6 +139,12 @@ export async function handler(req){
    const at=thread.last_incoming_at||new Date().toISOString();await db('mail_threads?id=eq.'+thread.id,'PATCH',{read_at:at});
    return reply({thread,messages:messages.reverse(),has_more:messages.length===100});
   }
+  if(body.action==='delivery'){
+   if(!UUID.test(body.message_id||''))throw new MailError('Ugyldig melding.');
+   const [message]=await db('mail_messages?id=eq.'+body.message_id+'&thread_id=eq.'+thread.id+'&select=id,delivery_state');
+   if(!message)throw new MailError('Meldingen finnes ikke.',404);
+   return reply(message);
+  }
   if(body.action==='unread'){await db('mail_threads?id=eq.'+thread.id,'PATCH',{read_at:null});return reply({success:true});}
   if(body.action==='retry'){
    if(!UUID.test(body.message_id||''))throw new MailError('Ugyldig melding.');
@@ -153,7 +159,11 @@ export async function handler(req){
    const text=typeof body.message==='string'?body.message.trim():'';
    if(!UUID.test(body.request_id||'')||text.length<2||text.length>20000)throw new MailError('Skriv et svar på mellom 2 og 20 000 tegn.');
    const result=await db('rpc/mail_ingest','POST',{p:{thread_id:thread.id,provider_key:'reply:'+body.request_id,source:thread.source,direction:'outgoing',sender_name:'Skallstuggu',sender_email:MAILBOX,contact_email:thread.contact_email,subject:thread.subject,body:text,received_at:new Date().toISOString(),delivery_state:'queued',reply_through_at:thread.last_incoming_at}});
-   background(processJobs());return reply({queued:true,message_id:result.message_id,recipient:thread.contact_email},202);
+   const [stored]=await db('mail_messages?provider_key=eq.'+encodeURIComponent('reply:'+body.request_id)+'&thread_id=eq.'+thread.id+'&select=id,delivery_state');
+   const messageId=result.message_id||stored?.id;
+   try{if(messageId)await processJobs(messageId);}catch{console.warn('mail_immediate_send_deferred');}
+   const [delivery]=messageId?await db('mail_messages?id=eq.'+messageId+'&select=delivery_state'):[];
+   return reply({queued:delivery?.delivery_state!=='sent',delivery_state:delivery?.delivery_state||'queued',message_id:messageId,recipient:thread.contact_email},delivery?.delivery_state==='sent'?200:202);
   }
   throw new MailError('Ukjent handling.');
  }catch(e){const status=e.status===403?403:e instanceof MailError?e.status:500;return reply({error:status===500?'Tjenesten svarte ikke. Meldingen er ikke bekreftet lagret; prøv igjen eller ring 906 88 873.':e.message},status);}
