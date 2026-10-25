@@ -43,3 +43,10 @@ test('acknowledgement includes booking branding and escaped customer content',as
  assert.ok(html.includes('/leiebetingelser/logo.png'));assert.ok(html.includes('#8B4A2B'));assert.ok(html.includes('Din melding til oss:'));assert.ok(html.includes('mailto:post@skallstuggu.no'));assert.ok(!html.includes('Se din booking'));assert.ok(html.includes('&lt;script&gt;'));assert.ok(!html.includes('<script>'));assert.ok(!html.includes('<img src=x'));
  await withFixture(async calls=>{await processJobs();const sent=calls.find(c=>c.url==='https://api.resend.com/emails');assert.ok(sent.body.html.includes('Takk for din henvendelse'));assert.ok(sent.body.text);assert.ok(sent.body.html.includes('cid:skallstuggu-logo'));assert.equal(sent.body.attachments[0].content_id,'skallstuggu-logo');},{kind:'acknowledgement'});
 });
+
+test('owner reply uses branded HTML, inline logo and working document URLs',async()=>{
+ const {replyHtml}=await import('../supabase/functions/mail-center/email-template.ts');
+ const html=replyHtml({name:'Anne <Test>',message:'Det koster 30 000 kr.\n<script>unsafe</script>'});
+ assert.ok(html.includes('Anne &lt;Test&gt;'));assert.ok(html.includes('&lt;script&gt;'));assert.ok(!html.includes('<script>'));assert.ok(!html.includes('automatisk bekreftelse'));assert.ok(html.includes('/dokumenter/Personvern_Skallstuggu.pdf'));assert.ok(html.includes('/dokumenter/Leiebetingelser_Skallstuggu.pdf'));
+ await withFixture(async calls=>{await processJobs();const sent=calls.find(c=>c.url==='https://api.resend.com/emails');assert.ok(sent.body.html.includes('cid:skallstuggu-logo'));assert.equal(sent.body.attachments[0].content_id,'skallstuggu-logo');assert.deepEqual(sent.body.to,['real-customer@example.test']);assert.ok(sent.body.text.includes('Et svar'));});
+});

@@ -52,6 +52,10 @@ function getEmailSignature(replyEmail) {
         </a>
       </p>
 
+      <p style="margin:18px 0;font-size:13px;">
+        <a href="https://skallstuggu-test.no/dokumenter/Leiebetingelser_Skallstuggu.pdf" style="color:${MAIN_COLOR}">Leievilkår (PDF)</a> ·
+        <a href="https://skallstuggu-test.no/dokumenter/Personvern_Skallstuggu.pdf" style="color:${MAIN_COLOR}">Personvern (PDF)</a>
+      </p>
       <div style="margin-top: 20px;">
         <img
           src="${LOGO_URL}"
@@ -79,8 +83,12 @@ export function acknowledgementHtml({name,message,replyEmail}) {
 }
 
 let inlineLogo;
-export async function acknowledgementContent(details) {
- const html=acknowledgementHtml(details);
+export function acknowledgementContent(details) { return withInlineLogo(acknowledgementHtml(details)); }
+export function replyHtml({name,message}) {
+ return `<!DOCTYPE html><html lang="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head><body style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.65;color:#333;max-width:620px;margin:0 auto;padding:30px 20px;background:#ffffff"><h2 style="color:${MAIN_COLOR}">Hei${name?' '+escapeHtml(name):''},</h2><div style="white-space:pre-wrap;overflow-wrap:anywhere">${escapeHtml(message)}</div>${getEmailSignature('post@skallstuggu.no')}</body></html>`;
+}
+export function replyContent(details) { return withInlineLogo(replyHtml(details)); }
+async function withInlineLogo(html) {
  try {
   inlineLogo ||= fetch('https://skallstuggu-test.no/images/Logo.png',{signal:AbortSignal.timeout(5000)}).then(async response=>{
    if(!response.ok||!response.headers.get('content-type')?.startsWith('image/png'))throw Error('logo_unavailable');
