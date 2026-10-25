@@ -105,7 +105,7 @@ export async function handler(req){
   const user=await requireAdmin(req,env);
   if(body.action==='list'){
    const filter=['new','unanswered','answered','all'].includes(body.filter)?body.filter:'unanswered';
-   return reply(await db('rpc/mail_list','POST',{p_filter:filter,p_search:String(body.search||'').slice(0,200),p_offset:Number.isInteger(body.offset)?body.offset:0}));
+   return reply(await db('rpc/mail_list_categorized','POST',{p_category:['customer','newsletter','review'].includes(body.category)?body.category:'all',p_filter:filter,p_search:String(body.search||'').slice(0,200),p_offset:Number.isInteger(body.offset)?body.offset:0}));
   }
   if(body.action==='status'){
    const [connection]=await db('mail_connection?id=eq.true&select=mailbox,enabled,backfill_complete,last_sync_at,last_error');
@@ -128,6 +128,11 @@ export async function handler(req){
   }
   if(!UUID.test(body.thread_id||''))throw new MailError('Ugyldig samtale.');
   const [thread]=await db('mail_threads?id=eq.'+body.thread_id+'&select=*');if(!thread)throw new MailError('Samtalen finnes ikke.',404);
+  if(body.action==='categorize'){
+   if(!['customer','newsletter','review'].includes(body.category))throw new MailError('Ugyldig innboks.');
+   await db('mail_threads?id=eq.'+thread.id,'PATCH',{category:body.category,category_manual:true,category_reason:'Valgt manuelt av eieren'});
+   return reply({success:true});
+  }
   if(body.action==='thread'){
    const offset=Number.isInteger(body.offset)?Math.max(0,Math.min(body.offset,100000)):0;
    const messages=await db('mail_messages?thread_id=eq.'+thread.id+'&select=*&order=received_at.desc,id&limit=100&offset='+offset);
