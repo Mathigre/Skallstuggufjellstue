@@ -121,7 +121,23 @@
 .room-plan-image:focus-visible,.room-plan-open:focus-visible{outline:3px solid #8b4a2b;outline-offset:4px}
 @media(max-width:680px){.room-plan-grid{grid-template-columns:1fr;gap:18px}.room-plan-card{padding:16px}.room-plan-image{min-height:0}.room-plan-notice{padding:16px}.room-plan-open{min-height:44px;box-sizing:border-box}.room-overviews{margin:36px 0}}
 </style>
-</head>
+<style>
+.two-columns{align-items:start}
+.venue-photos{margin:35px 0 48px}
+.venue-photos h2{color:#8b4a2b}
+.venue-photos .gallery{margin-top:20px}
+.price-table{width:100%;border-collapse:collapse;font-size:.96rem}
+.price-table th,.price-table td{padding:10px 0;border-bottom:1px solid #e7dccb;text-align:left;vertical-align:top}
+.price-table td:last-child,.price-table th:last-child{text-align:right;white-space:nowrap}
+.price-table caption{text-align:left;color:#6b5849;font-size:.88rem;padding-bottom:8px}
+.price-seasons{margin:18px 0;border:1px solid #d8c7b4;border-radius:8px;padding:12px}
+.price-seasons summary{font-weight:600;cursor:pointer;color:#8b4a2b}
+.price-seasons .price-table{margin-top:12px;font-size:.84rem}
+.price-seasons .price-table th:not(:first-child),.price-seasons .price-table td:not(:first-child){text-align:right;white-space:nowrap;padding-left:8px}
+.price-seasons small{display:block;color:#6b5849;margin-top:4px}
+.price-note{font-size:.88rem;color:#6b5849;line-height:1.55}
+@media(max-width:480px){.price-seasons{padding:10px 8px}.price-seasons .price-table{font-size:.76rem}.price-seasons .price-table th,.price-seasons .price-table td{padding-top:8px;padding-bottom:8px}}
+</style></head>
 <body>
 
 <!-- NAVBAR -->
@@ -152,10 +168,22 @@
     Perfekt for kurs, arrangementer, firmafester og større grupper.
   </p>
 
+<section class="venue-photos" aria-labelledby="venuePhotosTitle"><h2 id="venuePhotosTitle">Se lokalene</h2><p>Oppholdsrom, kjøkken, spiseplass og soverom på Skallstuggu.</p>  <!-- BILDER -->
+  <div class="gallery">
+    <img src="images/lokaler.jpeg" alt="Lokaler Skallstuggu">
+    <img src="images/lokaler1.jpeg" alt="Interiør Skallstuggu">
+    <img src="images/lokaler2.jpeg" alt="Spiseområde Skallstuggu">
+    <img src="images/lokaler3.jpeg" alt="Kjøkken Skallstuggu">
+    <img src="images/lokaler4.jpeg" alt="Soverom Skallstuggu">
+    <img src="images/lokaler5.jpeg" alt="Soverom Skallstuggu">
+    <img src="images/lokaler6.jpeg" alt="Fasiliteter Skallstuggu">
+    <img src="images/soverom1.jpeg" alt="Soverom Skallstuggu">
+    <img src="images/soverom.jpeg" alt="Soverom Skallstuggu">
+  </div></section>
   <div class="two-columns">
     <!-- VENSTRE KOLONNE -->
     <div class="box">
-      <h2 style="color: #8B4A2B;">Priser</h2>
+      <h2 style="color: #8B4A2B;">Priser per natt</h2>
       <div id="publishedPrices" aria-live="polite"><p>Henter priser …</p></div>
       <noscript><p>Slå på JavaScript eller kontakt oss for gjeldende priser.</p></noscript>
       <p><a href="booking.html">Velg datoer og se totalpris</a></p>
@@ -233,18 +261,7 @@
     </a>
   </div>
 
-  <!-- BILDER -->
-  <div class="gallery">
-    <img src="images/lokaler.jpeg" alt="Lokaler Skallstuggu">
-    <img src="images/lokaler1.jpeg" alt="Interiør Skallstuggu">
-    <img src="images/lokaler2.jpeg" alt="Spiseområde Skallstuggu">
-    <img src="images/lokaler3.jpeg" alt="Kjøkken Skallstuggu">
-    <img src="images/lokaler4.jpeg" alt="Soverom Skallstuggu">
-    <img src="images/lokaler5.jpeg" alt="Soverom Skallstuggu">
-    <img src="images/lokaler6.jpeg" alt="Fasiliteter Skallstuggu">
-    <img src="images/soverom1.jpeg" alt="Soverom Skallstuggu">
-    <img src="images/soverom.jpeg" alt="Soverom Skallstuggu">
-  </div>
+
 </section>
 
 <!-- FOOTER -->
@@ -321,29 +338,30 @@ async function loadPrices() {
     if (rows.length !== 1) throw new Error('Missing price settings');
     const settings = validateSettings(rows[0].settings);
     const fragment = document.createDocumentFragment();
-    paragraph(fragment, 'Grunnpris søndag–torsdag: ' + formatMoney(settings.weekday) + ' per natt.');
-    paragraph(fragment, 'Grunnpris fredag–lørdag: ' + formatMoney(settings.weekend) + ' per natt.');
-    paragraph(fragment, 'Alle priser inkluderer 25 % mva. Sesongpris erstatter grunnprisen for netter innenfor perioden.');
+    const makeTable = (headers, rows, caption) => {
+      const table=document.createElement('table');table.className='price-table';
+      if(caption){const c=document.createElement('caption');c.textContent=caption;table.append(c);}
+      const head=document.createElement('thead'),tr=document.createElement('tr');
+      for(const label of headers){const cell=document.createElement('th');cell.scope='col';cell.textContent=label;tr.append(cell);}head.append(tr);table.append(head);
+      const body=document.createElement('tbody');
+      for(const values of rows){const row=document.createElement('tr');for(const value of values){const cell=document.createElement('td');cell.textContent=value;row.append(cell);}body.append(row);}
+      table.append(body);return table;
+    };
+    fragment.append(makeTable(['Netter','Pris'],[['Søndag–torsdag',formatMoney(settings.weekday)],['Fredag–lørdag',formatMoney(settings.weekend)]],'Grunnpris for hovedetasjen'));
+    const note=document.createElement('p');note.className='price-note';note.textContent='Pris per natt, inkl. mva. Sesongpriser kan gjelde.';fragment.append(note);
     const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Oslo' }).format(new Date());
-    const date = value => new Intl.DateTimeFormat('nb-NO', { timeZone: 'UTC' }).format(new Date(value + 'T00:00:00Z'));
+    const date = value => new Intl.DateTimeFormat('nb-NO', { timeZone: 'UTC',day:'numeric',month:'numeric',year:'2-digit' }).format(new Date(value + 'T00:00:00Z'));
     const seasons = settings.seasons.filter(season => season.end >= today);
-    if (seasons.length) {
-      const heading = document.createElement('h3');
-      heading.textContent = 'Sesongpriser';
-      fragment.appendChild(heading);
-      for (const season of seasons) {
-        const title = document.createElement('strong');
-        title.textContent = season.name + ' (' + date(season.start) + '–' + date(season.end) + ')';
-        fragment.appendChild(title);
-        paragraph(fragment, 'Søndag–torsdag: ' + formatMoney(season.weekday) + ' per natt. Fredag–lørdag: ' + formatMoney(season.weekend) + ' per natt.');
-      }
+    if(seasons.length){
+      const details=document.createElement('details');details.className='price-seasons';
+      const summary=document.createElement('summary');summary.textContent='Vis sesongpriser';details.append(summary);
+      const table=makeTable(['Periode','Søn.–tor.','Fre.–lør.'],seasons.map(s=>[s.name,formatMoney(s.weekday),formatMoney(s.weekend)]));
+      const cells=table.querySelectorAll('tbody tr');
+      seasons.forEach((s,i)=>{const small=document.createElement('small');small.textContent=date(s.start)+'–'+date(s.end);cells[i].firstElementChild.append(small);});
+      details.append(table);fragment.append(details);
     }
-    const heading = document.createElement('h3');
-    heading.textContent = 'Tillegg';
-    fragment.appendChild(heading);
-    paragraph(fragment, 'Sengeklær: ' + formatMoney(RATES.linen) + ' per sett.');
-    paragraph(fragment, 'Håndklær: ' + formatMoney(RATES.towel) + ' per håndkle.');
-    paragraph(fragment, 'Sluttrengjøring: ' + formatMoney(RATES.cleaning) + ' per opphold.');
+    const heading=document.createElement('h3');heading.textContent='Valgfrie tillegg';fragment.append(heading);
+    fragment.append(makeTable(['Tillegg','Pris'],[['Sengeklær / sett',formatMoney(RATES.linen)],['Håndkle / stk.',formatMoney(RATES.towel)],['Sluttrengjøring / opphold',formatMoney(RATES.cleaning)]]));
     prices.replaceChildren(fragment);
   } catch {
     prices.replaceChildren();
