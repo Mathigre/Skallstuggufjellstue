@@ -177,3 +177,6 @@ Oppdater denne kunnskapsbasen når Skallstuggu eller relevante offentlige kilder
 
 ## Soveromsoversikter og tilleggsrom
 Hovedetasjen har 9 soverom og 39 sengeplasser. Kjelleren har 5 enkeltrom og 2 dobbeltrom (9 sengeplasser). Garasjebygget har 8 enkeltrom (8 sengeplasser). Soverom i kjeller og garasjebygg kan velges direkte som betalte tillegg i bookingskjemaet og belastes én gang per opphold. Prisene er redigerbare i admin og skal hentes fra booking_price_settings.settings.extraRooms; ikke anta at gamle priser fortsatt gjelder. Tilleggene inngår i bookingens total når de er valgt. Se tegningene på https://skallstuggu-test.no/lokaler.html#soveromsoversikt .
+
+## Ekstra areal og soverom
+Eier presiserer: Det kan leies ekstra areal og soverom, men dette koster ekstra. Ordinær leie inkluderer ikke automatisk alle arealer eller alle soverom. Kjellerrom og garasjerom er valgbare tillegg i bookingskjemaet og belastes per opphold. Andre tilleggsarealer må avklares særskilt med Skallstuggu og koster også ekstra. Pris for kjellerrom gjelder soverommene og må ikke presenteres som pris for kjellerstue, møterom eller andre arealer. Gjeldende romtillegg hentes fra adminprisene. Ikke finn på pris for andre arealer.

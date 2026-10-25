@@ -104,7 +104,7 @@ export const faqTopics = [
   },
   {
     "id": "senger",
-    "answer": "Skallstuggu har 56 sengeplasser fordelt på 24 soverom: 3 dobbeltrom, 13 enkeltrom, 6 firesengsrom, 1 seksengsrom og 1 sjusengsrom.",
+    "answer": "Skallstuggu har totalt 56 sengeplasser i 24 soverom. Hovedetasjen har 39 sengeplasser; kjelleren har 9 og garasjebygget 8. Soverom i kjelleren og garasjebygget leies som betalte tillegg i bookingskjemaet.",
     "questions": [
       "Hvor mange sengeplasser er det?",
       "Hvor mange kan overnatte?",
@@ -121,7 +121,7 @@ export const faqTopics = [
   },
   {
     "id": "rom",
-    "answer": "Hytta har 24 soverom: 3 dobbeltrom, 13 enkeltrom, 6 firesengsrom, 1 seksengsrom og 1 sjusengsrom. Totalt er det 56 sengeplasser.",
+    "answer": "Skallstuggu har totalt 24 soverom: 9 i hovedetasjen, 7 i kjelleren og 8 i garasjebygget. Rom i kjelleren og garasjebygget koster ekstra og kan velges i bookingskjemaet. Samlet kapasitet er 56 sengeplasser.",
     "questions": [
       "Hvor mange soverom er det?",
       "Har dere 22 rom?",
@@ -138,7 +138,7 @@ export const faqTopics = [
   },
   {
     "id": "helhytte",
-    "answer": "Bare hele hytta leies ut. Vanlig leie omfatter hele den ordinære etasjen; kjelleren koster ekstra. Se nettsiden for priser.",
+    "answer": "Ordinær leie gjelder hele hovedetasjen. Ekstra areal og soverom kan leies mot tillegg. Kjellerrom og soverom i garasjebygget kan velges i bookingskjemaet: https://skallstuggu-test.no/booking.html. Andre ekstra arealer avklares med Skallstuggu og koster ekstra.",
     "questions": [
       "Kan vi leie hele hytta?",
       "Leies hele Skallstuggu ut?",
@@ -189,7 +189,7 @@ export const faqTopics = [
   },
   {
     "id": "seminar",
-    "answer": "Skallstuggu omtaler kurs, seminar og firmasamlinger, med kjeller-/seminarlokale og projektor/whiteboard. Avklar kapasitet, utstyr og oppsett med Skallstuggu.",
+    "answer": "Skallstuggu omtaler kurs, seminar og firmasamlinger, med kjeller-/seminarlokale og projektor/whiteboard. Avklar kapasitet, utstyr og oppsett med Skallstuggu. Ekstra areal og soverom kan leies, men koster ekstra.",
     "questions": [
       "Kan vi ha seminar?",
       "Er det møterom?",

@@ -38,7 +38,7 @@ Du er et AI-program, aldri et menneske, en ansatt, eier eller resepsjonist. Du h
 Følgende eierbekreftede opplysninger går foran eldre nettstedutdrag:\nDisse oppdaterte eieropplysningene går foran eldre nettsidetekster ved motstrid.
 - Innsjekk kl. 12.00 og utsjekk kl. 12.00. Andre tider kan avtales i spesielle tilfeller, men må bekreftes.
 - Tilgang via nøkkelboks. Kode og praktiske detaljer avtales direkte med Skallstuggu; ikke publiser koder i chatten.
-- Bare hele hytta leies ut. Vanlig leie omfatter hele den ordinære etasjen. Kjelleren koster ekstra; se nettsidens priser.
+- Ordinær leie gjelder hele hovedetasjen med 9 soverom og 39 sengeplasser. Ekstra areal og soverom kan leies, men koster ekstra. Kjellerrom (9 sengeplasser) og garasjerom (8 sengeplasser) velges som tillegg i bookingskjemaet og belastes én gang per opphold. Prisene styres fra admin; aldri lov tilleggsarealer gratis eller anta at all kjellerbruk inngår i prisen for kjellerrom. Andre ekstra arealer avklares med Skallstuggu.
 - Eier har bekreftet 24 soverom og 56 sengeplasser: 3 dobbeltrom, 13 enkeltrom, 6 firesengsrom, 1 seksengsrom og 1 sjusengsrom. Dette erstatter tidligere tall på 22 rom/51 plasser.
 - Gjester kan ta med eget sengetøy og håndklær eller leie dette.
 - Gjester skal vaske og rydde alt selv, med mindre sluttrengjøring bestilles mot tillegg. Se nettsiden for gjeldende priser.
@@ -69,6 +69,26 @@ const iso=date=>date.toISOString().slice(0,10);
 const weekdayName=date=>new Intl.DateTimeFormat('nb-NO',{weekday:'long',timeZone:'Europe/Oslo'}).format(date);
 const fullDate=date=>new Intl.DateTimeFormat('nb-NO',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'Europe/Oslo'}).format(date);
 async function supabaseJson(path,body) { const response=await fetch(SUPABASE_URL+path,{method:body?'POST':'GET',headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY,...(body?{'Content-Type':'application/json',Origin:'https://skallstuggu-test.no'}:{})},...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(body ? 15000 : 6000)}); if(!response.ok)throw new Error('Public booking data unavailable'); return response.json(); }
+
+export async function extraRentalReply(question) {
+  if(!/kjeller|garasje|ekstra\s*(?:areal|rom|soverom|plass)|flere\s*(?:rom|soverom)|tilleggsrom/iu.test(question))return null;
+  if(!/leie|leies|leier|bestill|book|pris|koster|kostnad|areal|soverom|kjellerrom|ekstra|inkludert|følger|sengeplass|garasjerom|tillegg/iu.test(question))return null;
+  const parts=['Ekstra areal og soverom kan leies, men koster ekstra. Kjellerrom og soverom i garasjebygget kan velges som tillegg i bookingskjemaet.'];
+  const roomPrice=/pris|koster|kostnad|hvor mye/iu.test(question);
+  const otherArea=/kjellerstu|seminar|møterom|selskapslokale/iu.test(question);
+  if(roomPrice&&!otherArea&&/kjeller|garasje/iu.test(question)){
+    try{
+      const rows=await supabaseJson('/rest/v1/booking_price_settings?select=revision,settings&id=eq.1');
+      const rates=rows?.[0]?.settings?.extraRooms;
+      if(!rates||!Number.isSafeInteger(rates.basement)||!Number.isSafeInteger(rates.garage))throw Error('Room rates unavailable');
+      if(/kjeller/iu.test(question))parts.push('Soverom i kjelleren: '+formatMoney(rates.basement)+' ekstra per opphold.');
+      if(/garasje/iu.test(question))parts.push('Soverom i garasjebygget: '+formatMoney(rates.garage)+' ekstra per opphold.');
+    }catch{parts.push('Jeg får ikke hentet gjeldende priser nå. Se bookingskjemaet for oppdaterte tillegg.');}
+  }
+  parts.push('Andre ekstra arealer avklares særskilt med Skallstuggu og koster også ekstra. Bestilling: https://skallstuggu-test.no/booking.html.');
+  return parts.join(' ');
+}
+
 function selectKnowledge(pages,query) { const terms=new Set(String(query).toLowerCase().match(/[a-zæøå0-9]{3,}/g)||[]); return pages.map(page=>{const words=new Set((String(page.title)+' '+String(page.path)+' '+String(page.text)).toLowerCase().match(/[a-zæøå0-9]{3,}/g)||[]);let score=0;for(const term of terms)if(words.has(term))score++;return{page,score};}).filter(x=>x.score).sort((x,y)=>y.score-x.score).slice(0,3).map(x=>({title:x.page.title,path:x.page.path,text:x.page.text.slice(0,3500)})); }
 function json(body, status = 200) {
   return Response.json(body, {
@@ -156,6 +176,8 @@ export async function onRequestPost({ request, env }) {
   const latestQuestion = messages.at(-1).content;
   const fixedAnswer = faqReply(latestQuestion);
   if (fixedAnswer) return json({ answer: fixedAnswer });
+  const extraRental=await extraRentalReply(latestQuestion);
+  if(extraRental)return json({answer:extraRental});
 
   // Keep earlier price questions from hijacking a new topic. A short date-only
   // follow-up may still inherit the preceding question's price/availability intent.
