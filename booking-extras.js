@@ -64,9 +64,7 @@ if (form) {
       const total = document.createElement('strong');
       total.textContent = `Totalpris: ${formatMoney(quote.total)}`;
       summary.appendChild(total);
-      const vat = document.createElement('p');
-      vat.textContent = `Herav mva (25 %): ${formatMoney(quote.vat)}`;
-      summary.appendChild(vat);
+
     } catch (error) { summary.textContent = error.message; }
   };
   for (const id of ['start', 'end', 'linenCount', 'towelCount', 'fullCleaning', 'basementRooms', 'garageRooms']) document.getElementById(id).addEventListener('input', render);
@@ -82,7 +80,7 @@ if (form) {
     document.getElementById('basementRoomPrice').textContent=formatMoney(data.settings.extraRooms.basement);
     document.getElementById('garageRoomPrice').textContent=formatMoney(data.settings.extraRooms.garage);
     document.getElementById('basementRooms').disabled=false;document.getElementById('garageRooms').disabled=false;
-    document.getElementById('nightlyPriceInfo').textContent=`Grunnpris: ${formatMoney(data.settings.weekday)} søndag–torsdag og ${formatMoney(data.settings.weekend)} fredag–lørdag per natt. Sesongpriser kan gjelde. Alle priser inkluderer 25 % mva. Totalen under gjelder dine datoer.`;
+    document.getElementById('nightlyPriceInfo').textContent=`Grunnpris: ${formatMoney(data.settings.weekday)} søndag–torsdag og ${formatMoney(data.settings.weekend)} fredag–lørdag per natt. Sesongpriser kan gjelde. Prisene er inkl. mva. Totalen under gjelder datoene du har valgt.`;
     render();
   } catch(error){document.getElementById('nightlyPriceInfo').textContent=error.message;}
 }

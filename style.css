@@ -305,3 +305,16 @@ section {
     font-size: 0.9em;
   }
 }
+
+button.hamburger {
+  border: 0;
+  background: transparent;
+  min-width: 44px;
+  min-height: 44px;
+  line-height: 1;
+}
+
+button.hamburger:focus-visible {
+  outline: 3px solid #8B4A2B;
+  outline-offset: 3px;
+}

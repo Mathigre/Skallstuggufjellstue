@@ -161,7 +161,7 @@
       <a href="kontakt.html">Kontakt</a>
     </nav>
 
-    <div class="hamburger" id="hamburger">☰</div>
+    <button class="hamburger" id="hamburger" type="button" aria-label="Åpne meny" aria-controls="navLinks" aria-expanded="false">☰</button>
   </div>
 </header>
 
@@ -229,7 +229,7 @@
       <h4 style="color: #8B4A2B; margin-bottom: 18px;">Hjelp og informasjon</h4>
       <p><a href="kontakt.html" style="color: #555; text-decoration: none;">Kontakt oss</a></p>
       <p><a href="booking.html" style="color: #555; text-decoration: none;">Booking og priser</a></p>
-      <p><a href="lokaler.html" style="color: #555; text-decoration: none;">Leievilkår</a></p>
+      <p><a href="dokumenter/Leiebetingelser_Skallstuggu.pdf" target="_blank" rel="noopener" style="color: #555; text-decoration: none;">Leievilkår</a></p>
     </div>
     <div>
       <h4 style="color: #8B4A2B; margin-bottom: 18px;">Om Skallstuggu</h4>
@@ -250,7 +250,7 @@
         Telefon: <a href="tel:90688873" style="color: #555; text-decoration: none;"><strong>906 88 873</strong></a>
       </p>
       <p>
-        <a href="mailto:post@skallstuggu.no" style="color: #555; text-decoration: none;">E-post: post@skallstuggu.no</a>
+        <a href="mailto:skallstuggupost@gmail.com" style="color: #555; text-decoration: none;">E-post: skallstuggupost@gmail.com</a>
       </p>
       <p><a href="kontakt.html" style="color: #555; text-decoration: none;">Send melding</a></p>
     </div>
@@ -275,7 +275,23 @@ const hamburger = document.getElementById('hamburger');
 const navLinks = document.getElementById('navLinks');
 
 hamburger.addEventListener('click', () => {
-  navLinks.classList.toggle('active');
+  const open = hamburger.getAttribute('aria-expanded') !== 'true';
+  navLinks.classList.toggle('active', open);
+  hamburger.setAttribute('aria-expanded', String(open));
+  hamburger.setAttribute('aria-label', open ? 'Lukk meny' : 'Åpne meny');
+});
+navLinks.addEventListener('click', event => {
+  if (!event.target.closest('a')) return;
+  navLinks.classList.remove('active');
+  hamburger.setAttribute('aria-expanded', 'false');
+  hamburger.setAttribute('aria-label', 'Åpne meny');
+});
+document.addEventListener('keydown', event => {
+  if (event.key !== 'Escape' || hamburger.getAttribute('aria-expanded') !== 'true') return;
+  navLinks.classList.remove('active');
+  hamburger.setAttribute('aria-expanded', 'false');
+  hamburger.setAttribute('aria-label', 'Åpne meny');
+  hamburger.focus();
 });
 </script>
 

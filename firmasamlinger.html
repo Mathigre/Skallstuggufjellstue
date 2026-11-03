@@ -227,7 +227,7 @@
       <a href="kontakt.html">Kontakt</a>
     </nav>
 
-    <div class="hamburger" id="hamburger">☰</div>
+    <button class="hamburger" id="hamburger" type="button" aria-label="Åpne meny" aria-controls="navLinks" aria-expanded="false">☰</button>
   </div>
 </header>
 
@@ -261,7 +261,7 @@
       <li>Privat spise- og oppholdsrom</li>
       <li>Tilgang til utendørsområder for pauser og teambuilding</li>
       <li>Full servering – lunsj, middag, kaffe og snacks</li>
-      <li>Med totalt 51 sengeplasser</li>
+      <li>39 sengeplasser i hovedetasjen; 17 ekstra sengeplasser i kjeller og garasje kan legges til mot tillegg</li>
       <li>Dame- og herregarderobe med flere nyoppussede dusjer (handicaptilpasset)</li>
       <li>Tilbygget har en underetasje med kjellerstue/sokkel med plass til 50 personer, tilpasset selskaper, kurs og seminarer med prosjektor</li>
     </ul>
@@ -296,30 +296,12 @@
     </div>
   </section>
 
-  <!-- Kurseminar-pakken -->
+  <!-- Kurs- og samlingsopplegg -->
   <div class="package">
-    <h2 style="color: #8B4A2B; text-align: center; margin-bottom: 25px;">Kurseminar-pakke</h2>
-    <p><strong>1. Kurseminar – Leie av hele hytta</strong></p>
-    <p><strong>2 dager, 1 natt – fra kl. 08:00 til kl. 15:00 dagen etter</strong></p>
-   
-    <div class="price-highlight">
-      Min pris: 7 500 kr – Maks pris: 23 000 kr
-    </div>
-   
-    <p><strong>Overnatting:</strong> 22 soverom – maks 50 plasser</p>
-   
-    <div class="rooms">
-      <h3>Romfordeling:</h3>
-      <ul>
-        <li>3 rom med dobbelseng</li>
-        <li>13 enkeltrom</li>
-        <li>6 stk 4-mannsrom</li>
-        <li>1 stk 6-mannsrom</li>
-        <li>1 stk 7-mannsrom</li>
-      </ul>
-    </div>
-   
-    <p style="margin-top: 20px;"><strong>Pris per rom:</strong> 800 kr eks. sengetøy</p>
+    <h2 style="color: #8B4A2B; text-align: center; margin-bottom: 25px;">Kurs- og samlingsopplegg</h2>
+    <p>Opplegg, måltider og pris tilpasses gruppen. Kontakt oss for et tilbud.</p>
+    <p><strong>Overnatting:</strong> Hovedetasjen har 9 soverom og 39 sengeplasser. Kjellerrom (9 sengeplasser) og garasjerom (8 sengeplasser) kan legges til mot tillegg.</p>
+    <p><a href="lokaler.html">Se lokaler og priser</a> · <a href="kontakt.html#kontaktskjema">Be om tilbud</a></p>
   </div>
 </section>
 
@@ -330,7 +312,7 @@
       <h4 style="color: #8B4A2B; margin-bottom: 18px;">Hjelp og informasjon</h4>
       <p><a href="kontakt.html" style="color: #555; text-decoration: none;">Kontakt oss</a></p>
       <p><a href="booking.html" style="color: #555; text-decoration: none;">Booking og priser</a></p>
-      <p><a href="lokaler.html" style="color: #555; text-decoration: none;">Leievilkår</a></p>
+      <p><a href="dokumenter/Leiebetingelser_Skallstuggu.pdf" target="_blank" rel="noopener" style="color: #555; text-decoration: none;">Leievilkår</a></p>
     </div>
     <div>
       <h4 style="color: #8B4A2B; margin-bottom: 18px;">Om Skallstuggu</h4>
@@ -351,7 +333,7 @@
         Telefon: <a href="tel:90688873" style="color: #555; text-decoration: none;"><strong>906 88 873</strong></a>
       </p>
       <p>
-        <a href="mailto:post@skallstuggu.no" style="color: #555; text-decoration: none;">E-post: post@skallstuggu.no</a>
+        <a href="mailto:skallstuggupost@gmail.com" style="color: #555; text-decoration: none;">E-post: skallstuggupost@gmail.com</a>
       </p>
       <p><a href="kontakt.html" style="color: #555; text-decoration: none;">Send melding</a></p>
     </div>
@@ -374,7 +356,23 @@ const hamburger = document.getElementById('hamburger');
 const navLinks = document.getElementById('navLinks');
 
 hamburger.addEventListener('click', () => {
-  navLinks.classList.toggle('active');
+  const open = hamburger.getAttribute('aria-expanded') !== 'true';
+  navLinks.classList.toggle('active', open);
+  hamburger.setAttribute('aria-expanded', String(open));
+  hamburger.setAttribute('aria-label', open ? 'Lukk meny' : 'Åpne meny');
+});
+navLinks.addEventListener('click', event => {
+  if (!event.target.closest('a')) return;
+  navLinks.classList.remove('active');
+  hamburger.setAttribute('aria-expanded', 'false');
+  hamburger.setAttribute('aria-label', 'Åpne meny');
+});
+document.addEventListener('keydown', event => {
+  if (event.key !== 'Escape' || hamburger.getAttribute('aria-expanded') !== 'true') return;
+  navLinks.classList.remove('active');
+  hamburger.setAttribute('aria-expanded', 'false');
+  hamburger.setAttribute('aria-label', 'Åpne meny');
+  hamburger.focus();
 });
 </script>
 

@@ -257,7 +257,7 @@ export const faqTopics = [
   },
   {
     "id": "glamping",
-    "answer": "Skallstuggu har glampingtelt som ordnes på forespørsel. Kontakt post@skallstuggu.no eller telefon 906 88 873 om kapasitet, sesong, fasiliteter og pris.",
+    "answer": "Skallstuggu har glampingtelt som ordnes på forespørsel. Kontakt skallstuggupost@gmail.com eller telefon 906 88 873 om kapasitet, sesong, fasiliteter og pris.",
     "questions": [
       "Har dere glamping?",
       "Kan vi leie glampingtelt?",
@@ -495,7 +495,7 @@ export const faqTopics = [
   },
   {
     "id": "guidet",
-    "answer": "Kontakt Skallstuggu på post@skallstuggu.no eller telefon 906 88 873 for aktuelle guidede turer og aktiviteter. Tilbud og tilgjengelighet avtales direkte.",
+    "answer": "Kontakt Skallstuggu på skallstuggupost@gmail.com eller telefon 906 88 873 for aktuelle guidede turer og aktiviteter. Tilbud og tilgjengelighet avtales direkte.",
     "questions": [
       "Tilbyr dere guidede turer?",
       "Kan vi bestille en guide?",
@@ -597,7 +597,7 @@ export const faqTopics = [
   },
   {
     "id": "kontakt",
-    "answer": "Skallstuggu kan kontaktes på post@skallstuggu.no eller telefon 906 88 873 på dagtid. Se gjerne informasjonen på nettsiden først. Eier svarer fortløpende; hvis svar uteblir, send en ny e-post eller ring igjen.",
+    "answer": "Skallstuggu kan kontaktes på skallstuggupost@gmail.com eller telefon 906 88 873 på dagtid. Se gjerne informasjonen på nettsiden først. Eier svarer fortløpende; hvis svar uteblir, send en ny e-post eller ring igjen.",
     "questions": [
       "Hvordan kontakter jeg Skallstuggu?",
       "Hva er telefonnummeret?",

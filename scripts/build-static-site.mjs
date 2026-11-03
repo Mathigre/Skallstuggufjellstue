@@ -55,6 +55,28 @@ async function addChatWidget(directory, relative = "") {
 
 await addChatWidget(output);
 
+// Give public pages a consistent Skallstuggu icon when saved to a phone's home screen.
+async function addPublicAppIcons(directory) {
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    if (entry.name === 'admin' || entry.name.startsWith('.')) continue;
+    const file = path.join(directory, entry.name);
+    if (entry.isDirectory()) { await addPublicAppIcons(file); continue; }
+    if (!entry.isFile() || !entry.name.endsWith('.html')) continue;
+    let html = await readFile(file, 'utf8');
+    if (!/<\/head>/i.test(html)) continue;
+    html = html
+      .replace(/<link\b[^>]*rel=["'](?:apple-touch-icon|manifest)["'][^>]*>/gi, '')
+      .replace(/<meta\b[^>]*name=["']apple-mobile-web-app-(?:capable|title)["'][^>]*>/gi, '');
+    const tags = '<link rel="manifest" href="/manifest.json">' +
+      '<link rel="apple-touch-icon" sizes="180x180" href="/images/app-icons/skallstuggu-180.png">' +
+      '<meta name="apple-mobile-web-app-capable" content="yes">' +
+      '<meta name="apple-mobile-web-app-title" content="Skallstuggu">' +
+      '<meta name="theme-color" content="#8B4A2B">';
+    await writeFile(file, html.replace(/<\/head>/i, tags + '</head>'));
+  }
+}
+await addPublicAppIcons(output);
+
 // Build a text index from public pages plus the separately maintained chatbot knowledge source.
 // The markdown file is not copied as a standalone website page. Each heading becomes its own
 // retrieval document so the Worker can select the most relevant material for a visitor question.

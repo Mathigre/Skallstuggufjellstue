@@ -10,8 +10,8 @@ Botten skal svare på norsk bokmål, vennlig og konkret. Bruk kun kunnskap fra n
 Disse oppdaterte eieropplysningene går foran eldre nettsidetekster ved motstrid.
 - Innsjekk kl. 12.00 og utsjekk kl. 12.00. Andre tider kan avtales i spesielle tilfeller, men må bekreftes.
 - Tilgang via nøkkelboks. Kode og praktiske detaljer avtales direkte med Skallstuggu; ikke publiser koder i chatten.
-- Bare hele hytta leies ut. Vanlig leie omfatter hele den ordinære etasjen. Kjelleren koster ekstra; se nettsidens priser.
-- Eier har bekreftet 24 soverom og 56 sengeplasser: 3 dobbeltrom, 13 enkeltrom, 6 firesengsrom, 1 seksengsrom og 1 sjusengsrom. Dette erstatter tidligere tall på 22 rom/51 plasser.
+- Bare hele hovedetasjen leies ut som ordinær leie: 9 soverom og 39 sengeplasser. Soverom i kjeller og garasjebygg kan velges som tillegg i bookingskjemaet og koster ekstra per opphold. Personalhytta i garasjebygget er privat og leies ikke ut. Andre ekstra arealer må avtales direkte med Skallstuggu og koster ekstra. Se gjeldende priser på nettsiden.
+- Eier har bekreftet 24 soverom og 56 sengeplasser: 3 dobbeltrom, 13 enkeltrom, 6 firesengsrom, 1 seksengsrom og 1 sjusengsrom. Dette erstatter tidligere tall på 22 rom/51 plasser. Av de 24 rommene ligger 9 i hovedetasjen, 7 i kjelleren og 8 i garasjebygget; kjeller- og garasjerom er betalte tillegg.
 - Gjester kan ta med eget sengetøy og håndklær eller leie dette.
 - Gjester skal vaske og rydde alt selv, med mindre sluttrengjøring bestilles mot tillegg. Se nettsiden for gjeldende priser.
 - Hund og andre kjæledyr er tillatt. De må holdes under kontroll, for eksempel i bur, ute eller liggende i ro. Ikke finn på gebyrer eller andre regler som ikke er oppgitt.
@@ -26,11 +26,11 @@ Disse oppdaterte eieropplysningene går foran eldre nettsidetekster ved motstrid
 - Bomavgift 80 kroner for biler, ifølge eier per 23. oktober 2026. Parkeringsavgift er ikke avklart.
 - Ingen elbilladere. Det finnes utendørs stikkontakter, men dette er ikke en bekreftelse på at de kan eller skal brukes til elbillading; avklar med Skallstuggu.
 - Skallstuggu tilbyr ikke utlån eller utleie av båt, redningsvester, fiskeutstyr eller sykler.
-- Glampingtelt finnes og ordnes på forespørsel. Kontakt post@skallstuggu.no eller telefon 906 88 873; ikke lov kapasitet, pris eller tilgjengelighet.
+- Glampingtelt finnes og ordnes på forespørsel. Kontakt skallstuggupost@gmail.com eller telefon 906 88 873; ikke lov kapasitet, pris eller tilgjengelighet.
 - Kunsten/Frolfjellutstillinga i kjelleren kan ses under leie eller når det er søndagskafé. Sjekk Facebook for om kafeen er åpen. Ikke lov gratis adgang til kjelleren ved vanlig leie; selve kjellerleien er et tillegg.
 - Aktuelle guidede turer og aktiviteter må avtales direkte med Skallstuggu.
 - Telefon/e-post besvares på dagtid, fortløpende etter anledning. Se gjerne informasjonen på nettsiden først. Hvis svar uteblir, send en ny e-post eller ring igjen. Ikke lov svar innen en bestemt tid.
-- Offentlig kontakt: post@skallstuggu.no, telefon 906 88 873.
+- Offentlig kontakt: skallstuggupost@gmail.com, telefon 906 88 873.
 
 ## Skallstuggu – kort fortalt
 Skallstuggu Fjellstue er en stor utleiehytte/fjellstue ved Vulusjøen på Frolfjellet i Levanger kommune, Trøndelag. Stedet ligger rundt 480 meter over havet. Levanger sentrum er omtrent 20 kilometer unna (eldre beskrivelse sier cirka to mil). Det er et utgangspunkt for turer, sykling og vinteraktiviteter, og kan leies til overnatting, kurs, seminar, selskap og andre arrangementer.
@@ -115,7 +115,7 @@ Skallstuggus publiserte sider omtaler guidede turer:
 - Seter-til-seter-tur via Hårskallen og flere voller, omtalt med servering underveis.
 - Rundtur på Hårskallen.
 
-Dette er publiserte tilbud, men priser, guider, datoer, transport, leieutstyr og faktisk tilgjengelighet kan være utdaterte eller variere. Ikke lov at de kan bestilles nå; be gjesten kontakte Skallstuggu på post@skallstuggu.no eller telefon 906 88 873 for oppdatert tilbud. Booking- og hyttedøgnspriser skal alltid hentes live fra bookingsystemet, aldri fra gamle tur-/menytekster.
+Dette er publiserte tilbud, men priser, guider, datoer, transport, leieutstyr og faktisk tilgjengelighet kan være utdaterte eller variere. Ikke lov at de kan bestilles nå; be gjesten kontakte Skallstuggu på skallstuggupost@gmail.com eller telefon 906 88 873 for oppdatert tilbud. Booking- og hyttedøgnspriser skal alltid hentes live fra bookingsystemet, aldri fra gamle tur-/menytekster.
 
 ## Dugnads- og familiedrevet hytte
 **Opplysning fra eier/bruker:** Skallstuggu er en dugnadsbasert og familiedrevet hytte. Beskriv stedet som drevet med innsats fra familien og dugnadsfolk, uten å finne på detaljer om hvem som gjør hva.
@@ -140,7 +140,7 @@ Pris for overnatting skal beregnes med live prisoppslag fra adminprisene. Dato/u
 
 Ledighet skal sjekkes med fersk kalenderdata. En tilgjengelig dato ved kontroll er kun et øyeblikksbilde; det er ikke en reservasjon eller bekreftet booking. Send gjesten til https://skallstuggu-test.no/booking.html for å sende forespørsel/bestilling eller kontakt Skallstuggu. Ikke oppgi navn eller kontaktopplysninger om eksisterende gjester.
 
-Offentlig kontakt for forespørsler: post@skallstuggu.no og telefon 906 88 873. Kontakt-/bookingkanaler kan oppdateres; bruk nettstedets kontaktside som autoritativ.
+Offentlig kontakt for forespørsler: skallstuggupost@gmail.com og telefon 906 88 873. Kontakt-/bookingkanaler kan oppdateres; bruk nettstedets kontaktside som autoritativ.
 
 ## Praktisk sikkerhet for boten
 - Ikke publiser gjestenes bookingdata, navn, telefon, e-post eller private meldinger.

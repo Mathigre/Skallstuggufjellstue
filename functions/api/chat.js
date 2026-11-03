@@ -8,7 +8,7 @@ const WINDOW_MS = 60_000;
 const MAX_REQUESTS_PER_WINDOW = 8;
 const requestsByIp = new Map();
 
-const AI_IDENTITY = 'Jeg er Skallstuggus AI-assistent, ikke en ansatt eller en person. Jeg kan hjelpe med informasjon om Skallstuggu. For å snakke med noen som driver stedet, kontakt post@skallstuggu.no eller telefon 906 88 873.';
+const AI_IDENTITY = 'Jeg er Skallstuggus AI-assistent, ikke en ansatt eller en person. Jeg kan hjelpe med informasjon om Skallstuggu. For å snakke med noen som driver stedet, kontakt skallstuggupost@gmail.com eller telefon 906 88 873.';
 
 export function claimsHumanIdentity(text) {
   const plain = String(text).replace(/[*_`]/g, '').replace(/\b(?:ikke|aldri|not|never)\b[^.!?\n]*/giu, '');
@@ -21,7 +21,7 @@ export function claimsHumanIdentity(text) {
 export function humanContactReply(message) {
   if (/\b(?:snakke|prate|snakk|prat|kontakt|kontakte|ringe|ring|f(?:å|år)(?: jeg| vi)? tak i)\b[^.!?\n]{0,60}\b(?:person|menneske|ansatt(?:e)?|eier(?:en)?|vertskap(?:et)?|noen|menneskelig)\b/iu.test(message)
     || /\b(?:vil|ønsker|trenger|kan jeg få)\b[^.!?\n]{0,40}\b(?:ekte person|ekte menneske|menneskelig hjelp)\b/iu.test(message)) {
-    return 'For å snakke med en ekte person hos Skallstuggu, ring 906 88 873 eller send e-post til post@skallstuggu.no.';
+    return 'For å snakke med en ekte person hos Skallstuggu, ring 906 88 873 eller send e-post til skallstuggupost@gmail.com.';
   }
   return null;
 }
@@ -38,7 +38,7 @@ Du er et AI-program, aldri et menneske, en ansatt, eier eller resepsjonist. Du h
 Følgende eierbekreftede opplysninger går foran eldre nettstedutdrag:\nDisse oppdaterte eieropplysningene går foran eldre nettsidetekster ved motstrid.
 - Innsjekk kl. 12.00 og utsjekk kl. 12.00. Andre tider kan avtales i spesielle tilfeller, men må bekreftes.
 - Tilgang via nøkkelboks. Kode og praktiske detaljer avtales direkte med Skallstuggu; ikke publiser koder i chatten.
-- Ordinær leie gjelder hele hovedetasjen med 9 soverom og 39 sengeplasser. Ekstra areal og soverom kan leies, men koster ekstra. Kjellerrom (9 sengeplasser) og garasjerom (8 sengeplasser) velges som tillegg i bookingskjemaet og belastes én gang per opphold. Prisene styres fra admin; aldri lov tilleggsarealer gratis eller anta at all kjellerbruk inngår i prisen for kjellerrom. Andre ekstra arealer avklares med Skallstuggu.
+- Ordinær leie gjelder hele hovedetasjen med 9 soverom og 39 sengeplasser. Ekstra areal og soverom kan leies, men koster ekstra. Kjellerrom (9 sengeplasser) og garasjerom (8 sengeplasser) velges som tillegg i bookingskjemaet og belastes én gang per opphold. Prisene styres fra admin; aldri lov tilleggsarealer gratis eller anta at all kjellerbruk inngår i prisen for kjellerrom. Andre ekstra arealer avklares med Skallstuggu. Personalhytta i garasjebygget er privat og leies ikke ut.
 - Eier har bekreftet 24 soverom og 56 sengeplasser: 3 dobbeltrom, 13 enkeltrom, 6 firesengsrom, 1 seksengsrom og 1 sjusengsrom. Dette erstatter tidligere tall på 22 rom/51 plasser.
 - Gjester kan ta med eget sengetøy og håndklær eller leie dette.
 - Gjester skal vaske og rydde alt selv, med mindre sluttrengjøring bestilles mot tillegg. Se nettsiden for gjeldende priser.
@@ -54,14 +54,14 @@ Følgende eierbekreftede opplysninger går foran eldre nettstedutdrag:\nDisse op
 - Bomavgift 80 kroner for biler, ifølge eier per 23. oktober 2026. Parkeringsavgift er ikke avklart.
 - Ingen elbilladere. Det finnes utendørs stikkontakter, men dette er ikke en bekreftelse på at de kan eller skal brukes til elbillading; avklar med Skallstuggu.
 - Skallstuggu tilbyr ikke utlån eller utleie av båt, redningsvester, fiskeutstyr eller sykler.
-- Glampingtelt finnes og ordnes på forespørsel. Kontakt post@skallstuggu.no eller telefon 906 88 873; ikke lov kapasitet, pris eller tilgjengelighet.
+- Glampingtelt finnes og ordnes på forespørsel. Kontakt skallstuggupost@gmail.com eller telefon 906 88 873; ikke lov kapasitet, pris eller tilgjengelighet.
 - Kunsten/Frolfjellutstillinga i kjelleren kan ses under leie eller når det er søndagskafé. Sjekk Facebook for om kafeen er åpen. Ikke lov gratis adgang til kjelleren ved vanlig leie; selve kjellerleien er et tillegg.
 - Aktuelle guidede turer og aktiviteter må avtales direkte med Skallstuggu.
 - Telefon/e-post besvares på dagtid, fortløpende etter anledning. Se gjerne informasjonen på nettsiden først. Hvis svar uteblir, send en ny e-post eller ring igjen. Ikke lov svar innen en bestemt tid.
-- Offentlig kontakt: post@skallstuggu.no, telefon 906 88 873.\nBruk fakta fra nettsideutdragene og instruksen. Ikke finn på priser, ledige datoer, regler eller fasiliteter. Når noen spør om pris uten dato eller periode, spør hvilken dato eller uke de mener. Oppgi bare beregnede priser som systemet legger ved. Ved spørsmål om ledighet må du spørre etter dato eller uke hvis det mangler, og aldri påstå at en periode er ledig uten ferske kalenderdata.
+- Offentlig kontakt: skallstuggupost@gmail.com, telefon 906 88 873.\nBruk fakta fra nettsideutdragene og instruksen. Ikke finn på priser, ledige datoer, regler eller fasiliteter. Når noen spør om pris uten dato eller periode, spør hvilken dato eller uke de mener. Oppgi bare beregnede priser som systemet legger ved. Ved spørsmål om ledighet må du spørre etter dato eller uke hvis det mangler, og aldri påstå at en periode er ledig uten ferske kalenderdata.
 Skallstuggu ligger på Frolfjellet ved Vulusjøen i Levanger, omtrent 480 meter over havet. Hytta har 24 soverom og 56 sengeplasser. Vulusjøen ligger omtrent 150 meter unna, og turen til Hårskallens topp er omtrent 2 km. Kjøkkenet kan brukes til arrangementer for opptil 80 personer. Søndagskafé og mat ved arrangementer er omtalt på nettsiden.
 For å sende en forespørsel eller fullføre en bestilling, vis til bookingsiden: https://skallstuggu-test.no/booking.html
-For spørsmål du ikke kan svare sikkert på, be gjesten kontakte Skallstuggu via https://skallstuggu-test.no/kontakt.html eller post@skallstuggu.no.
+For spørsmål du ikke kan svare sikkert på, be gjesten kontakte Skallstuggu via https://skallstuggu-test.no/kontakt.html eller skallstuggupost@gmail.com.
 Ikke be om betalingskort, fødselsnummer eller andre sensitive opplysninger. Du kan ikke opprette, endre eller bekrefte bestillinger.`;
 
 function weekMonday(year, week) { if (!Number.isInteger(week) || week < 1 || week > 53) return null; const jan4=new Date(Date.UTC(year,0,4)); const monday=new Date(Date.UTC(year,0,4-((jan4.getUTCDay()+6)%7)+(week-1)*7)); return new Date(monday.getTime()+3*86400000).getUTCFullYear()===year?monday:null; }
