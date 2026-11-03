@@ -446,7 +446,7 @@ serveWithCloudflareOrigin(async (req) => {
         `Ny bookingforespørsel fra ${name}`;
 
       to = [
-  "minsten.mg@gmail.com",
+  "skallstuggupost@gmail.com",
   "post@skallstuggu.no"
 ];
 
