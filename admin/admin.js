@@ -115,7 +115,13 @@ async function setPaymentStatus(id,status) {
   await loadData();
 }
 
-function checkOverlap(booking) { for(const b of allBookings){if(String(b.id)===String(booking.id)||b.status!=="pending")continue;if(!(booking.end_date<=b.start_date||booking.start_date>=b.end_date))return b;}return null; }
+function checkOverlap(booking) {
+  for (const other of allBookings) {
+    if (String(other.id) === String(booking.id) || other.status === "rejected" || other.cancelled_at) continue;
+    if (!(booking.end_date <= other.start_date || booking.start_date >= other.end_date)) return other;
+  }
+  return null;
+}
 function highlightBookingInCalendar(booking){selectedBooking=booking;const d=new Date(booking.start_date);currentDate.setFullYear(d.getFullYear());currentDate.setMonth(d.getMonth());loadCalendar();}
 
 async function sendReply(bookingId,customerEmail,customerName) {
